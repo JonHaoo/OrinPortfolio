@@ -18,6 +18,11 @@ const {
   description = '从客户需求到配置交付，再到使用辅导与反馈回收——把 AI 真正落地到业务里的完整链路。作品集：招聘智能助手、评论洞察 Agent、企业级数据系统。',
   fluid = false,
 } = Astro.props;
+
+// 归一化基础路径（保证带尾部斜杠，便于拼接子路径）
+const BASE_URL = import.meta.env.BASE_URL.endsWith('/')
+  ? import.meta.env.BASE_URL
+  : import.meta.env.BASE_URL + '/';
 ---
 
 <!DOCTYPE html>
@@ -25,7 +30,7 @@ const {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href={`${BASE_URL}favicon.svg`} />
     <meta name="description" content={description} />
     <title>{title}</title>
     <!-- 主题初始化：避免刷新时闪白 -->

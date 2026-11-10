@@ -1,5 +1,6 @@
 ---
 // 导航栏：Logo + 导航链接 + 主题切换 + CTA（对应设计稿 2:2）
+const BASE_URL = import.meta.env.BASE_URL.endsWith("/") ? import.meta.env.BASE_URL : import.meta.env.BASE_URL + "/";
 ---
 
 <header class="site-header">
@@ -12,7 +13,7 @@
     <a href="#works" class="active">作品</a>
     <a href="#about">关于我</a>
     <a href="#stats">底气</a>
-    <a href="/workflow/">工作流</a>
+    <a href={`${BASE_URL}workflow/`}>工作流</a>
     <a href="#contact">联系</a>
   </nav>
 

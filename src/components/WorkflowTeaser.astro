@@ -1,5 +1,6 @@
 ---
 // 工程方法论提炼卡：AI 辅助研发工作流规范的首页入口（链接到 /workflow/ 完整版）
+const BASE_URL = import.meta.env.BASE_URL.endsWith("/") ? import.meta.env.BASE_URL : import.meta.env.BASE_URL + "/";
 const principles = [
   { color: 'wf-chip-yellow', text: '人负责方向与取舍' },
   { color: 'wf-chip-pink', text: 'AI 负责加速执行' },
@@ -29,7 +30,7 @@ const principles = [
     </div>
 
     <div class="wf-right">
-      <a class="btn wf-link-btn" href="/workflow/">
+      <a class="btn wf-link-btn" href={`${BASE_URL}workflow/`}>
         读完整规范
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
           <path d="M3 10H17M17 10L11 4M17 10L11 16" stroke="#FFDC58" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />

@@ -1,6 +1,6 @@
 # OrinPortfolio
 
-个人作品集网站（独立开发 & AI 企业服务方向），新粗野主义（Neubrutalism）风格。
+个人作品集网站（AI 解决方案工程师 / FDE 方向），新粗野主义（Neubrutalism）风格。
 
 ## 技术栈
 
@@ -34,6 +34,11 @@ npm run dev      # 本地开发，默认 http://localhost:4321
 npm run build    # 构建到 dist/
 npm run preview  # 本地预览构建产物
 ```
+
+## 部署
+
+- **GitHub Pages**：push 到 `main` 自动构建发布（`.github/workflows/deploy.yml`），地址 https://jonhaoo.github.io/OrinPortfolio/ 。子路径 base 由工作流注入 `ASTRO_BASE=/OrinPortfolio`。
+- **WorkBuddy 应用托管**：构建 `npm run build` 后发布 `dist/` 目录（默认 base 为根路径 `/`）。
 
 ## 说明
 

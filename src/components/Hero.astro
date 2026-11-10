@@ -1,5 +1,6 @@
 ---
 // Hero 区：贴纸徽章 + 大标题荧光块 + 双 CTA + 插画卡片（对应设计稿 2:15）
+const BASE_URL = import.meta.env.BASE_URL.endsWith("/") ? import.meta.env.BASE_URL : import.meta.env.BASE_URL + "/";
 ---
 
 <section class="hero">
@@ -29,7 +30,7 @@
 
   <div class="hero-right">
     <div class="hero-image-card">
-      <img src="/images/hero.png" alt="开发者与 AI 机器人协作的新粗野主义插画" />
+      <img src={`${BASE_URL}images/hero.png`} alt="开发者与 AI 机器人协作的新粗野主义插画" />
     </div>
     <div class="hero-status-badge">开放合作</div>
     <svg class="hero-sparkle" viewBox="0 0 44 44" fill="none" aria-hidden="true">

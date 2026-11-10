@@ -1,4 +1,4 @@
-# neubrutalism-portfolio
+# OrinPortfolio
 
 个人作品集网站（独立开发 & AI 企业服务方向），新粗野主义（Neubrutalism）风格。
 

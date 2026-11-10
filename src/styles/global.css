@@ -709,6 +709,13 @@ a { color: inherit; text-decoration: none; }
   color: #141414;
 }
 
+.stat-num.stat-num-sm {
+  font-size: 38px;
+  font-family: var(--font-body);
+  font-weight: 900;
+  line-height: 1.2;
+}
+
 .stat-label {
   font-size: 16px;
   font-weight: 700;
@@ -738,10 +745,31 @@ a { color: inherit; text-decoration: none; }
 .quote-card .quote-mark.mark-blue { color: var(--blue); }
 .quote-card .quote-mark.mark-pink { color: var(--pink); }
 
+.note-heading {
+  font-size: 20px;
+  font-weight: 900;
+  color: #141414;
+  margin-bottom: 10px;
+}
+
 .quote-content {
   font-size: 17px;
   font-weight: 500;
   line-height: 30px;
+  color: #141414;
+}
+
+.note-dot {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  background: var(--yellow);
+  border: 2px solid #141414;
+}
+
+.note-label {
+  font-size: 14px;
+  font-weight: 700;
   color: #141414;
 }
 

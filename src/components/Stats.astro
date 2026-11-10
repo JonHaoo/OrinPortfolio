@@ -4,71 +4,65 @@ interface Stat {
   num: string;
   label: string;
   colorClass: string;
+  small?: boolean;
 }
 
 const stats: Stat[] = [
-  { num: '5+', label: '年全栈开发经验', colorClass: 'stat-yellow' },
-  { num: '20+', label: '个项目完整交付', colorClass: 'stat-pink' },
-  { num: '12', label: '家企业服务客户', colorClass: 'stat-blue' },
-  { num: '4000+', label: '独立产品注册用户', colorClass: 'stat-green' },
+  { num: '2年8个月', label: 'B 端项目交付经验', colorClass: 'stat-yellow', small: true },
+  { num: '3', label: '类 B 端系统交付', colorClass: 'stat-pink' },
+  { num: '2', label: '个智能助手场景已交付', colorClass: 'stat-blue' },
+  { num: '5.7亿', label: '条评论 · 自研 Agent 数据规模', colorClass: 'stat-green', small: true },
 ];
 
-interface Testimonial {
+interface Note {
   markClass: string;
+  heading: string;
   content: string;
-  avatarBg: string;
-  name: string;
-  role: string;
+  source: string;
 }
 
-const testimonials: Testimonial[] = [
+const notes: Note[] = [
   {
     markClass: 'mark-blue',
-    content: '别的供应商给我们讲概念，他直接给系统。三个月上线，客服团队的质检工作量减了一半。',
-    avatarBg: '#FFDC58',
-    name: '陈总',
-    role: '某制造企业 · 数字化负责人',
+    heading: '交付不是终点，用起来才是',
+    content: '招聘智能助手上线后，客户 HR 反馈「提问方式不符合预期」。我没有把它归为使用问题，而是回收成提示词迭代的输入——助手的最终形态，是在真实使用里长出来的。',
+    source: '交付笔记 01 · 招聘智能助手',
   },
   {
     markClass: 'mark-pink',
-    content: '最难得的是他懂业务。不是我们说一句他做一句，而是会反问「这个动作员工真的会做吗」。',
-    avatarBg: '#7FBC6B',
-    name: '林女士',
-    role: '某连锁零售品牌 · 运营总监',
+    heading: '先划边界，再谈模型',
+    content: '评论洞察 Agent 里，分类第一层用关键词规则、LLM 只做语义归因；招聘助手里，确定性内容走知识库、开放对话走 LLM。把算力花在只有模型能解决的地方，成本与准确率才都可控。',
+    source: '交付笔记 02 · 架构取舍',
   },
 ];
 ---
 
 <section class="stats" id="stats">
   <div class="section-header">
-    <span class="section-tag">NUMBERS &amp; TRUST</span>
+    <span class="section-tag">NUMBERS &amp; NOTES</span>
     <h2 class="section-title">用结果说话</h2>
   </div>
 
   <div class="stats-row">
     {stats.map((s) => (
       <div class={`stat-block ${s.colorClass}`}>
-        <span class="stat-num">{s.num}</span>
+        <span class={`stat-num${s.small ? ' stat-num-sm' : ''}`}>{s.num}</span>
         <span class="stat-label">{s.label}</span>
       </div>
     ))}
   </div>
 
   <div class="quotes-row">
-    {testimonials.map((t) => (
+    {notes.map((t) => (
       <figure class="quote-card">
         <span class={`quote-mark ${t.markClass}`}>“</span>
-        <blockquote class="quote-content">{t.content}</blockquote>
+        <blockquote>
+          <h3 class="note-heading">{t.heading}</h3>
+          <p class="quote-content">{t.content}</p>
+        </blockquote>
         <figcaption class="quote-person">
-          <svg class="avatar" width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true">
-            <circle cx="22" cy="22" r="20" fill={t.avatarBg} stroke="#141414" stroke-width="3" />
-            <circle cx="22" cy="17" r="6" fill="#141414" />
-            <path d="M10 34C10 28 15 25 22 25C29 25 34 28 34 34" fill="#141414" />
-          </svg>
-          <span class="person-info">
-            <span class="person-name">{t.name}</span>
-            <span class="person-role">{t.role}</span>
-          </span>
+          <span class="note-dot"></span>
+          <span class="note-label">{t.source}</span>
         </figcaption>
       </figure>
     ))}

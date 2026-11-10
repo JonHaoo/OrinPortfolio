@@ -12,27 +12,27 @@ interface Project {
 const projects: Project[] = [
   {
     num: '01',
-    type: 'AI 企业服务',
-    title: '企业知识库智能问答',
-    desc: '为制造企业搭建 RAG 知识库系统，把散落在文档里的经验变成随问随答的智能助手，检索到生成全链路自研。',
+    type: 'AI 交付案例',
+    title: '招聘智能助手',
+    desc: '从客户招聘流程拆出岗位解析、候选人问答、面试题生成三个环节；确定性内容走知识库、开放对话走 LLM，控制幻觉与答非所问。交付后辅导 HR 团队并迭代提示词。',
     coverClass: 'cover-blue',
-    chips: ['RAG', 'LLM 应用'],
+    chips: ['Prompt 工程', '知识库配置'],
   },
   {
     num: '02',
-    type: 'AI 企业服务',
-    title: 'AI 智能外呼系统',
-    desc: '为电销团队搭建 AI 外呼智能体，自研话术引擎与意图识别，单日稳定千级通话，人力成本下降七成。',
+    type: '个人项目 · 进行中',
+    title: '跨境电商评论洞察 Agent',
+    desc: '基于 Amazon Reviews 2023 公开数据集（5.7 亿条真实评论）构建评论管道 → RAG 检索 → 多步分析 Agent Loop → FAQ 衍生闭环；分类层用规则、LLM 只做语义归因以控成本。',
     coverClass: 'cover-pink',
-    chips: ['智能体', '语音交互'],
+    chips: ['RAG', 'Agent Loop', '评测体系'],
   },
   {
     num: '03',
-    type: '独立产品',
-    title: '创作者效率工作台',
-    desc: '面向自媒体创作者的一站式内容工具，覆盖选题、写作到多平台分发，上线 8 个月积累 4000+ 注册用户。',
+    type: 'B 端工程案例',
+    title: '投放数据分析系统',
+    desc: '与运营、投放团队梳理数据源与流转，交付投放效果分析、市场竞品分析等可视化模块；同期负责广告投放 CRM、短剧版权交易平台等 B 端系统的前端架构与迭代。',
     coverClass: 'cover-green',
-    chips: ['SaaS', 'Next.js'],
+    chips: ['Vue', 'ECharts', 'TypeScript'],
   },
 ];
 ---
@@ -41,7 +41,7 @@ const projects: Project[] = [
   <div class="section-header">
     <span class="section-tag">SELECTED WORKS</span>
     <h2 class="section-title">精选作品</h2>
-    <p class="section-sub">从企业内部系统到面向用户的独立产品，每个项目都从真实问题出发。</p>
+    <p class="section-sub">从客户侧的 AI 交付，到自研 Agent 的工程闭环，底层是 B 端系统的工程实现能力。</p>
   </div>
 
   <div class="cards-row">

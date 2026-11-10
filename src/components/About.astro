@@ -1,12 +1,12 @@
 ---
 // 关于我：引言贴纸卡 + 介绍 + 经历 + 技能标签（对应设计稿 2:101）
 const experiences = [
-  { dot: 'dot-yellow', text: 'AI 企业服务：需求梳理、方案设计、开发交付，一站式落地' },
-  { dot: 'dot-pink', text: '独立开发：从产品定义到增长运营，完整走完 0 到 1' },
-  { dot: 'dot-green', text: '工程背景：前后端都能写，和研发团队直接用代码对话' },
+  { dot: 'dot-yellow', text: '客户侧：需求洽谈 → 方案演示 → 配置交付 → 使用辅导 → 反馈回收，五环节独立闭环' },
+  { dot: 'dot-pink', text: '工程侧：React / Vue3 / TypeScript + Node.js，B 端系统与高并发 C 端活动页交付' },
+  { dot: 'dot-green', text: '双向转译：把业务问题拆成 AI 可介入的环节，也把系统能力讲成客户用得上的操作' },
 ];
 
-const skills = ['LLM 应用开发', '智能体搭建', 'RAG 检索', '工作流自动化', '全栈开发', '产品设计'];
+const skills = ['Prompt 工程', '智能助手配置', '知识库 / RAG', 'LLM 评测', 'React', 'Vue3', 'TypeScript', 'Node.js', 'Python', 'Docker', 'Claude Code / Cursor', 'GEO'];
 ---
 
 <section class="about" id="about">
@@ -18,15 +18,14 @@ const skills = ['LLM 应用开发', '智能体搭建', 'RAG 检索', '工作流�
   <div class="about-row">
     <div class="about-quote-card">
       <span class="quote-mark">“</span>
-      <p class="quote-text">工具不值钱，把工具变成业务结果才值钱。</p>
-      <p class="quote-by">—— 我做事的方式</p>
+      <p class="quote-text">方案讲得再漂亮，客户用起来才算落地。</p>
+      <p class="quote-by">—— 我做交付的标准</p>
     </div>
 
     <div class="about-right">
       <p class="about-intro">
-        5 年全栈开发出身，现在专注两件事：一是帮企业把 AI
-        真正用进业务流程，从知识库问答到智能体外呼，交付能跑起来的系统而不只是
-        PPT；二是做自己的独立产品，保持对真实用户需求的体感。
+        前端全栈开发出身，2 年 8 个月 B 端项目交付打底；近一年转到 AI
+        企业服务一线，直面客户洽谈方案、驻场辅导系统落地、以 Prompt 工程交付多场景智能助手。既能和研发对齐实现，也能把技术能力翻译成业务方听得懂的用法——这条双向转译的链路，是我最核心的能力。现在正补齐 RAG / Agent Loop / 评测体系的工程闭环。
       </p>
 
       {experiences.map((e) => (

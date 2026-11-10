@@ -1,0 +1,17 @@
+{
+  "name": "neubrutalism-portfolio",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@fontsource/archivo-black": "^5.1.0",
+    "@fontsource/noto-sans-sc": "^5.1.0",
+    "@fontsource/zcool-qingke-huangyou": "^5.1.0",
+    "astro": "^5.0.0"
+  }
+}

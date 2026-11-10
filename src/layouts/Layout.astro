@@ -1,0 +1,81 @@
+---
+import '@fontsource/archivo-black';
+import '@fontsource/noto-sans-sc/400.css';
+import '@fontsource/noto-sans-sc/500.css';
+import '@fontsource/noto-sans-sc/700.css';
+import '@fontsource/noto-sans-sc/900.css';
+import '@fontsource/zcool-qingke-huangyou';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'HAO.DEV · 独立开发 & AI 企业服务',
+  description = '把 AI 真正落地到业务里 — 独立开发者与 AI 企业服务作品集',
+} = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <!-- 主题初始化：避免刷新时闪白 -->
+    <script is:inline>
+      (function () {
+        var theme = 'light';
+        try { theme = localStorage.getItem('theme') || 'light'; } catch (e) {}
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="viewport-scaler" id="viewport-scaler">
+      <div class="page" id="page">
+        <slot />
+      </div>
+    </div>
+
+    <script is:inline>
+      // ---- 画布等比缩放：1440px 设计稿居中渲染，窗口变小时整体缩放 ----
+      (function () {
+        var PAGE_WIDTH = 1440;
+        var scaler = document.getElementById('viewport-scaler');
+        var page = document.getElementById('page');
+
+        function fit() {
+          var viewportWidth = document.documentElement.clientWidth;
+          var scale = Math.min(viewportWidth / PAGE_WIDTH, 1);
+          var left = (viewportWidth - PAGE_WIDTH * scale) / 2;
+          page.style.transform = 'scale(' + scale + ')';
+          page.style.left = left + 'px';
+          scaler.style.height = page.offsetHeight * scale + 'px';
+        }
+
+        window.addEventListener('resize', fit);
+        if (window.ResizeObserver) {
+          new ResizeObserver(fit).observe(page);
+        }
+        fit();
+      })();
+
+      // ---- 主题切换：右上角开关，全站 CSS 变量换肤 ----
+      (function () {
+        var toggle = document.getElementById('theme-toggle-btn');
+        if (!toggle) return;
+        toggle.addEventListener('click', function () {
+          var root = document.documentElement;
+          var next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+          root.dataset.theme = next;
+          try { localStorage.setItem('theme', next); } catch (e) {}
+        });
+      })();
+    </script>
+  </body>
+</html>

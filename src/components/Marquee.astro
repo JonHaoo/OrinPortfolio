@@ -1,0 +1,11 @@
+---
+// 黑色跑马灯：无缝循环滚动，悬停暂停（对应设计稿 2:40）
+const items = 'AI 应用落地 / 智能体搭建 / 工作流自动化 / LLM 应用开发 / 独立产品 / 技术咨询 / ';
+---
+
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    <span>{items.repeat(4)}</span>
+    <span>{items.repeat(4)}</span>
+  </div>
+</div>

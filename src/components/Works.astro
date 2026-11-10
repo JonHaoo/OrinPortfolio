@@ -1,0 +1,71 @@
+---
+// 作品区：三张项目卡片（对应设计稿 2:42）
+interface Project {
+  num: string;
+  type: string;
+  title: string;
+  desc: string;
+  coverClass: string;
+  chips: string[];
+}
+
+const projects: Project[] = [
+  {
+    num: '01',
+    type: 'AI 企业服务',
+    title: '企业知识库智能问答',
+    desc: '为制造企业搭建 RAG 知识库系统，把散落在文档里的经验变成随问随答的智能助手，检索到生成全链路自研。',
+    coverClass: 'cover-blue',
+    chips: ['RAG', 'LLM 应用'],
+  },
+  {
+    num: '02',
+    type: 'AI 企业服务',
+    title: 'AI 智能外呼系统',
+    desc: '为电销团队搭建 AI 外呼智能体，自研话术引擎与意图识别，单日稳定千级通话，人力成本下降七成。',
+    coverClass: 'cover-pink',
+    chips: ['智能体', '语音交互'],
+  },
+  {
+    num: '03',
+    type: '独立产品',
+    title: '创作者效率工作台',
+    desc: '面向自媒体创作者的一站式内容工具，覆盖选题、写作到多平台分发，上线 8 个月积累 4000+ 注册用户。',
+    coverClass: 'cover-green',
+    chips: ['SaaS', 'Next.js'],
+  },
+];
+---
+
+<section class="works" id="works">
+  <div class="section-header">
+    <span class="section-tag">SELECTED WORKS</span>
+    <h2 class="section-title">精选作品</h2>
+    <p class="section-sub">从企业内部系统到面向用户的独立产品，每个项目都从真实问题出发。</p>
+  </div>
+
+  <div class="cards-row">
+    {projects.map((p) => (
+      <article class="project-card">
+        <div class={`project-cover ${p.coverClass}`}>
+          <span class="num">{p.num}</span>
+          <span class="type">{p.type}</span>
+        </div>
+        <div class="project-divider"></div>
+        <div class="project-body">
+          <h3 class="project-title">{p.title}</h3>
+          <p class="project-desc">{p.desc}</p>
+          <div class="project-chips">
+            {p.chips.map((c) => <span class="chip">{c}</span>)}
+          </div>
+          <a class="project-link" href="#" aria-label={`查看项目：${p.title}`}>
+            查看项目
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+              <path d="M3 9H15M15 9L10 4M15 9L10 14" stroke="#141414" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </a>
+        </div>
+      </article>
+    ))}
+  </div>
+</section>

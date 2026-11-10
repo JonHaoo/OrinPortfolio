@@ -1,0 +1,76 @@
+---
+// 数据与信任：四个撞色数据块 + 两张客户评价卡（对应设计稿 2:137）
+interface Stat {
+  num: string;
+  label: string;
+  colorClass: string;
+}
+
+const stats: Stat[] = [
+  { num: '5+', label: '年全栈开发经验', colorClass: 'stat-yellow' },
+  { num: '20+', label: '个项目完整交付', colorClass: 'stat-pink' },
+  { num: '12', label: '家企业服务客户', colorClass: 'stat-blue' },
+  { num: '4000+', label: '独立产品注册用户', colorClass: 'stat-green' },
+];
+
+interface Testimonial {
+  markClass: string;
+  content: string;
+  avatarBg: string;
+  name: string;
+  role: string;
+}
+
+const testimonials: Testimonial[] = [
+  {
+    markClass: 'mark-blue',
+    content: '别的供应商给我们讲概念，他直接给系统。三个月上线，客服团队的质检工作量减了一半。',
+    avatarBg: '#FFDC58',
+    name: '陈总',
+    role: '某制造企业 · 数字化负责人',
+  },
+  {
+    markClass: 'mark-pink',
+    content: '最难得的是他懂业务。不是我们说一句他做一句，而是会反问「这个动作员工真的会做吗」。',
+    avatarBg: '#7FBC6B',
+    name: '林女士',
+    role: '某连锁零售品牌 · 运营总监',
+  },
+];
+---
+
+<section class="stats" id="stats">
+  <div class="section-header">
+    <span class="section-tag">NUMBERS &amp; TRUST</span>
+    <h2 class="section-title">用结果说话</h2>
+  </div>
+
+  <div class="stats-row">
+    {stats.map((s) => (
+      <div class={`stat-block ${s.colorClass}`}>
+        <span class="stat-num">{s.num}</span>
+        <span class="stat-label">{s.label}</span>
+      </div>
+    ))}
+  </div>
+
+  <div class="quotes-row">
+    {testimonials.map((t) => (
+      <figure class="quote-card">
+        <span class={`quote-mark ${t.markClass}`}>“</span>
+        <blockquote class="quote-content">{t.content}</blockquote>
+        <figcaption class="quote-person">
+          <svg class="avatar" width="44" height="44" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+            <circle cx="22" cy="22" r="20" fill={t.avatarBg} stroke="#141414" stroke-width="3" />
+            <circle cx="22" cy="17" r="6" fill="#141414" />
+            <path d="M10 34C10 28 15 25 22 25C29 25 34 28 34 34" fill="#141414" />
+          </svg>
+          <span class="person-info">
+            <span class="person-name">{t.name}</span>
+            <span class="person-role">{t.role}</span>
+          </span>
+        </figcaption>
+      </figure>
+    ))}
+  </div>
+</section>

@@ -1,0 +1,45 @@
+---
+// 关于我：引言贴纸卡 + 介绍 + 经历 + 技能标签（对应设计稿 2:101）
+const experiences = [
+  { dot: 'dot-yellow', text: 'AI 企业服务：需求梳理、方案设计、开发交付，一站式落地' },
+  { dot: 'dot-pink', text: '独立开发：从产品定义到增长运营，完整走完 0 到 1' },
+  { dot: 'dot-green', text: '工程背景：前后端都能写，和研发团队直接用代码对话' },
+];
+
+const skills = ['LLM 应用开发', '智能体搭建', 'RAG 检索', '工作流自动化', '全栈开发', '产品设计'];
+---
+
+<section class="about" id="about">
+  <div class="section-header">
+    <span class="section-tag">ABOUT ME</span>
+    <h2 class="section-title">关于我</h2>
+  </div>
+
+  <div class="about-row">
+    <div class="about-quote-card">
+      <span class="quote-mark">“</span>
+      <p class="quote-text">工具不值钱，把工具变成业务结果才值钱。</p>
+      <p class="quote-by">—— 我做事的方式</p>
+    </div>
+
+    <div class="about-right">
+      <p class="about-intro">
+        5 年全栈开发出身，现在专注两件事：一是帮企业把 AI
+        真正用进业务流程，从知识库问答到智能体外呼，交付能跑起来的系统而不只是
+        PPT；二是做自己的独立产品，保持对真实用户需求的体感。
+      </p>
+
+      {experiences.map((e) => (
+        <div class="exp-row">
+          <span class={`exp-dot ${e.dot}`}></span>
+          <span class="exp-text">{e.text}</span>
+        </div>
+      ))}
+
+      <p class="skills-title">常用工具箱</p>
+      <div class="skills-wrap">
+        {skills.map((s) => <span class="skill-chip">{s}</span>)}
+      </div>
+    </div>
+  </div>
+</section>

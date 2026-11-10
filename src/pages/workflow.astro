@@ -1,0 +1,1166 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  fluid
+  title="AI 辅助研发工作流规范 · Orin"
+  description="我自己沉淀并正在使用的 AI 辅助研发流程：按风险分快慢车道，小步实现，每个结论都要有证据，人保留产品判断和高风险决策权。"
+>
+  <header class="site-header doc-header">
+    <a class="logo" href="/" aria-label="返回作品集首页">
+      <div class="logo-square"><span>O</span></div>
+      <span class="logo-name">ORIN.DEV</span>
+    </a>
+
+    <nav class="site-nav" aria-label="主导航">
+      <a href="/">返回作品集</a>
+      <a href="/workflow/" class="active">工作流规范</a>
+    </nav>
+
+    <div class="nav-right">
+      <button
+        class="theme-toggle"
+        id="theme-toggle-btn"
+        type="button"
+        role="switch"
+        aria-checked="false"
+        aria-label="切换深色 / 浅色主题"
+        title="切换深色 / 浅色主题"
+      >
+        <svg class="icon-sun" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <circle cx="7" cy="7" r="3" fill="#FFF5E6" />
+          <path d="M7 0.5V2.5M7 11.5V13.5M0.5 7H2.5M11.5 7H13.5M2.4 2.4L3.8 3.8M10.2 10.2L11.6 11.6M11.6 2.4L10.2 3.8M3.8 10.2L2.4 11.6" stroke="#FFF5E6" stroke-width="1.2" stroke-linecap="round" />
+        </svg>
+        <svg class="icon-moon" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M13 9C11.9 9.6 10.7 9.9 9.4 9.9C5.2 9.9 1.8 6.5 1.8 2.3C1.8 1.8 1.9 1.3 2 0.9C0.9 1.7 0.2 3 0.2 4.5C0.2 8.2 3.1 11.1 6.8 11.1C9.2 11.1 11.3 9.8 12.4 7.8L13 9Z" fill="#141414" />
+        </svg>
+        <span class="knob">
+          <svg class="knob-sun" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" style="position:absolute;top:5px;left:5px;">
+            <circle cx="7" cy="7" r="3" fill="#141414" />
+            <path d="M7 0.5V2.5M7 11.5V13.5M0.5 7H2.5M11.5 7H13.5M2.4 2.4L3.8 3.8M10.2 10.2L11.6 11.6M11.6 2.4L10.2 3.8M3.8 10.2L2.4 11.6" stroke="#141414" stroke-width="1.2" stroke-linecap="round" />
+          </svg>
+          <svg class="knob-moon" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" style="position:absolute;top:5px;left:5px;">
+            <path d="M13 9C11.9 9.6 10.7 9.9 9.4 9.9C5.2 9.9 1.8 6.5 1.8 2.3C1.8 1.8 1.9 1.3 2 0.9C0.9 1.7 0.2 3 0.2 4.5C0.2 8.2 3.1 11.1 6.8 11.1C9.2 11.1 11.3 9.8 12.4 7.8L13 9Z" fill="#141414" />
+          </svg>
+        </span>
+      </button>
+
+      <a class="btn btn-cta" href="/#contact">聊聊合作</a>
+    </div>
+  </header>
+
+  <div class="doc-wrap">
+    <!-- ===== 文档头 ===== -->
+    <div class="doc-hero">
+      <span class="doc-hero-chip">v1.0 · 2026-10-29</span>
+      <h1 class="doc-title">AI 辅助研发工作流规范</h1>
+      <p class="doc-sub">
+        面向个人开发者与小型团队的、可由 AI Coding Agent 执行并由人类把关的软件研发流程。
+      </p>
+      <p class="doc-meta">适用范围：Web 应用 · AI 应用 · Agent · API · 数据处理任务及常规产品迭代</p>
+    </div>
+
+    <div class="doc-principles">
+      <span class="doc-prin doc-prin-yellow">人负责方向与取舍，AI 负责加速执行</span>
+      <span class="doc-prin doc-prin-pink">规格明确但允许经批准修订</span>
+      <span class="doc-prin doc-prin-blue">测试提供证据而非制造安全感</span>
+      <span class="doc-prin doc-prin-green">流程强度与风险匹配</span>
+    </div>
+
+    <!-- ===== §0 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§0</span>
+        <h2 class="doc-sec-title">一页版：每个任务都遵循什么</h2>
+      </div>
+
+      <h3 class="doc-h3">六条原则</h3>
+      <ol class="doc-ol">
+        <li><strong>先确认要解决的问题，再选择实现方案。</strong>不把用户的第一种想法直接等同于正确需求。</li>
+        <li><strong>先检查现场，再动手。</strong>读取项目指令、相关代码、Git 状态、现有测试和运行方式；不凭空重建项目。</li>
+        <li><strong>规格是可修订的约定，不是不可质疑的圣旨。</strong>重要变更必须提出理由、影响和替代方案，并更新相关测试与任务。</li>
+        <li><strong>小步实现，尽早验证。</strong>每次只完成一个可检查的切片，避免一次修改大量文件后才发现方向错误。</li>
+        <li><strong>完成必须有证据。</strong>测试通过、浏览器验证、日志、截图或审查记录，应与任务风险相匹配；不得虚报执行结果。</li>
+        <li><strong>人类保留产品判断和高风险决策权。</strong>AI 可以提出、实现、测试和审查，但不能替人决定产品是否有价值，也不能自行批准重大风险。</li>
+      </ol>
+
+      <h3 class="doc-h3">默认执行路径</h3>
+      <pre class="doc-pre">任务进入
+  ↓
+读取项目上下文、Git 状态和现有实现
+  ↓
+澄清目标、验收标准、约束与风险
+  ↓
+选择快车道 / 标准车道 / 慢车道
+  ↓
+制定最小必要规格与测试计划
+  ↓
+拆成小任务，逐个实现
+  ↓
+运行针对性测试 → 修复 → 回归
+  ↓
+按风险进行真实浏览器 / API / 安全 / 数据验证
+  ↓
+独立审查（必要时第二个 Agent 或模型交叉 Review）
+  ↓
+人工确认交付、提交或发布
+  ↓
+记录结果、未解决问题和可复用经验</pre>
+
+      <p class="doc-p">
+        这是一条默认路径，不是要求所有任务机械走完所有步骤。简单任务可以省略独立文档，但不能省略对目标和结果的基本核实；高风险任务不能因为代码改动少而跳过关键验证。
+      </p>
+    </section>
+
+    <!-- ===== §1 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§1</span>
+        <h2 class="doc-sec-title">角色与责任边界</h2>
+      </div>
+
+      <h3 class="doc-h3">人类负责人（产品与最终决策者）</h3>
+      <p class="doc-p">负责：</p>
+      <ul class="doc-ul">
+        <li>确认用户问题、目标用户、价值假设和成功标准；</li>
+        <li>对范围、体验、成本、时间、风险做取舍；</li>
+        <li>审批影响数据、安全、计费、架构或用户承诺的关键决定；</li>
+        <li>判断功能是否真正满足需求；</li>
+        <li>决定是否提交、发布、回滚或接受已知风险。</li>
+      </ul>
+      <p class="doc-p">
+        不要求人类逐行手写代码，但必须理解关键行为和主要风险。对于自己无法解释、又会影响安全、隐私、数据完整性或资金的代码，不应仅凭「测试全绿」就批准上线。
+      </p>
+
+      <h3 class="doc-h3">主 Agent（Orchestrator / Implementer）</h3>
+      <p class="doc-p">负责：</p>
+      <ul class="doc-ul">
+        <li>读取项目上下文与约定；</li>
+        <li>把需求转成可执行任务；</li>
+        <li>选择工具和工作流档位；</li>
+        <li>修改代码、编写或更新测试；</li>
+        <li>执行验证、处理失败并更新任务状态；</li>
+        <li>汇总变更、证据、风险和需要人类决定的问题。</li>
+      </ul>
+      <p class="doc-p">主 Agent 不得：</p>
+      <ul class="doc-ul">
+        <li>编造自己没有运行过的测试、浏览器操作或命令结果；</li>
+        <li>未经确认扩大需求或重写无关模块；</li>
+        <li>因测试失败就随意删除测试、放宽断言或修改业务语义；</li>
+        <li>在没有授权时提交代码、推送分支、执行破坏性数据操作或发布；</li>
+        <li>将「代码已经生成」当成「功能已经完成」。</li>
+      </ul>
+
+      <h3 class="doc-h3">独立 Reviewer（第二 Agent、不同模型或人工）</h3>
+      <p class="doc-p">
+        负责从不同视角寻找问题，而不是重复实现 Agent 的解释。重点检查：
+      </p>
+      <ul class="doc-ul">
+        <li>需求遗漏与未经授权的范围扩张；</li>
+        <li>逻辑缺陷、边界条件和异常路径；</li>
+        <li>安全、权限、隐私、密钥和数据隔离；</li>
+        <li>并发、重试、幂等、状态一致性；</li>
+        <li>测试是否真的验证关键行为；</li>
+        <li>维护性、可读性、复杂度和回归风险。</li>
+      </ul>
+      <p class="doc-p">
+        交叉 Review 是风险控制手段，不是正确性证明。两个模型可能共享同样的误解；最终仍需要测试证据和人类决策。
+      </p>
+
+      <h3 class="doc-h3">工具与技能</h3>
+      <p class="doc-p">
+        Skills、命令、Hooks、MCP、浏览器自动化和脚本用于承载重复流程。只有在工具实际存在、权限已授予且调用成功时，才可以声称使用了它们。
+      </p>
+      <ul class="doc-ul">
+        <li>项目指令文件（如 <code class="doc-code">AGENTS.md</code>、<code class="doc-code">CLAUDE.md</code>）：稳定、全局适用的约定；</li>
+        <li>Skill：特定任务的操作方法、检查表和产物标准；</li>
+        <li>Hook / Gate：需要稳定自动执行的机械规则；</li>
+        <li>Workflow：阶段、状态、依赖与转移规则；</li>
+        <li>测试与评估集：验证代码、技能和工作流是否真的有效；</li>
+        <li>临时任务文档：当前 feature 的规格、计划、测试结果和决策。</li>
+      </ul>
+      <p class="doc-p">
+        不要把所有背景、全部流程和每次任务细节塞进一个超长指令文件。全局指令只放高价值、稳定且跨任务适用的内容；任务特定内容放在任务文档中；可复用操作放在 Skill 中。
+      </p>
+    </section>
+
+    <!-- ===== §2 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§2</span>
+        <h2 class="doc-sec-title">工作流档位：风险决定流程强度</h2>
+      </div>
+
+      <p class="doc-p">
+        每个任务开始时，Agent 应给出简短的「执行门禁」判断：任务目标与预期结果、影响范围、风险等级、建议流程档位、必须执行的验证、需要人类先确认的事项（如有）。
+      </p>
+
+      <h3 class="doc-h3">快车道</h3>
+      <p class="doc-p">适用：</p>
+      <ul class="doc-ul">
+        <li>文案、低风险样式微调；</li>
+        <li>局部、可逆的小 Bug；</li>
+        <li>不改变公共接口、数据模型、权限或关键业务状态的简单修改。</li>
+      </ul>
+      <p class="doc-p">最低要求：</p>
+      <ol class="doc-ol">
+        <li>查看相关代码与 Git 状态；</li>
+        <li>明确预期行为；</li>
+        <li>做最小修改；</li>
+        <li>运行相关测试、类型检查或 lint（按项目情况）；</li>
+        <li>简述改动和验证结果。</li>
+      </ol>
+      <p class="doc-p">
+        可省略独立 Spec、工单拆解、正式 ADR 和完整 E2E 计划。若过程中发现风险升级，应切换到标准或慢车道。
+      </p>
+
+      <h3 class="doc-h3">标准车道</h3>
+      <p class="doc-p">适用：</p>
+      <ul class="doc-ul">
+        <li>新增一个页面、组件、API 或普通业务功能；</li>
+        <li>修改已有交互流程；</li>
+        <li>涉及多个文件，但边界清晰、影响可控的任务。</li>
+      </ul>
+      <p class="doc-p">要求：</p>
+      <ol class="doc-ol">
+        <li>写明验收标准；</li>
+        <li>建立简要 Spec 或任务说明；</li>
+        <li>规划正常路径、异常路径和关键边界；</li>
+        <li>小步实现与测试；</li>
+        <li>对用户可见交互执行浏览器验收；</li>
+        <li>做针对性代码审查；</li>
+        <li>记录验证证据和未解决事项。</li>
+      </ol>
+
+      <h3 class="doc-h3">慢车道</h3>
+      <p class="doc-p">适用：</p>
+      <ul class="doc-ul">
+        <li>登录、授权、租户隔离、隐私数据；</li>
+        <li>计费、额度扣减、支付、退款；</li>
+        <li>数据库迁移、批量数据变更、不可逆操作；</li>
+        <li>AI 对话流、任务队列、异步任务、重试与幂等等核心链路；</li>
+        <li>跨模块重构、公共接口变更、核心架构调整；</li>
+        <li>发布失败后可能造成较大损失的功能。</li>
+      </ul>
+      <p class="doc-p">要求：</p>
+      <ol class="doc-ol">
+        <li>完整需求对齐与范围界定；</li>
+        <li>Spec、接口契约和重要架构决策记录（ADR）；</li>
+        <li>风险分析、回滚或恢复方案；</li>
+        <li>任务拆解与依赖管理；</li>
+        <li>单元、集成、端到端测试按需组合；</li>
+        <li>专项安全、权限、并发、数据一致性检查；</li>
+        <li>独立 Review，必要时跨模型审查；</li>
+        <li>发布前人工批准，必要时灰度发布和发布后观察。</li>
+      </ol>
+
+      <h3 class="doc-h3">风险判断原则</h3>
+      <p class="doc-p">风险不能只按代码行数或文件数量判断。至少考虑：</p>
+      <ul class="doc-ul">
+        <li>影响用户数量与损失程度；</li>
+        <li>是否涉及身份、权限、敏感数据或资金；</li>
+        <li>是否可逆、是否有可靠回滚；</li>
+        <li>外部依赖与运行环境复杂度；</li>
+        <li>失败是否容易被发现；</li>
+        <li>是否存在并发、重试、重复请求或异步状态；</li>
+        <li>需求本身的不确定性。</li>
+      </ul>
+      <p class="doc-p">
+        只要触及高风险数据或关键业务不变量，就应升级验证强度，即使代码改动只有几行。
+      </p>
+    </section>
+
+    <!-- ===== §3 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§3</span>
+        <h2 class="doc-sec-title">阶段 0：检查现场与建立任务上下文</h2>
+      </div>
+
+      <h3 class="doc-h3">开始前必须做什么</h3>
+      <p class="doc-p">Agent 首先检查：</p>
+      <ul class="doc-ul">
+        <li>项目根目录与项目指令文件；</li>
+        <li>相关模块、已有相似实现和接口；</li>
+        <li>Git 分支、未提交改动、工作区是否干净；</li>
+        <li><code class="doc-code">package.json</code>、测试命令、构建命令和运行方式；</li>
+        <li>当前环境、依赖服务和相关配置；</li>
+        <li>现有失败测试与已知问题。</li>
+      </ul>
+      <p class="doc-p">
+        不要覆盖用户已有的未提交改动。发现工作区存在变更时，先识别其归属；不能确定时先询问，不得默认清理。
+      </p>
+
+      <h3 class="doc-h3">现场报告格式</h3>
+      <pre class="doc-pre">现场检查
+- 当前分支：
+- 工作区状态：
+- 相关模块：
+- 已有实现 / 可复用能力：
+- 测试与运行命令：
+- 已知失败或环境风险：
+- 本次预计修改范围：</pre>
+      <p class="doc-p">
+        对简单任务可以在对话中简短报告；对标准或慢车道任务，应把重要信息写入任务目录。
+      </p>
+
+      <h3 class="doc-h3">环境问题与代码问题分离</h3>
+      <p class="doc-p">
+        遇到服务不可达、依赖异常、凭证失效、代理问题或第三方 API 错误时，先做分层诊断：
+      </p>
+      <ol class="doc-ol">
+        <li><strong>基础设施层</strong>：服务是否启动、端口是否正确、网络是否连通；</li>
+        <li><strong>依赖层</strong>：凭证、配额、SDK、第三方服务状态；</li>
+        <li><strong>应用接缝层</strong>：本地封装、请求参数、响应解析；</li>
+        <li><strong>业务层</strong>：业务逻辑、状态转换、错误处理。</li>
+      </ol>
+      <p class="doc-p">
+        在证据指向代码之前，不要为了「试试看」而大规模重构业务逻辑。临时探针应尽可能独立、最小化，并在任务结束后清理或归档。
+      </p>
+    </section>
+
+    <!-- ===== §4 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§4</span>
+        <h2 class="doc-sec-title">阶段 1：需求对齐与产品判断</h2>
+      </div>
+
+      <h3 class="doc-h3">需求对齐要回答的问题</h3>
+      <ol class="doc-ol">
+        <li>谁遇到了什么问题？</li>
+        <li>这个问题为什么值得解决？现在不做的代价是什么？</li>
+        <li>用户真正需要的结果是什么，而不是用户最初指定的实现方式是什么？</li>
+        <li>成功如何被观察或衡量？</li>
+        <li>本次明确不做什么？</li>
+        <li>有哪些技术、时间、预算、合规或兼容性约束？</li>
+        <li>哪些假设尚未验证？哪些不确定性会改变方案？</li>
+        <li>是否存在更简单、风险更低的替代方案？</li>
+      </ol>
+      <p class="doc-p">
+        对产品不确定性高的需求，优先设计低成本、可逆、可验证的实验，而不是直接投入复杂实现。
+      </p>
+
+      <h3 class="doc-h3">不要把 AI 的方案当作需求本身</h3>
+      <p class="doc-p">AI 应当：</p>
+      <ul class="doc-ul">
+        <li>复述自己对问题的理解；</li>
+        <li>列出关键假设和可能的误解；</li>
+        <li>给出必要的替代方案与取舍；</li>
+        <li>指出哪些问题必须由人类决定；</li>
+        <li>对低影响细节使用合理默认值，避免用大量问题阻塞开发。</li>
+      </ul>
+      <p class="doc-p">
+        只有会改变产品方向、接口、数据模型、风险或成本的未知事项，才需要在开工前强制澄清。其他细节可以先采用可逆默认值并记录。
+      </p>
+
+      <h3 class="doc-h3">验收标准</h3>
+      <p class="doc-p">
+        验收标准应当可观察、可验证，尽量避免「体验更好」「性能更快」「处理得更智能」等无法直接判断的表述。示例：
+      </p>
+      <pre class="doc-pre">需求：用户可以发送消息并看到 Agent 的流式回答。
+
+验收标准：
+- 空消息不能发送，并给出明确提示；
+- 正常请求能收到并显示流式内容；
+- 用户可以停止生成；
+- 请求失败时显示可理解的错误状态；
+- 网络中断后页面不会永久停留在 loading；
+- 重复点击不会意外创建重复请求（若业务要求如此）。</pre>
+    </section>
+
+    <!-- ===== §5 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§5</span>
+        <h2 class="doc-sec-title">阶段 2：规格、计划与架构决策</h2>
+      </div>
+
+      <h3 class="doc-h3">三类文档不要混为一谈</h3>
+      <ul class="doc-ul">
+        <li><strong>PRD / 需求说明</strong>：为什么做、为谁做、用户流程与成功标准；</li>
+        <li><strong>Spec / 技术规格</strong>：接口、数据、状态、边界、约束和验收契约；</li>
+        <li><strong>Plan / Tasks / Issues</strong>：如何按依赖关系实施，下一步具体做什么；</li>
+        <li><strong>ADR</strong>：为什么选择某个重要方案，以及放弃了哪些替代方案；</li>
+        <li><strong>QA Plan</strong>：如何证明需求被满足，包含用例和执行记录。</li>
+      </ul>
+      <p class="doc-p">
+        小任务不必强行创建全部文档。文档应服务于执行、沟通和复盘，不是为流程打卡。
+      </p>
+
+      <h3 class="doc-h3">Spec 建议模板</h3>
+      <pre class="doc-pre"># Feature Spec: &lt;名称&gt;
+
+Status: draft | ready | implementing | validating | accepted
+Owner: &lt;负责人&gt;
+Last updated: &lt;日期&gt;
+
+## 1. Problem &amp; Goal
+- 用户问题：
+- 目标结果：
+- 成功标准：
+
+## 2. Scope
+- In scope：
+- Out of scope：
+
+## 3. User Flow
+- 前置条件：
+- 主流程：
+- 失败 / 取消 / 重试流程：
+
+## 4. Contracts
+- API / 事件 / 类型：
+- 数据模型：
+- 状态与状态转换：
+- 错误语义：
+- 权限与数据边界：
+
+## 5. Constraints &amp; Decisions
+- 约束：
+- 关键假设：
+- 已确认决策：
+- 尚待验证的假设：
+
+## 6. Acceptance Criteria
+- [ ] AC-01：
+- [ ] AC-02：
+- [ ] AC-03：
+
+## 7. Test Strategy
+- 单元测试：
+- 集成测试：
+- 浏览器 / E2E：
+- 安全与数据一致性：
+- 手工验收：
+
+## 8. Rollback / Recovery
+- 回滚或恢复方式：
+- 失败后的数据处理：
+
+## 9. Change Log
+- 日期 / 变更 / 原因 / 批准人：</pre>
+
+      <h3 class="doc-h3">Spec 是有版本的契约</h3>
+      <p class="doc-p">Spec 在实现阶段可以被修订，但不能被 Agent 静默改写。如果发现规格不合理：</p>
+      <ol class="doc-ol">
+        <li>暂停受影响的实现；</li>
+        <li>说明发现、证据、影响范围和备选方案；</li>
+        <li>标明受影响的接口、测试和任务；</li>
+        <li>由有权决策的人批准；</li>
+        <li>更新 Spec、QA Plan、任务与必要的 ADR；</li>
+        <li>再继续实现。</li>
+      </ol>
+      <p class="doc-p">
+        紧急情况下可先采取安全、可逆的止损措施，但必须记录原因并补齐决策。
+      </p>
+
+      <h3 class="doc-h3">任务拆解</h3>
+      <p class="doc-p">把任务拆成尽量独立、可验证的小切片。每个任务都应说明：</p>
+      <ul class="doc-ul">
+        <li>要实现的结果；</li>
+        <li>前置依赖；</li>
+        <li>允许修改的范围；</li>
+        <li>验收条件；</li>
+        <li>必须运行的测试；</li>
+        <li>完成后应更新的文档或状态。</li>
+      </ul>
+      <p class="doc-p">
+        只有真正独立、接口已稳定且不会竞争修改相同文件的任务才适合并行。不要为了「多 Agent」而把紧密耦合的工作强行拆开。
+      </p>
+    </section>
+
+    <!-- ===== §6 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§6</span>
+        <h2 class="doc-sec-title">阶段 3：测试规划与 TDD 实现</h2>
+      </div>
+
+      <h3 class="doc-h3">测试规划先于实现，但不等于穷尽一切</h3>
+      <p class="doc-p">针对验收标准，至少考虑：</p>
+      <ul class="doc-ul">
+        <li>正常路径；</li>
+        <li>空值、边界值和非法输入；</li>
+        <li>失败、超时、取消和重试；</li>
+        <li>重复操作与并发；</li>
+        <li>权限与数据隔离；</li>
+        <li>状态是否正确结束；</li>
+        <li>用户能否理解当前状态。</li>
+      </ul>
+      <p class="doc-p">用例优先级：</p>
+      <ul class="doc-ul">
+        <li><strong>P0</strong>：关键用户链路、安全、资金或数据完整性；</li>
+        <li><strong>P1</strong>：主要功能和常见异常；</li>
+        <li><strong>P2</strong>：低频边缘场景、体验细节。</li>
+      </ul>
+
+      <h3 class="doc-h3">TDD 推荐循环</h3>
+      <pre class="doc-pre">选择一个最小行为
+  ↓
+编写符合业务契约的测试
+  ↓
+运行测试，确认它因预期缺失而失败（Red）
+  ↓
+写最小实现让测试通过（Green）
+  ↓
+重构，保持测试通过（Refactor）
+  ↓
+运行相关回归测试
+  ↓
+进入下一个行为</pre>
+      <p class="doc-p">
+        红灯不应只是随便制造一个错误。要确认测试失败的原因确实是待实现的行为缺失，而不是测试文件路径、依赖配置或测试环境本身出错。
+      </p>
+
+      <h3 class="doc-h3">AI 编写的测试必须经过质量检查</h3>
+      <p class="doc-p">检查：</p>
+      <ul class="doc-ul">
+        <li>断言是否验证了需求，而不只是验证实现细节；</li>
+        <li>是否存在过宽松的断言，例如只检查对象存在；</li>
+        <li>是否把所有错误都吞掉；</li>
+        <li>是否只测试 mock，而没有验证真实接口契约；</li>
+        <li>是否测试了失败路径和关键边界；</li>
+        <li>是否因为实现困难而删除原本有价值的测试；</li>
+        <li>测试是否具有可重复性，是否依赖不稳定的时间、网络或外部状态。</li>
+      </ul>
+      <p class="doc-p">
+        测试全绿只意味着当前测试集通过，不意味着没有缺陷，也不意味着产品有价值。
+      </p>
+
+      <h3 class="doc-h3">每次实现应保持小步</h3>
+      <p class="doc-p">推荐每个切片完成后：</p>
+      <ol class="doc-ol">
+        <li>检查 diff；</li>
+        <li>运行最小相关测试；</li>
+        <li>运行类型检查和 lint（若项目配置了这些检查）；</li>
+        <li>检查是否修改了范围外文件；</li>
+        <li>更新任务状态；</li>
+        <li>再开始下一切片。</li>
+      </ol>
+      <p class="doc-p">
+        如果修改范围明显扩大，先解释原因并重新确认，不要持续堆叠改动。
+      </p>
+    </section>
+
+    <!-- ===== §7 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§7</span>
+        <h2 class="doc-sec-title">阶段 4：真实环境验证</h2>
+      </div>
+
+      <h3 class="doc-h3">验证层级</h3>
+      <table class="doc-table">
+        <thead>
+          <tr><th>层级</th><th>主要验证内容</th><th>典型工具</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>静态检查</td><td>类型、格式、明显错误</td><td>TypeScript、ESLint 等</td></tr>
+          <tr><td>单元测试</td><td>单个函数或模块逻辑</td><td>Vitest、Jest 等</td></tr>
+          <tr><td>集成测试</td><td>模块、数据库、外部接口之间的契约</td><td>测试数据库、SDK 探针</td></tr>
+          <tr><td>E2E / 浏览器</td><td>真实页面渲染、交互和请求链路</td><td>Playwright、可用的浏览器 Agent</td></tr>
+          <tr><td>专项验证</td><td>权限、安全、性能、数据一致性</td><td>定制测试与审查</td></tr>
+          <tr><td>人工验收</td><td>产品体验、语义正确性、业务取舍</td><td>人类检查</td></tr>
+        </tbody>
+      </table>
+      <p class="doc-p">
+        不是每个任务都要跑所有层级。根据风险和改动范围选择，但不得把单元测试结果表述为真实浏览器验收结果。
+      </p>
+
+      <h3 class="doc-h3">浏览器验收要求</h3>
+      <p class="doc-p">对用户可见的核心交互，按需验证：</p>
+      <ul class="doc-ul">
+        <li>页面能加载，关键元素可交互；</li>
+        <li>主流程能完成；</li>
+        <li>错误、加载、空状态和取消状态正确；</li>
+        <li>Console 没有与本次改动相关的未处理异常；</li>
+        <li>网络请求与响应符合契约；</li>
+        <li>布局、遮挡和关键视觉状态符合预期。</li>
+      </ul>
+      <p class="doc-p">
+        优先使用稳定的语义选择器，例如 <code class="doc-code">role</code>、<code class="doc-code">aria-label</code>、<code class="doc-code">data-testid</code>。等待客户端就绪锚点，不要盲目依赖 <code class="doc-code">networkidle</code>，尤其是存在 HMR、SSE 或长连接的应用。
+      </p>
+
+      <h3 class="doc-h3">环境探活与故障归因</h3>
+      <p class="doc-p">
+        浏览器访问失败时，先确认开发服务是否启动、端口是否正确、健康检查是否可用。不要将 <code class="doc-code">ERR_CONNECTION_REFUSED</code> 直接认定为业务 Bug。
+      </p>
+      <p class="doc-p">
+        若上游模型接口异常，先分层验证网络、凭证、配额、SDK 与本地适配器，再修改业务逻辑。
+      </p>
+
+      <h3 class="doc-h3">真实浏览器 Agent 与 Playwright 的分工</h3>
+      <ul class="doc-ul">
+        <li>浏览器 Agent：适合探索性测试、复杂视觉检查、首次体验验收、需要人工接管的登录流程；</li>
+        <li>Playwright 等自动化测试：适合稳定、重复、可回归的流程以及 CI；</li>
+        <li>人工检查：适合产品语义、审美、模糊体验与业务判断。</li>
+      </ul>
+      <p class="doc-p">
+        不要把所有回归都交给视觉 Agent 逐帧操作；能稳定脚本化的测试应尽量自动化。对浏览器 Agent 设置合理时间盒，遇到重复失败时转向日志、网络记录和最小探针，而不是盲目重试。
+      </p>
+
+      <h3 class="doc-h3">测试证据</h3>
+      <p class="doc-p">根据任务选择：</p>
+      <ul class="doc-ul">
+        <li>UI：截图、录屏、浏览器测试结果；</li>
+        <li>API：请求、响应、状态码和集成测试；</li>
+        <li>数据：迁移测试、一致性断言和恢复验证；</li>
+        <li>安全：权限矩阵、越权测试和敏感数据检查。</li>
+      </ul>
+      <p class="doc-p">
+        证据应能追溯到具体用例和代码版本。截图只能证明某个时刻的视觉状态，不能单独证明后台逻辑、安全或数据正确。归档前要脱敏，不得泄露令牌、密钥、个人数据和内部机密。
+      </p>
+    </section>
+
+    <!-- ===== §8 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§8</span>
+        <h2 class="doc-sec-title">阶段 5：独立代码审查与交叉 Review</h2>
+      </div>
+
+      <h3 class="doc-h3">第一轮：实现者自查</h3>
+      <p class="doc-p">实现 Agent 先总结：</p>
+      <ul class="doc-ul">
+        <li>改了什么；</li>
+        <li>为什么这样改；</li>
+        <li>哪些验收标准已满足；</li>
+        <li>执行过哪些测试（只列真实执行的命令和结果）；</li>
+        <li>还有哪些风险或未验证事项；</li>
+        <li>是否修改了范围外文件。</li>
+      </ul>
+
+      <h3 class="doc-h3">第二轮：独立 Review</h3>
+      <p class="doc-p">
+        Reviewer 应尽可能使用独立上下文，不直接照搬实现者的自我评价。给 Reviewer 的输入应包含：原始需求与验收标准、Spec 和相关架构约束、实际 diff、测试结果、需要特别关注的风险。
+      </p>
+      <p class="doc-p">
+        不要只问「帮我看看有没有问题」，而要要求按类别输出可验证的发现。建议 Review 提示模板：
+      </p>
+      <pre class="doc-pre">你是独立代码审查者，不负责为当前实现辩护。
+
+依据：原始需求、验收标准、Spec、实际 diff。
+请优先寻找可复现的问题，而非给出泛泛的风格意见。
+
+按以下类别检查：
+1. 功能错误与需求遗漏
+2. 边界条件、异常路径、状态转换
+3. 权限、安全、隐私与密钥
+4. 并发、重试、幂等和数据一致性
+5. 测试盲区或虚假通过
+6. 不必要的复杂度、范围外修改与兼容性
+
+每条发现包含：
+- 严重程度（Blocker / High / Medium / Low）
+- 文件与位置
+- 触发条件
+- 具体影响
+- 证据或复现方式
+- 建议修复方向
+
+如果没有发现问题，请明确说明审查范围和未覆盖部分；
+不要声称「绝对没有 Bug」。</pre>
+
+      <h3 class="doc-h3">是否需要第二个模型</h3>
+      <p class="doc-p">以下情况更值得跨模型或跨 Agent Review：</p>
+      <ul class="doc-ul">
+        <li>核心业务逻辑或架构改动；</li>
+        <li>安全、权限、资金和数据迁移；</li>
+        <li>实现者对关键代码不够理解；</li>
+        <li>测试覆盖有限或异常路径复杂；</li>
+        <li>代码即将对外发布且缺陷代价高。</li>
+      </ul>
+      <p class="doc-p">
+        小型、低风险改动可以使用同一 Agent 自查加自动化测试，不必为每次改动额外消耗另一个模型。不同模型也不天然独立；要关注它们是否使用同一套错误假设。
+      </p>
+
+      <h3 class="doc-h3">Review 发现的处理</h3>
+      <ul class="doc-ul">
+        <li><strong>Blocker / High</strong>：修复后必须重新验证相关用例；</li>
+        <li><strong>Medium</strong>：评估影响，修复或明确记录接受理由；</li>
+        <li><strong>Low</strong>：可以在不扩大本次范围的前提下修复，也可另建任务；</li>
+        <li><strong>误报</strong>：用代码、测试或可复现证据解释，不应仅凭主观判断忽略。</li>
+      </ul>
+      <p class="doc-p">
+        修复后重新 Review 受影响部分并运行回归。不要因为 Reviewer 没有新发现就无限循环。应在关键发现关闭、验证通过且剩余风险明确后停止。
+      </p>
+    </section>
+
+    <!-- ===== §9 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§9</span>
+        <h2 class="doc-sec-title">阶段 6：验收、交付与发布</h2>
+      </div>
+
+      <h3 class="doc-h3">完成门槛</h3>
+      <p class="doc-p">任务进入 <code class="doc-code">accepted</code> 前，应确认：</p>
+      <ul class="doc-checklist">
+        <li>验收标准逐项有结论；</li>
+        <li>相关测试已执行，结果如实记录；</li>
+        <li>需要的浏览器 / API / 专项验证已完成；</li>
+        <li>重要 Review 发现已修复或有明确接受记录；</li>
+        <li>没有意外的范围外修改；</li>
+        <li>无密钥、隐私数据或临时调试内容泄露；</li>
+        <li>文档、配置和迁移说明已按需更新；</li>
+        <li>未解决问题与风险已明确列出。</li>
+      </ul>
+
+      <h3 class="doc-h3">Git 与发布权限</h3>
+      <p class="doc-p">除非项目明确授权，Agent 不应自动执行：</p>
+      <ul class="doc-ul">
+        <li><code class="doc-code">git commit</code>、push、合并；</li>
+        <li>生产发布、数据库迁移；</li>
+        <li>删除数据、清理用户文件或覆盖用户改动；</li>
+        <li>修改权限、密钥、账单或线上配置。</li>
+      </ul>
+      <p class="doc-p">
+        Agent 可以准备提交说明、PR 描述、变更摘要和验证证据，最终动作由有权限的人确认。若团队已经明确授予某些自动化权限，应在项目规则中具体写明范围和停止条件。
+      </p>
+
+      <h3 class="doc-h3">PR / 交付说明模板</h3>
+      <pre class="doc-pre">## What changed
+-
+
+## Why
+-
+
+## Acceptance criteria
+- [x] AC-01
+- [ ] AC-02 — 未完成原因：
+
+## Validation
+- Command / test:
+- Result:
+- Browser / API evidence:
+- Screenshots or logs:
+
+## Review
+- Findings:
+- Resolutions:
+- Accepted risks:
+
+## Rollback / Recovery
+-
+
+## Follow-ups
+-</pre>
+      <p class="doc-p">
+        不要只写「测试通过」。应写出运行了哪些测试、覆盖什么、结果是什么，以及没有验证什么。
+      </p>
+    </section>
+
+    <!-- ===== §10 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§10</span>
+        <h2 class="doc-sec-title">状态机：让流程可追踪，而不是依赖聊天记忆</h2>
+      </div>
+
+      <h3 class="doc-h3">建议状态</h3>
+      <pre class="doc-pre">created
+  → investigating
+  → ready
+  → implementing
+  → validating
+  → reviewing
+  → accepted
+  → archived</pre>
+      <p class="doc-p">允许的异常状态：</p>
+      <ul class="doc-ul">
+        <li><code class="doc-code">blocked</code>：缺少输入、权限、依赖或人类决策；</li>
+        <li><code class="doc-code">rejected</code>：需求或方案被明确拒绝；</li>
+        <li><code class="doc-code">cancelled</code>：任务被取消；</li>
+        <li><code class="doc-code">rework</code>：验证或 Review 失败，需要返工。</li>
+      </ul>
+
+      <h3 class="doc-h3">状态含义与进入条件</h3>
+      <table class="doc-table">
+        <thead>
+          <tr><th>状态</th><th>含义</th><th>进入条件</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>created</td><td>任务已登记</td><td>任务有可识别的目标</td></tr>
+          <tr><td>investigating</td><td>正在检查现场、澄清需求</td><td>已开始读取项目与需求材料</td></tr>
+          <tr><td>ready</td><td>可以开始实现</td><td>目标、范围和最低验收标准清楚</td></tr>
+          <tr><td>implementing</td><td>正在编码</td><td>已选定方案并开始修改</td></tr>
+          <tr><td>validating</td><td>正在验证</td><td>实现切片已形成，开始执行测试</td></tr>
+          <tr><td>reviewing</td><td>正在独立审查</td><td>必需的测试结果可供审查</td></tr>
+          <tr><td>rework</td><td>需要返工</td><td>发现阻断问题或测试失败</td></tr>
+          <tr><td>blocked</td><td>暂时无法继续</td><td>依赖或决策缺失，已写明阻塞原因</td></tr>
+          <tr><td>accepted</td><td>验收完成</td><td>必需门禁通过，风险已披露</td></tr>
+          <tr><td>archived</td><td>任务收尾</td><td>产物、结果与可复用经验已整理</td></tr>
+        </tbody>
+      </table>
+      <p class="doc-p">
+        状态不能只靠 Agent 自述更新。每次转移应满足相应条件，并更新任务记录。不能从 <code class="doc-code">implementing</code> 直接跳到 <code class="doc-code">accepted</code>，也不能把未运行的测试写成通过。
+      </p>
+
+      <h3 class="doc-h3">失败与回退</h3>
+      <pre class="doc-pre">validating / reviewing
+        ↓ 发现问题
+      rework
+        ↓ 修复
+    validating
+        ↓ 验证通过
+    reviewing
+        ↓ 通过
+    accepted</pre>
+      <p class="doc-p">
+        返工不是失败的羞耻标记，而是正常闭环。已经验收的功能若后来发现缺陷，应创建新的修复任务或重新打开任务并记录原因；不要静默覆盖历史结论。
+      </p>
+    </section>
+
+    <!-- ===== §11 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§11</span>
+        <h2 class="doc-sec-title">跨会话交接与文件落盘</h2>
+      </div>
+
+      <h3 class="doc-h3">建议目录结构</h3>
+      <p class="doc-p">小任务可只使用 Git diff 与任务描述；标准和慢车道可以采用：</p>
+      <pre class="doc-pre">docs/
+  adr/
+  architecture/
+  agents/
+.scratch/
+  &lt;feature-slug&gt;/
+    brief.md
+    spec.md
+    plan.md
+    qa-plan.md
+    issues/
+    evidence/
+    decisions.md
+    handoff.md</pre>
+      <ul class="doc-ul">
+        <li><code class="doc-code">docs/</code>：长期有效、跨任务复用的文档；</li>
+        <li><code class="doc-code">.scratch/</code>：当前 feature 的临时工作产物；</li>
+        <li><code class="doc-code">handoff.md</code>：跨会话接力入口；</li>
+        <li><code class="doc-code">evidence/</code>：测试结果、截图、日志等经脱敏的证据；</li>
+        <li><code class="doc-code">decisions.md</code>：本次关键决策与变更记录。</li>
+      </ul>
+      <p class="doc-p">
+        不要把所有临时内容永久沉淀进全局项目指令。只把经验证、可复用且长期稳定的经验提升到项目规范或 Skill。
+      </p>
+
+      <h3 class="doc-h3">交接文件模板</h3>
+      <pre class="doc-pre"># Handoff: &lt;feature&gt;
+
+## Goal
+## Current status
+## Completed
+## Remaining tasks
+## Files changed
+## Commands already run and exact results
+## Test / browser evidence
+## Known issues and risks
+## Decisions made
+## Decisions requiring human approval
+## Next recommended action</pre>
+
+      <h3 class="doc-h3">新会话启动规则</h3>
+      <p class="doc-p">新会话应先读取：</p>
+      <ol class="doc-ol">
+        <li>项目指令文件；</li>
+        <li>当前任务 <code class="doc-code">handoff.md</code>；</li>
+        <li>Spec、任务列表和 QA Plan；</li>
+        <li>Git 状态与最近 diff；</li>
+        <li>最近一次测试结果。</li>
+      </ol>
+      <p class="doc-p">
+        然后用简短报告说明「当前状态、已完成、未完成、阻塞点、下一步」，再继续工作。不要假定旧会话中的口头记忆仍然可靠，也不要重复执行可能有破坏性的操作。
+      </p>
+    </section>
+
+    <!-- ===== §12 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§12</span>
+        <h2 class="doc-sec-title">Skills、Prompt、Hooks 与工作流的维护</h2>
+      </div>
+
+      <h3 class="doc-h3">经验如何沉淀</h3>
+      <p class="doc-p">当某次任务出现可复用经验时：</p>
+      <ol class="doc-ol">
+        <li>记录当时的上下文、行为、失败模式和实际结果；</li>
+        <li>判断它是偶发事件、项目特定规则，还是可跨任务复用的模式；</li>
+        <li>选择合适的承载位置：项目指令、Skill、Hook、测试或 ADR；</li>
+        <li>给规则配一个可验证的例子或回归测试；</li>
+        <li>在后续任务中观察是否真的改善结果。</li>
+      </ol>
+      <p class="doc-p">
+        不要只把「上次遇到的问题」追加成越来越长的指令。未经验证的经验可能过时、冲突或导致过度约束。
+      </p>
+
+      <h3 class="doc-h3">什么时候用 Hook / Gate</h3>
+      <p class="doc-p">适合自动化的规则：</p>
+      <ul class="doc-ul">
+        <li>不能提交包含已知密钥的文件；</li>
+        <li>关键测试未通过时阻止特定发布动作；</li>
+        <li>任务状态转换必须具备必需产物；</li>
+        <li>禁止未经授权的破坏性命令；</li>
+        <li>格式化、类型检查等确定性检查。</li>
+      </ul>
+      <p class="doc-p">不适合仅靠机械 Hook 决定的事情：</p>
+      <ul class="doc-ul">
+        <li>产品方向是否正确；</li>
+        <li>文案是否有感染力；</li>
+        <li>复杂架构方案是否最优；</li>
+        <li>模糊需求的业务价值。</li>
+      </ul>
+
+      <h3 class="doc-h3">防止流程膨胀</h3>
+      <p class="doc-p">每新增一个 Skill、Hook、模板或强制步骤，都应回答：</p>
+      <ul class="doc-ul">
+        <li>它具体减少哪一种失败？</li>
+        <li>失败发生频率与代价有多大？</li>
+        <li>是否已有更简单的检查能达到同样效果？</li>
+        <li>是否增加了上下文负担、执行时间或维护成本？</li>
+        <li>如何验证它有效？</li>
+        <li>何时应该删除或调整它？</li>
+      </ul>
+      <p class="doc-p">
+        若无法说明收益或验证方式，不应因为「看起来专业」就加入流程。
+      </p>
+    </section>
+
+    <!-- ===== §13 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§13</span>
+        <h2 class="doc-sec-title">AI 开发中的产品与学习原则</h2>
+      </div>
+
+      <h3 class="doc-h3">AI 可以加速执行，不能替代产品判断</h3>
+      <p class="doc-p">
+        AI 能协助研究、实现、生成 UI、写测试、整理资料和发现问题。但它不能仅凭一句「做一个 X」就可靠地确定：用户真正需要什么、哪个问题值得解决、哪种体验会被接受、当前方案是否有商业价值、人是否真正理解了所交付的系统。
+      </p>
+      <p class="doc-p">
+        因此，研发过程要不断回到真实用户、实际使用情境和可观察结果。对于产品价值不确定的功能，应先用原型、访谈、人工流程或最小实验验证，不要把「实现完成」误当成「产品成功」。
+      </p>
+
+      <h3 class="doc-h3">让人类在迭代中持续提供判断</h3>
+      <p class="doc-p">AI 产出初稿后，人类要明确审视：</p>
+      <ul class="doc-ul">
+        <li>这是否符合真实需求？</li>
+        <li>这是否符合产品的风格和使用情境？</li>
+        <li>是否存在看起来正确、实际不合理的行为？</li>
+        <li>是否引入了不必要的复杂度？</li>
+        <li>是否值得继续投入，还是应该停止或换方向？</li>
+      </ul>
+      <p class="doc-p">
+        主观体验、视觉风格、产品语义等部分往往需要反复调整。工作流不应假装它们可以被一次生成、一次审核后彻底确定。
+      </p>
+
+      <h3 class="doc-h3">区分「能运行」与「真正理解」</h3>
+      <p class="doc-p">对于有学习目标的开发者，重要代码不能只满足「跑起来」。每个关键切片完成后，应能解释：</p>
+      <ul class="doc-ul">
+        <li>为什么采用这种设计；</li>
+        <li>数据如何流动；</li>
+        <li>错误和边界如何处理；</li>
+        <li>为什么选择这个接口或状态模型；</li>
+        <li>测试覆盖了什么、没覆盖什么；</li>
+        <li>如果不依赖 AI，自己能否定位和修改常见问题。</li>
+      </ul>
+      <p class="doc-p">
+        不要求每行代码都手工重写，但对于核心架构、关键业务逻辑和面试作品集，必须通过解释、局部修改或脱离 AI 的小练习来检验理解程度。
+      </p>
+
+      <h3 class="doc-h3">避免无限打磨</h3>
+      <p class="doc-p">每个任务在开始时就定义「本轮完成标准」和「停止条件」。例如：</p>
+      <ul class="doc-ul">
+        <li>P0 验收通过；</li>
+        <li>无阻断级 Review 发现；</li>
+        <li>关键体验达到预先约定标准；</li>
+        <li>未解决问题已经记录；</li>
+        <li>剩余改进的收益低于继续投入的成本。</li>
+      </ul>
+      <p class="doc-p">
+        不为了追求抽象意义上的完美而无限生成、反复改写或不断扩大范围。发现新的高价值问题时，可以创建后续任务，而不是无限延长当前任务。
+      </p>
+    </section>
+
+    <!-- ===== §14 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§14</span>
+        <h2 class="doc-sec-title">复盘：把结果转成可复用改进</h2>
+      </div>
+
+      <h3 class="doc-h3">什么时候复盘</h3>
+      <p class="doc-p">建议在以下情况复盘：</p>
+      <ul class="doc-ul">
+        <li>出现意外的重大返工；</li>
+        <li>环境故障被误判为业务问题；</li>
+        <li>测试全绿但实际验收失败；</li>
+        <li>Agent 多次误读项目结构或扩大修改范围；</li>
+        <li>新增的 Skill / Hook 没有达到预期；</li>
+        <li>高风险任务出现遗漏；</li>
+        <li>一个新流程显著降低或增加了开发成本。</li>
+      </ul>
+      <p class="doc-p">小任务不必每次写长篇复盘。可以只记一条有价值的经验。</p>
+
+      <h3 class="doc-h3">复盘模板</h3>
+      <pre class="doc-pre"># Retro: &lt;任务名称&gt;
+
+## Expected
+## Actual
+## What worked
+## What failed
+## Root cause (evidence-based)
+## Cost / impact
+## Preventive change
+## Regression example or test
+## Owner / follow-up</pre>
+
+      <h3 class="doc-h3">复盘的质量标准</h3>
+      <p class="doc-p">复盘必须从事实出发，区分：</p>
+      <ul class="doc-ul">
+        <li>直接观察到的事实；</li>
+        <li>对根因的推断；</li>
+        <li>尚未验证的假设；</li>
+        <li>已采取的改进；</li>
+        <li>未来如何验证改进有效。</li>
+      </ul>
+      <p class="doc-p">
+        不要把「多写一点提示词」当成所有失败的统一答案。根因可能是需求不清、项目上下文不足、工具不可靠、测试缺失、权限设计错误、产品判断失误或环境问题。
+      </p>
+    </section>
+
+    <!-- ===== §15 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§15</span>
+        <h2 class="doc-sec-title">快速执行清单</h2>
+      </div>
+
+      <h3 class="doc-h3">开工前</h3>
+      <ul class="doc-checklist">
+        <li>已检查项目指令、相关代码和 Git 状态；</li>
+        <li>已确认目标、范围和可观察的验收标准；</li>
+        <li>已判断风险档位；</li>
+        <li>已识别必须由人类决定的事项；</li>
+        <li>没有覆盖用户未提交改动。</li>
+      </ul>
+
+      <h3 class="doc-h3">实现中</h3>
+      <ul class="doc-checklist">
+        <li>按小切片推进；</li>
+        <li>测试失败的原因已经确认；</li>
+        <li>没有为了通过测试而削弱需求；</li>
+        <li>变更范围与任务一致；</li>
+        <li>发现规格问题时先记录并确认，不静默改约定；</li>
+        <li>环境问题与业务问题分层排查。</li>
+      </ul>
+
+      <h3 class="doc-h3">验收前</h3>
+      <ul class="doc-checklist">
+        <li>相关测试、类型检查与 lint 已按项目要求执行；</li>
+        <li>用户可见核心链路已进行适当浏览器验收；</li>
+        <li>高风险功能已完成专项验证；</li>
+        <li>Review 发现已处理；</li>
+        <li>证据与真实执行结果一致；</li>
+        <li>未验证事项与已知风险已明确列出。</li>
+      </ul>
+
+      <h3 class="doc-h3">交付时</h3>
+      <ul class="doc-checklist">
+        <li>验收标准逐项有结论；</li>
+        <li>文档、配置和迁移说明按需更新；</li>
+        <li>没有密钥、隐私数据或调试内容泄露；</li>
+        <li>未经批准没有提交、推送、合并或发布；</li>
+        <li>已准备清晰的变更摘要与验证说明；</li>
+        <li>已记录必要的后续任务和可复用经验。</li>
+      </ul>
+    </section>
+
+    <!-- ===== §16 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§16</span>
+        <h2 class="doc-sec-title">推荐的 Agent 总指令</h2>
+      </div>
+      <p class="doc-p">
+        以下内容适合放入项目级 Agent 指令文件，再根据实际工具环境调整：
+      </p>
+      <pre class="doc-pre">你的职责是协助交付正确、可验证、可维护且符合真实用户需求的软件，
+而不是尽可能快地生成代码。
+
+工作规则：
+1. 开始前先阅读项目指令、相关代码、Git 状态和现有测试；保护用户已有改动。
+2. 先理解目标、范围、验收标准和约束，再选择实现方式。不要把用户提出的第一种方案视为不可质疑的前提。
+3. 根据影响范围、失败代价和可逆性选择快车道、标准车道或慢车道。
+4. 只创建当前任务真正需要的规格、计划和记录；避免无价值的文档与流程膨胀。
+5. 将工作拆成小切片，优先复用已有实现，保持改动聚焦。
+6. 根据项目情况编写和运行测试。测试应验证业务契约，而非迎合当前实现。
+7. 对用户可见的核心交互进行真实浏览器验收；对 API、数据、安全和资金相关变更执行相应专项验证。
+8. 把环境、依赖、接口接缝和业务逻辑分层排查。没有证据时不要大规模重构。
+9. 在重要任务中执行独立 Review；需要时使用不同上下文或第二个模型。交叉 Review 不能代替测试和人类决策。
+10. 规格可以修订，但不能静默改变。说明原因、影响和方案，获得必要批准后同步更新文档与测试。
+11. 绝不编造命令、测试、浏览器操作或审查结果。明确区分已执行、未执行、通过、失败和无法验证。
+12. 未经授权，不执行破坏性操作、覆盖用户改动、提交、推送、合并、生产发布或不可逆数据变更。
+13. 交付时汇报：改动内容、关键决策、实际验证命令与结果、证据、剩余风险和后续建议。
+14. 只有在验收标准满足、必要门禁通过、剩余风险明确后，才报告任务完成。
+15. 复盘要以事实和证据为基础；只有在证明有价值后，才把经验沉淀为长期规则、Skill 或 Hook。
+
+核心原则：人类决定方向与关键取舍，AI 加速执行；每个重要结论都要有证据；
+流程强度与风险匹配；目标是交付价值，而不是完成流程本身。</pre>
+    </section>
+
+    <!-- ===== §17 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§17</span>
+        <h2 class="doc-sec-title">参考资料与适用边界</h2>
+      </div>
+
+      <h3 class="doc-h3">来自用户提供的 QA Workflow Guide</h3>
+      <p class="doc-p">保留并整合的主要机制：</p>
+      <ul class="doc-ul">
+        <li>需求对齐、Spec、任务拆解与 QA 计划；</li>
+        <li>TDD 红—绿—重构；</li>
+        <li>真实浏览器验收与证据归档；</li>
+        <li>环境探活和分层排障；</li>
+        <li>快慢车道；</li>
+        <li>跨会话状态落盘；</li>
+        <li>代码审查、PR 交付和复盘。</li>
+      </ul>
+
+      <h3 class="doc-h3">可读取的公开参考</h3>
+      <ul class="doc-ul">
+        <li>
+          <a class="doc-link" href="https://developer.cloud.tencent.com/article/2697395" target="_blank" rel="noopener">端到端研发自动化，为什么不能只靠 Workflow 或 SDD</a>
+          —— 强调 Workflow 和规格表达之外，还要管理 Agent 的运行上下文、过程观察、验证、失败恢复与经验沉淀。
+        </li>
+        <li>
+          <a class="doc-link" href="https://terryyaowork.cc/ai/coding-assistants/11-feature-with-ai" target="_blank" rel="noopener">用 AI 做完整 feature：每个环节都在调，但 AI 不能凭空创造一个产品</a>
+          —— 强调真实开发过程会反复调整；AI 可以加速实现，但产品方向、用户理解、质量判断与学习仍需要人参与。
+        </li>
+      </ul>
+
+      <h3 class="doc-h3">适用边界与相关笔记</h3>
+      <p class="doc-p">
+        本规范是可执行的初版，不是一次性定稿。应先在真实项目中试用，记录返工率、测试漏检、任务周期、Agent 误操作和流程成本，再据此调整。没有被实际验证的流程，不应仅因为形式完整就被视为成熟。
+      </p>
+      <ul class="doc-ul">
+        <li><strong>AI 项目跨助手迁移 SOP</strong> —— 同为 AI 协作开发方法论，二者互补：那份解决「项目如何在助手之间迁移」（跨会话载体），本篇解决「单次任务按风险走完整流程」（过程规范）。本篇 §11 的交接落盘机制是迁移 SOP 的流程化扩展。</li>
+        <li><strong>项目快照模板</strong> —— 本篇 §11「跨会话交接与文件落盘」的轻量实践：用单文件快照替代多文件 <code class="doc-code">.scratch/</code> 目录，适合个人项目；多文件结构适合团队协作。</li>
+      </ul>
+    </section>
+
+    <!-- ===== 文档尾 ===== -->
+    <div class="doc-end">
+      <a class="btn wf-link-btn doc-back-btn" href="/">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M17 10H3M3 10L9 4M3 10L9 16" stroke="#FFDC58" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        返回作品集
+      </a>
+      <span class="doc-end-note">AI 辅助研发工作流规范 v1.0 · 整合 QA Workflow Guide、公开 AI 开发实践与个人工程建议</span>
+    </div>
+  </div>
+</Layout>

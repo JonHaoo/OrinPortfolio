@@ -10,11 +10,13 @@ import '../styles/global.css';
 interface Props {
   title?: string;
   description?: string;
+  fluid?: boolean;
 }
 
 const {
   title = 'Orin · AI 解决方案工程师 / FDE 作品集',
   description = '从客户需求到配置交付，再到使用辅导与反馈回收——把 AI 真正落地到业务里的完整链路。作品集：招聘智能助手、评论洞察 Agent、企业级数据系统。',
+  fluid = false,
 } = Astro.props;
 ---
 
@@ -36,11 +38,17 @@ const {
     </script>
   </head>
   <body>
-    <div class="viewport-scaler" id="viewport-scaler">
-      <div class="page" id="page">
+    {fluid ? (
+      <div class="doc-page" id="doc-page">
         <slot />
       </div>
-    </div>
+    ) : (
+      <div class="viewport-scaler" id="viewport-scaler">
+        <div class="page" id="page">
+          <slot />
+        </div>
+      </div>
+    )}
 
     <script is:inline>
       // ---- 画布等比缩放：1440px 设计稿居中渲染，窗口变小时整体缩放 ----
@@ -48,6 +56,7 @@ const {
         var PAGE_WIDTH = 1440;
         var scaler = document.getElementById('viewport-scaler');
         var page = document.getElementById('page');
+        if (!scaler || !page) return;
 
         function fit() {
           var viewportWidth = document.documentElement.clientWidth;

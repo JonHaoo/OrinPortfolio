@@ -703,17 +703,16 @@ a { color: inherit; text-decoration: none; }
 .stat-block.stat-blue { background: var(--blue); }
 .stat-block.stat-green { background: var(--green); }
 
-.stat-num {
-  font-family: var(--font-latin);
-  font-size: 56px;
+.stat-word {
+  font-family: var(--font-display);
+  font-size: 40px;
   color: #141414;
+  line-height: 1.2;
 }
 
-.stat-num.stat-num-sm {
-  font-size: 38px;
-  font-family: var(--font-body);
-  font-weight: 900;
-  line-height: 1.2;
+.stat-word.stat-latin {
+  font-family: var(--font-latin);
+  font-size: 52px;
 }
 
 .stat-label {

@@ -1,17 +1,17 @@
 ---
-// 数据与信任：四个撞色数据块 + 两张客户评价卡（对应设计稿 2:137）
-interface Stat {
-  num: string;
+// 能力标签区：四张撞色能力卡 + 两张交付笔记卡（对应设计稿 2:137）
+interface Strength {
+  word: string;
+  latin?: boolean;
   label: string;
   colorClass: string;
-  small?: boolean;
 }
 
-const stats: Stat[] = [
-  { num: '5', label: '环节客户侧交付链路独立闭环', colorClass: 'stat-yellow' },
-  { num: '3', label: '类企业级前端系统交付', colorClass: 'stat-pink' },
-  { num: '2', label: '个智能助手场景已交付', colorClass: 'stat-blue' },
-  { num: '5.7亿', label: '条评论 · 自研 Agent 数据规模', colorClass: 'stat-green', small: true },
+const strengths: Strength[] = [
+  { word: '0 → 1', latin: true, label: '企业级前端系统，从零搭到能用', colorClass: 'stat-yellow' },
+  { word: '全链路', label: 'AI 落地五环节独立闭环，不甩锅', colorClass: 'stat-pink' },
+  { word: '控幻觉', label: '分层边界设计，成本与准确率双可控', colorClass: 'stat-blue' },
+  { word: '双向转译', label: '业务拆给 AI，技术讲给客户', colorClass: 'stat-green' },
 ];
 
 interface Note {
@@ -39,14 +39,14 @@ const notes: Note[] = [
 
 <section class="stats" id="stats">
   <div class="section-header">
-    <span class="section-tag">NUMBERS &amp; NOTES</span>
-    <h2 class="section-title">用结果说话</h2>
+    <span class="section-tag">STRENGTHS &amp; NOTES</span>
+    <h2 class="section-title">我的底气</h2>
   </div>
 
   <div class="stats-row">
-    {stats.map((s) => (
+    {strengths.map((s) => (
       <div class={`stat-block ${s.colorClass}`}>
-        <span class={`stat-num${s.small ? ' stat-num-sm' : ''}`}>{s.num}</span>
+        <span class={`stat-word${s.latin ? ' stat-latin' : ''}`}>{s.word}</span>
         <span class="stat-label">{s.label}</span>
       </div>
     ))}

@@ -1273,6 +1273,22 @@ a { color: inherit; text-decoration: none; }
   transition: color 0.25s ease;
 }
 
+/* 深色模式：规范页卡片换深灰底（--surface 白底保留给首页卡片贴纸感），
+   代码块固定黑底黄字，避免奶油文字落在白卡上看不清 */
+:root[data-theme='dark'] .doc-section {
+  background: #333333;
+}
+
+:root[data-theme='dark'] .doc-table td {
+  background: #333333;
+}
+
+:root[data-theme='dark'] .doc-pre {
+  background: #141414;
+  border-color: #FFF5E6;
+  color: #FFDC58;
+}
+
 .doc-end {
   display: flex;
   flex-direction: column;

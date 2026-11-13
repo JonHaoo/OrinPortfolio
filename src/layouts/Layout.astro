@@ -1,4 +1,5 @@
 ---
+import { ClientRouter } from 'astro:transitions';
 import '@fontsource/archivo-black';
 import '@fontsource/noto-sans-sc/400.css';
 import '@fontsource/noto-sans-sc/500.css';
@@ -33,16 +34,41 @@ const BASE_URL = import.meta.env.BASE_URL.endsWith('/')
     <link rel="icon" type="image/svg+xml" href={`${BASE_URL}favicon.svg`} />
     <meta name="description" content={description} />
     <title>{title}</title>
-    <!-- 主题初始化：避免刷新时闪白 -->
-    <script is:inline>
+    <!-- 主题初始化：避免刷新时闪白。
+         data-astro-rerun：ClientRouter 软导航换页时重跑本脚本——
+         否则 <html data-theme="light">（静态默认值）会把用户已选的深色主题重置掉 -->
+    <script is:inline data-astro-rerun>
       (function () {
         var theme = 'light';
         try { theme = localStorage.getItem('theme') || 'light'; } catch (e) {}
         document.documentElement.dataset.theme = theme;
       })();
     </script>
+    <!-- 主题切换圆形扩散的动画定义（MOTION_GUIDE §2.4-B）：
+         ::view-transition-new(root) 从开关位置 clip-path: circle() 展开 -->
+    <style is:inline>
+      ::view-transition-old(root),
+      ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+      ::view-transition-new(root) {
+        z-index: 9999;
+        clip-path: circle(0px at var(--vt-x, 50%) var(--vt-y, 50%));
+      }
+      /* 快照捕获期间冻结页面自身 transition：
+         1) 避免快照把"半过渡颜色"烙进图层（VT 标准做法）
+         2) 消除 click 瞬间 20+ 处 background-color transition 的样式重算开销——
+            实测该开销集中在扩散起步帧（radius≈29 处一帧 54ms），是用户感知"卡一下"的主因（R2-fix4） */
+      html.vt-freeze,
+      html.vt-freeze *,
+      html.vt-freeze *::before,
+      html.vt-freeze *::after {
+        transition: none !important;
+        animation-play-state: paused !important;
+      }
+      /* 由 JS 以 Web Animations API 驱动 clip-path 半径（含 --vt-x/--vt-y 起点） */
+    </style>
   </head>
   <body>
+    <ClientRouter />
     {fluid ? (
       <div class="doc-page" id="doc-page">
         <slot />
@@ -56,14 +82,32 @@ const BASE_URL = import.meta.env.BASE_URL.endsWith('/')
     )}
 
     <script is:inline>
-      // ---- 画布等比缩放：1440px 设计稿居中渲染，窗口变小时整体缩放 ----
+      // ---- 全站页面脚本（幂等初始化）----
+      // 架构说明：is:inline 脚本在 ClientRouter 软导航后不会重跑（Astro 对相同脚本去重），
+      // 而监听器/观察者挂在旧 DOM 节点上，换页即随节点丢弃——曾导致主题按钮跨页后失灵。
+      // 因此所有初始化集中到 initPageScripts()，由 document 级 astro:page-load 事件驱动
+      // （初次加载与每次软导航后都触发）；末尾的直接调用兜底无 ClientRouter 的环境。
+      // 各 init 内部用 dataset 标记 / disconnect 旧实例保证幂等，不会重复挂载。
       (function () {
         var PAGE_WIDTH = 1440;
-        var scaler = document.getElementById('viewport-scaler');
-        var page = document.getElementById('page');
-        if (!scaler || !page) return;
+        var resizeBound = false;
+        var pageRO = null;
+        var spyObserver = null;
 
+        // ---- 画布等比缩放：1440px 设计稿居中渲染 ----
+        // ≤1023px 切流式布局（CSS 断点重排接管），清除内联缩放；≥1024 保持等比缩放（系数 ≥0.71，可读）。
+        // 断点值与 global.css 的 @media (max-width: 1023px) 严格一致（matchMedia 保证判定同源）。
+        var mobileMQ = window.matchMedia('(max-width: 1023px)');
         function fit() {
+          var scaler = document.getElementById('viewport-scaler');
+          var page = document.getElementById('page');
+          if (!scaler || !page) return;
+          if (mobileMQ.matches) {
+            page.style.transform = '';
+            page.style.left = '';
+            scaler.style.height = '';
+            return;
+          }
           var viewportWidth = document.documentElement.clientWidth;
           var scale = Math.min(viewportWidth / PAGE_WIDTH, 1);
           var left = (viewportWidth - PAGE_WIDTH * scale) / 2;
@@ -72,23 +116,129 @@ const BASE_URL = import.meta.env.BASE_URL.endsWith('/')
           scaler.style.height = page.offsetHeight * scale + 'px';
         }
 
-        window.addEventListener('resize', fit);
-        if (window.ResizeObserver) {
-          new ResizeObserver(fit).observe(page);
+        function initScaler() {
+          var scaler = document.getElementById('viewport-scaler');
+          var page = document.getElementById('page');
+          if (!scaler || !page) return;
+          if (!resizeBound) {
+            window.addEventListener('resize', fit);
+            resizeBound = true;
+          }
+          if (window.ResizeObserver) {
+            if (pageRO) pageRO.disconnect();
+            pageRO = new ResizeObserver(fit);
+            pageRO.observe(page);
+          }
+          fit();
         }
-        fit();
-      })();
 
-      // ---- 主题切换：右上角开关，全站 CSS 变量换肤 ----
-      (function () {
-        var toggle = document.getElementById('theme-toggle-btn');
-        if (!toggle) return;
-        toggle.addEventListener('click', function () {
-          var root = document.documentElement;
-          var next = root.dataset.theme === 'dark' ? 'light' : 'dark';
-          root.dataset.theme = next;
-          try { localStorage.setItem('theme', next); } catch (e) {}
-        });
+        // ---- 主题切换：圆形扩散（MOTION_GUIDE §2.4-B 旗舰效果）----
+        // startViewTransition 包裹换肤；clip-path circle 从开关实际坐标铺开盖住旧主题。
+        // 特性检测降级：不支持时退回原有全局变色。
+        function initThemeToggle() {
+          var toggle = document.getElementById('theme-toggle-btn');
+          if (!toggle || toggle.dataset.vtInit) return;
+          toggle.dataset.vtInit = '1';
+
+          function applyTheme(next) {
+            document.documentElement.dataset.theme = next;
+            try { localStorage.setItem('theme', next); } catch (e) {}
+          }
+
+          toggle.addEventListener('click', function (e) {
+            var root = document.documentElement;
+            var next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+
+            if (!document.startViewTransition || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+              applyTheme(next); // 降级：直接换肤
+              return;
+            }
+
+            // 以开关中心为扩散原点，写入 CSS 自定义属性
+            var rect = toggle.getBoundingClientRect();
+            var x = rect.left + rect.width / 2;
+            var y = rect.top + rect.height / 2;
+            root.style.setProperty('--vt-x', x + 'px');
+            root.style.setProperty('--vt-y', y + 'px');
+            // 半径：覆盖视口对角线
+            var endRadius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+
+            var transition = document.startViewTransition(function () { applyTheme(next); });
+            // 快照捕获前冻结页面 transition/animation（对应 html.vt-freeze 样式），
+            // finished/skip 后无论成败都解冻
+            root.classList.add('vt-freeze');
+            var unfreeze = function () { root.classList.remove('vt-freeze'); };
+            transition.finished.then(unfreeze).catch(unfreeze);
+            transition.ready.then(function () {
+              var clipAnim = document.documentElement.animate(
+                { clipPath: ['circle(0px at ' + x + 'px ' + y + 'px)', 'circle(' + endRadius + 'px at ' + x + 'px ' + y + 'px)'] },
+                // fill: 'forwards' 必须保留：动画结束后冻结全屏半径，
+                // 否则 clip 回落 CSS 静态值 circle(0px) → 新主题层瞬间不可见 → 露出旧主题快照
+                // → 出现"扩散完成后回闪旧主题"的 bug（R2-fix2 实证）
+                { duration: 500, easing: 'cubic-bezier(0.65, 0, 0.35, 1)', pseudoElement: '::view-transition-new(root)', fill: 'forwards' }
+              );
+              return clipAnim.finished;
+            }).catch(function () { /* 中断则停在当前态，可逆 */ });
+          });
+        }
+
+        // ---- Scroll-spy：导航 active 跟随滚动区块（MOTION_GUIDE §2.3 触发 B）----
+        // 锚点链接按 href 推断目标 id；跨页链接（如「工作流」）用 data-spy 显式声明。
+        // 无匹配区块的页面（如 workflow 规范页）自动跳过，初始 active 保持不变。
+        function initScrollSpy() {
+          var links = document.querySelectorAll('.site-nav a[href^="#"], .site-nav a[data-spy]');
+          if (!links.length || !('IntersectionObserver' in window)) return;
+          var map = {};
+          Array.prototype.forEach.call(links, function (a) {
+            var id = a.getAttribute('data-spy');
+            if (!id) {
+              var href = a.getAttribute('href');
+              if (href && href.length > 1) id = href.slice(1);
+            }
+            if (id) map[id] = a;
+          });
+          var sections = Object.keys(map)
+            .map(function (id) { return document.getElementById(id); })
+            .filter(Boolean);
+          if (!sections.length) return;
+
+          // 软导航后旧 observer 观察的是死节点，先断开再重建
+          if (spyObserver) { spyObserver.disconnect(); spyObserver = null; }
+
+          var current = document.querySelector('.site-nav a.active');
+          function setActive(a) {
+            if (!a || current === a) return;
+            if (current) current.classList.remove('active');
+            a.classList.add('active');
+            current = a;
+          }
+
+          // 检测带：视口 35%~40% 高度区间的窄条，区块穿过时切换高亮。
+          // Hero 先于 sections 注册：顶部时占据检测带 → 高亮「作品」（首区块前导）；
+          // 同帧 Hero 与 Works 同时占带时 sections 后注册，回调后处理、结果正确。
+          spyObserver = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+              if (!entry.isIntersecting) return;
+              if (entry.target.classList.contains('hero')) {
+                setActive(map.works);
+              } else {
+                setActive(map[entry.target.id]);
+              }
+            });
+          }, { rootMargin: '-35% 0px -60% 0px', threshold: 0 });
+          var hero = document.querySelector('.hero');
+          if (hero && map.works) spyObserver.observe(hero);
+          sections.forEach(function (s) { spyObserver.observe(s); });
+        }
+
+        function initPageScripts() {
+          initScaler();
+          initThemeToggle();
+          initScrollSpy();
+        }
+
+        document.addEventListener('astro:page-load', initPageScripts);
+        initPageScripts();
       })();
     </script>
   </body>

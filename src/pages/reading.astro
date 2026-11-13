@@ -1,0 +1,404 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { AS_OF, CATEGORY_DISTRIBUTION, READING_FACTS as F } from '../data/reading';
+const BASE_URL = import.meta.env.BASE_URL.endsWith("/") ? import.meta.env.BASE_URL : import.meta.env.BASE_URL + "/";
+
+// ===== 数据：微信读书 Agent API，统计截至见 src/data/reading.ts =====
+
+interface Stat { word: string; latin?: boolean; label: string; colorClass: string; }
+
+const heroStats: Stat[] = [
+  { word: `${F.totalHours}h`, latin: true, label: '总阅读时长 ≈ 53 个整天', colorClass: 'stat-yellow' },
+  { word: `${F.booksRead}本`, label: `读过 · 读完 ${F.booksFinished} 本`, colorClass: 'stat-pink' },
+  { word: `${F.notes}条`, label: '笔记 · 平均 7.6 条/本', colorClass: 'stat-blue' },
+  { word: `${F.readDays}天`, label: '有效阅读天数', colorClass: 'stat-green' },
+];
+
+// 年度节奏（小时）：max=2024 的 338.1 → 柱高按比例
+const yearBars = [
+  { year: '2019', hours: '0.4h', h: '6px', color: 'var(--blue)' },
+  { year: '2020', hours: '0.1h', h: '6px', color: 'var(--blue)' },
+  { year: '2021', hours: '0h', h: '6px', color: 'var(--blue)' },
+  { year: '2022', hours: '140.2h', h: '91px', color: 'var(--blue)' },
+  { year: '2023', hours: '290.5h', h: '189px', color: 'var(--green)' },
+  { year: '2024', hours: '338.1h', h: '220px', color: 'var(--pink)' },
+  { year: '2025', hours: '301.3h', h: '196px', color: 'var(--yellow)' },
+  { year: '2026', hours: '195.4h', h: '127px', color: 'var(--yellow)' },
+];
+
+// 读得最多（在架时长排行）
+const topBooks = [
+  { title: '人类简史：从动物到上帝', author: '尤瓦尔·赫拉利', hours: '23.5h' },
+  { title: '津巴多普通心理学（第8版）', author: '菲利普·津巴多 等', hours: '21.3h' },
+  { title: '社会性动物（第12版）', author: '艾略特·阿伦森 等', hours: '16.4h' },
+  { title: '人性的弱点', author: '戴尔·卡耐基', hours: '16.3h' },
+  { title: '人体简史', author: '比尔·布莱森', hours: '15.2h' },
+  { title: '原则：应对变化中的世界秩序', author: '瑞·达利欧', hours: '12.5h' },
+  { title: '象与骑象人', author: '乔纳森·海特', hours: '12.4h' },
+  { title: '刻意练习', author: '安德斯·艾利克森 等', hours: '12.0h' },
+  { title: '成为自控者', author: 'Susan Kuang', hours: '12.0h' },
+];
+
+// 偏好卡片
+const prefs = [
+  {
+    dot: 'd-pink',
+    title: '时段 · 偏好夜晚阅读',
+    body: '微信读书官方判定。深夜是主力阅读时段，白天碎片时间用听书补——书架上挂着 14 个有声书专辑，《随机漫步的傻瓜》《潜规则》《不能承受的生命之轻》都是用耳朵读完的。',
+  },
+  {
+    dot: 'd-yellow',
+    title: '作者 · 认准了就读完',
+    body: '尤瓦尔·赫拉利 3 本 30.7h；罗伯特·清崎 4 本、梁永安 4 本、史铁生 4 本、余华 4 本；周岭《认知觉醒》系列 2 本 18.3h。合计涉猎 277 位作者。',
+  },
+  {
+    dot: 'd-blue',
+    title: '出版社 · 主流商业成长系',
+    body: '中信出版集团 36 本、机械工业出版社 23 本、北京联合出版公司 16 本。书单构成非常一致：商业、成长、心理学是绝对主力。',
+  },
+  {
+    dot: 'd-green',
+    title: '书单 · 自建「创业」目录',
+    body: '书架 1053 个条目（1038 本电子书 + 14 个有声书 + 文章收藏），自建「创业」书单 19 本。读完率 21%——会筛选、敢弃书，读是为了用，不是为了打卡。',
+  },
+];
+
+// 画像分析
+const portraits = [
+  {
+    tag: 'TRAIT 01',
+    tagColor: 't-yellow',
+    heading: '把自己当产品迭代的读者',
+    text: '62% 的时长花在个人成长、心理与财经；21 天阅读挑战达成 21 次、连续阅读 180 天。读书不是消遣，是给操作系统打补丁——读的全是「怎么把自己和系统变得更好」。',
+  },
+  {
+    tag: 'TRAIT 02',
+    tagColor: 't-pink',
+    heading: '心理学的底子是科班的',
+    text: '《津巴多普通心理学》《社会性动物》这类专业教材整本啃完，不止停留在畅销心理书。理解人性的机制，才做得了「技术 ↔ 用户」的双向转译。',
+  },
+  {
+    tag: 'TRAIT 03',
+    tagColor: 't-blue',
+    heading: '转型不是嘴上说说',
+    text: '2025 年起 AI 类书籍密集读完：《AI 未来已来》《奇点更近》《我看见的世界：李飞飞自传》《半小时讲透 FDE》《半小时讲透 Harness 工程》《Hermes Agent 橙皮书》。简历上写「转 AI 方向」，阅读记录先交了底稿。',
+  },
+  {
+    tag: 'TRAIT 04',
+    tagColor: 't-green',
+    heading: '输出型阅读者',
+    text: '4370 条笔记，读过的书平均 7.6 条/本。划线不是收藏，是加工：把作者的方法论拆成自己能用的操作。想法发布 100+ 条，收到的赞也攒到了 100+。',
+  },
+  {
+    tag: 'TRAIT 05',
+    tagColor: 't-yellow',
+    heading: '文学是精神缓冲区',
+    text: '史铁生、余华、汪曾祺、陶勇《目光》、《皮囊》——散文书架 72 本。高强度的成长阅读之外，文学是平衡轮：先理解人，再优化人。',
+  },
+];
+
+// 最近读完（书架 finishReading 标记 + 最近阅读时间）
+const finished2026 = [
+  { name: '目光（2026 全新增订版）', meta: '陶勇 · 散文 · 11月' },
+  { name: '自控力', meta: '凯利·麦格尼格尔 · 心理 · 11月' },
+  { name: '负熵生存：无序世界里的个人秩序', meta: '李洁 · 人生哲学 · 10月' },
+  { name: '纳瓦尔宝典', meta: '埃里克·乔根森 · 理财 · 10月' },
+  { name: '我看见的世界：李飞飞自传', meta: '李飞飞 · 人物传记 · 09月' },
+  { name: '半小时讲透《枪炮、病菌与钢铁》', meta: '俞穆 · 社科 · 08月' },
+  { name: '半小时讲透 AI 时代的新职业：FDE', meta: '樊中恺 · 人工智能 · 08月' },
+  { name: '象与骑象人（全新升级版）', meta: '乔纳森·海特 · 心理学研究 · 08月' },
+  { name: '30 天重构人生：如何培养强大的执行力', meta: '高能量笔记 · 励志成长 · 08月' },
+  { name: 'Hermes Agent 橙皮书', meta: '花叔 · 人工智能 · 08月' },
+  { name: 'AI 未来已来', meta: '李开复 · 人工智能 · 07月' },
+  { name: '不要挑战人性', meta: '潘楷文 · 认知与行为 · 07月' },
+  { name: '贪婪的多巴胺', meta: '丹尼尔·利伯曼 等 · 自然科学 · 07月' },
+  { name: '心流：最优体验心理学', meta: '米哈里·契克森米哈赖 · 心理应用 · 06月' },
+  { name: '半小时讲透 Harness 工程', meta: '魏思理 · 人工智能 · 06月' },
+  { name: '被讨厌的勇气', meta: '岸见一郎 等 · 积极心理学 · 06月' },
+  { name: '亲密关系', meta: '克里斯多福·孟 · 沟通表达 · 05月' },
+  { name: '专注的真相', meta: '李笑来 · 励志成长 · 05月' },
+];
+
+const finished2025 = [
+  { name: '每一天梦想练习', meta: '另维 · 11月' },
+  { name: '打开心智', meta: '李睿秋 · 认知思维 · 11月' },
+  { name: '皮囊', meta: '蔡崇达 · 散文 · 11月' },
+  { name: '你的敏感，就是你的天赋', meta: '伊米·洛 · 心理应用 · 11月' },
+  { name: '不过是一碗人间烟火', meta: '汪曾祺 等著 · 名家散文 · 11月' },
+  { name: '成为自控者：建立幸福人生的正向循环', meta: 'Susan Kuang · 人生哲学 · 10月' },
+  { name: '今天的我有点热爱生活', meta: '韩梅梅 · 散文 · 10月' },
+  { name: '奇点更近：未来 20 年的人工智能神预测', meta: '雷·库兹韦尔 · 人工智能 · 09月' },
+  { name: '耶鲁的心理学第一课', meta: '安宇敬 · 心理学研究 · 08月' },
+  { name: '奇迹公式', meta: '哈尔·埃尔罗德 · 人生哲学 · 08月' },
+  { name: '重塑杏仁核：情绪修复脑科学', meta: '凯瑟琳·M. 皮特曼 · 心理学研究 · 07月' },
+];
+
+// 勋章墙（摘录）
+const medals = [
+  { color: 'doc-prin-yellow', text: '阅读 500 本书籍' },
+  { color: 'doc-prin-pink', text: '读完 100 本书籍' },
+  { color: 'doc-prin-blue', text: '阅读 1000 小时' },
+  { color: 'doc-prin-green', text: '阅读 1000 天' },
+  { color: 'doc-prin-yellow', text: '连续阅读 180 天' },
+  { color: 'doc-prin-pink', text: '21 天挑战 · 达成 21 次' },
+  { color: 'doc-prin-blue', text: '神作收藏家 · 50 本神作' },
+  { color: 'doc-prin-green', text: '想法发布 100 条' },
+  { color: 'doc-prin-yellow', text: '收到 100 个点赞' },
+];
+---
+
+<Layout
+  fluid
+  title="我的阅读报告 · Orin"
+  description="微信读书全量数据报告：1266 小时、573 本读过、4370 条笔记。类型分布、年度节奏、阅读偏好，以及数据背后的画像——一个把自己当产品迭代的读者。"
+>
+  <header class="site-header doc-header">
+    <a class="logo vt-logo" href={BASE_URL} aria-label="返回作品集首页">
+      <div class="logo-square"><span>O</span></div>
+      <span class="logo-name">ORIN.DEV</span>
+    </a>
+
+    <nav class="site-nav" aria-label="主导航">
+      <a href={BASE_URL}>返回作品集</a>
+      <a href={`${BASE_URL}reading/`} class="active">阅读档案</a>
+      <a href={`${BASE_URL}workflow/`}>研发工作流</a>
+      <a href={`${BASE_URL}design-sop/`}>设计 SOP</a>
+    </nav>
+
+    <div class="nav-right">
+      <button
+        class="theme-toggle vt-toggle"
+        id="theme-toggle-btn"
+        type="button"
+        role="switch"
+        aria-checked="false"
+        aria-label="切换深色 / 浅色主题"
+        title="切换深色 / 浅色主题"
+      >
+        <svg class="icon-sun" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <circle cx="7" cy="7" r="3" fill="#FFF5E6" />
+          <path d="M7 0.5V2.5M7 11.5V13.5M0.5 7H2.5M11.5 7H13.5M2.4 2.4L3.8 3.8M10.2 10.2L11.6 11.6M11.6 2.4L10.2 3.8M3.8 10.2L2.4 11.6" stroke="#FFF5E6" stroke-width="1.2" stroke-linecap="round" />
+        </svg>
+        <svg class="icon-moon" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M13 9C11.9 9.6 10.7 9.9 9.4 9.9C5.2 9.9 1.8 6.5 1.8 2.3C1.8 1.8 1.9 1.3 2 0.9C0.9 1.7 0.2 3 0.2 4.5C0.2 8.2 3.1 11.1 6.8 11.1C9.2 11.1 11.3 9.8 12.4 7.8L13 9Z" fill="#141414" />
+        </svg>
+        <span class="knob">
+          <svg class="knob-sun" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" style="position:absolute;top:5px;left:5px;">
+            <circle cx="7" cy="7" r="3" fill="#141414" />
+            <path d="M7 0.5V2.5M7 11.5V13.5M0.5 7H2.5M11.5 7H13.5M2.4 2.4L3.8 3.8M10.2 10.2L11.6 11.6M11.6 2.4L10.2 3.8M3.8 10.2L2.4 11.6" stroke="#141414" stroke-width="1.2" stroke-linecap="round" />
+          </svg>
+          <svg class="knob-moon" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" style="position:absolute;top:5px;left:5px;">
+            <path d="M13 9C11.9 9.6 10.7 9.9 9.4 9.9C5.2 9.9 1.8 6.5 1.8 2.3C1.8 1.8 1.9 1.3 2 0.9C0.9 1.7 0.2 3 0.2 4.5C0.2 8.2 3.1 11.1 6.8 11.1C9.2 11.1 11.3 9.8 12.4 7.8L13 9Z" fill="#141414" />
+          </svg>
+        </span>
+      </button>
+
+      <a class="btn btn-cta vt-cta" href={`${BASE_URL}#contact`}>聊聊合作</a>
+    </div>
+  </header>
+
+  <div class="doc-wrap">
+    <!-- ===== 报告头 ===== -->
+    <div class="rd-report-hero">
+      <span class="doc-hero-chip">数据快照 · 统计截至 {AS_OF}</span>
+      <h1 class="doc-title">我的阅读报告</h1>
+      <p class="doc-sub">
+        2019 年注册微信读书，2022 年真正开始读。这份报告把全部阅读数据摊开：
+        读了什么、什么时候读、读完多少——以及这些数字背后的一个人。
+      </p>
+      <p class="doc-meta">总时长 1266 小时 · 读过 573 本 · 读完 121 本 · 笔记 4370 条 · 阅读天数 1491 天</p>
+      <p class="rd-asof-note">每天还在读书，本页是某一时点的快照；阅读时长、书目与笔记都会随时间继续增长。</p>
+    </div>
+
+    <!-- ===== §1 总账本 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§1</span>
+        <h2 class="doc-sec-title">总账本</h2>
+      </div>
+
+      <div class="rd-statgrid">
+        {heroStats.map((s) => (
+          <div class={`stat-block ${s.colorClass}`}>
+            <span class={`stat-word${s.latin ? ' stat-latin' : ''}`}>{s.word}</span>
+            <span class="stat-label">{s.label}</span>
+          </div>
+        ))}
+      </div>
+
+      <p class="doc-p">
+        今年（2026）到现在：读过 180 本、读完 30 本、阅读 250 天、195.4 小时、412 条笔记。
+        8–10 月明显加速（29.2h / 25.2h / 28.9h），日均接近 2024 年的峰值水平。
+      </p>
+    </section>
+
+    <!-- ===== §2 年度节奏 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§2</span>
+        <h2 class="doc-sec-title">年度节奏</h2>
+      </div>
+
+      <div class="rd-yearchart">
+        {yearBars.map((y) => (
+          <div class="rd-ybar-col">
+            <span class="rd-ybar-num">{y.hours}</span>
+            <span class="rd-ybar" style={`--h:${y.h};--c:${y.color}`}></span>
+            <span class="rd-ybar-lab">{y.year}</span>
+          </div>
+        ))}
+      </div>
+      <p class="rd-chart-note">2026 为 1–11 月数据 · 单位：小时/年</p>
+
+      <p class="doc-p">
+        2019 年注册之后基本没动，2022 年觉醒（140 小时），2024 年登顶（338 小时，日均近 1 小时），
+        此后稳定在 300 小时/年的量级。这条曲线和「从迷茫到系统化自我提升」的人生阶段完全同步。
+      </p>
+    </section>
+
+    <!-- ===== §3 类型分布 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§3</span>
+        <h2 class="doc-sec-title">类型分布</h2>
+      </div>
+
+      <div class="rd-cat-rows">
+        {CATEGORY_DISTRIBUTION.map((c) => (
+          <div class="rd-cat-row">
+            <span class="rd-cat-label">{c.name}</span>
+            <span class="rd-cat-track"><span class="rd-cat-bar" style={`--w:${c.width};--c:${c.color}`}></span></span>
+            <span class="rd-cat-val"><span>{c.hours}</span><span>{c.books}</span><span>占 {c.pct}</span></span>
+          </div>
+        ))}
+      </div>
+
+      <p class="doc-p">
+        成长 + 心理 + 经济理财合计约 <strong>62%</strong> 的时长——书架子分类里排最前面的也是「人生哲学 97 本、散文杂著 72 本、财经 64 本」。
+        计算机 34 本但时长只有 38 小时，说明技术书更多是按需查阅而非通读。读什么，就是什么人。
+      </p>
+    </section>
+
+    <!-- ===== §4 读得最多 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§4</span>
+        <h2 class="doc-sec-title">读得最多的书</h2>
+      </div>
+
+      <div class="rd-booklist">
+        {topBooks.map((b, i) => (
+          <div class="rd-book-row">
+            <span class="rd-book-rank">{String(i + 1).padStart(2, '0')}</span>
+            <span class="rd-book-name">
+              {b.title}
+              <span class="rd-book-author">{b.author}</span>
+            </span>
+            <span class="rd-book-hours">{b.hours}</span>
+          </div>
+        ))}
+      </div>
+
+      <p class="doc-p">
+        前十里没有一本小说。心理学两本科班教材（津巴多、社会性动物）都在——这不是「看过心理学」，是真的啃过教科书。
+      </p>
+    </section>
+
+    <!-- ===== §5 阅读偏好 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§5</span>
+        <h2 class="doc-sec-title">阅读偏好</h2>
+      </div>
+
+      <div class="rd-prefgrid">
+        {prefs.map((p) => (
+          <div class="rd-prefcard">
+            <span class="rd-pref-title"><span class={`rd-pref-dot ${p.dot}`}></span>{p.title}</span>
+            <p class="rd-pref-body">{p.body}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- ===== §6 画像分析 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§6</span>
+        <h2 class="doc-sec-title">数据背后是个什么样的人</h2>
+      </div>
+
+      <p class="doc-p">
+        事实先说清楚：以下是数据能直接支撑的推断，不编故事。
+      </p>
+
+      <div class="rd-portrait-grid">
+        {portraits.map((p) => (
+          <div class="rd-portrait-card">
+            <span class={`rd-portrait-tag ${p.tagColor}`}>{p.tag}</span>
+            <h3 class="rd-portrait-heading">{p.heading}</h3>
+            <p class="rd-portrait-text">{p.text}</p>
+          </div>
+        ))}
+      </div>
+
+      <p class="doc-p" style="margin-top: 24px;">
+        一句话总结：<strong>白天啃方法论，深夜在散文里喘口气；把阅读当输入端口，把笔记当处理流水线，把自己当迭代对象。</strong>
+      </p>
+    </section>
+
+    <!-- ===== §7 最近读完 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§7</span>
+        <h2 class="doc-sec-title">最近读完的书</h2>
+      </div>
+
+      <h3 class="rd-h3">2026 年 · 18 本（书架在架标记）</h3>
+      <div class="rd-fin-grid">
+        {finished2026.map((b) => (
+          <p class="rd-fin-item"><span class="rd-fin-name">{b.name}</span><span class="rd-fin-meta">{b.meta}</span></p>
+        ))}
+      </div>
+
+      <h3 class="rd-h3">2025 年下半年 · 11 本</h3>
+      <div class="rd-fin-grid">
+        {finished2025.map((b) => (
+          <p class="rd-fin-item"><span class="rd-fin-name">{b.name}</span><span class="rd-fin-meta">{b.meta}</span></p>
+        ))}
+      </div>
+
+      <p class="doc-p" style="margin-top: 18px;">
+        2026 年书单里 AI 类占了 4 本（FDE、Harness 工程、Agent 橙皮书、AI 未来已来）——转型方向的阅读弹药，比简历先行。
+      </p>
+    </section>
+
+    <!-- ===== §8 勋章墙 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§8</span>
+        <h2 class="doc-sec-title">勋章墙（摘录）</h2>
+      </div>
+
+      <div class="rd-medals">
+        {medals.map((m) => <span class={`doc-prin ${m.color}`}>{m.text}</span>)}
+      </div>
+
+      <p class="doc-p" style="margin-top: 20px;">
+        其中「21 天阅读挑战 · 达成 21 次」从 2024 年 8 月首次成功后几乎月月达成——
+        对一个从 2022 年才养成阅读习惯的人来说，坚持本身已经成了习惯。
+      </p>
+    </section>
+
+    <!-- ===== 报告尾 ===== -->
+    <div class="doc-end">
+      <a class="btn wf-link-btn doc-back-btn" href={BASE_URL}>
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M17 10H3M3 10L9 4M3 10L9 16" stroke="#FFDC58" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        返回作品集
+      </a>
+      <span class="doc-end-note">阅读报告 v1.0 · 统计截至 {AS_OF} · 数据来自微信读书 Agent API · 每天仍在阅读，会持续更新 · 画像分析基于数据推断，非人格测评</span>
+    </div>
+  </div>
+</Layout>

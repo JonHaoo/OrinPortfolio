@@ -3,8 +3,8 @@
 const BASE_URL = import.meta.env.BASE_URL.endsWith("/") ? import.meta.env.BASE_URL : import.meta.env.BASE_URL + "/";
 ---
 
-<header class="site-header">
-  <a class="logo" href="#top" aria-label="Orin 作品集首页">
+  <header class="site-header">
+    <a class="logo vt-logo" href="#top" aria-label="Orin 作品集首页">
     <div class="logo-square"><span>O</span></div>
     <span class="logo-name">ORIN.DEV</span>
   </a>
@@ -13,13 +13,14 @@ const BASE_URL = import.meta.env.BASE_URL.endsWith("/") ? import.meta.env.BASE_U
     <a href="#works" class="active">作品</a>
     <a href="#about">关于我</a>
     <a href="#stats">底气</a>
-    <a href={`${BASE_URL}workflow/`}>工作流</a>
+    <a href={`${BASE_URL}reading/`} data-spy="reading">阅读</a>
+    <a href={`${BASE_URL}workflow/`} data-spy="workflow">工作流</a>
     <a href="#contact">联系</a>
   </nav>
 
   <div class="nav-right">
     <button
-      class="theme-toggle"
+      class="theme-toggle vt-toggle"
       id="theme-toggle-btn"
       type="button"
       role="switch"
@@ -45,6 +46,6 @@ const BASE_URL = import.meta.env.BASE_URL.endsWith("/") ? import.meta.env.BASE_U
       </span>
     </button>
 
-    <a class="btn btn-cta" href="#contact">聊聊合作</a>
+    <a class="btn btn-cta vt-cta" href="#contact">聊聊合作</a>
   </div>
 </header>

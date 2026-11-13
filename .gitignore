@@ -3,3 +3,9 @@ dist/
 .astro/
 .DS_Store
 *.log
+
+# 本地临时产物：模型处理脚本、预览页、后台任务日志（不入库）
+.temp/
+
+# 未被代码引用的旧版 Hero 素材（保留本地，避免误传 1.2MB 冗余资源）
+public/images/hero.png

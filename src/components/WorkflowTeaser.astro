@@ -1,5 +1,5 @@
 ---
-// 工程方法论提炼卡：AI 辅助研发工作流规范的首页入口（链接到 /workflow/ 完整版）
+// 方法论区：研发工作流规范 + 设计 SOP 两张提炼卡（各自链接到完整阅读页）
 const BASE_URL = import.meta.env.BASE_URL.endsWith("/") ? import.meta.env.BASE_URL : import.meta.env.BASE_URL + "/";
 const principles = [
   { color: 'wf-chip-yellow', text: '人负责方向与取舍' },
@@ -7,12 +7,18 @@ const principles = [
   { color: 'wf-chip-blue', text: '测试提供证据，而非制造安全感' },
   { color: 'wf-chip-green', text: '流程强度与风险匹配' },
 ];
+const sopChips = [
+  { color: 'wf-chip-yellow', text: '视觉·体验·动效三维独立组合' },
+  { color: 'wf-chip-pink', text: '冲突按五级优先级裁决' },
+  { color: 'wf-chip-blue', text: '强度分区声明' },
+  { color: 'wf-chip-green', text: '无证据不验收' },
+];
 ---
 
 <section class="workflow-teaser" id="workflow">
   <div class="section-header">
     <span class="section-tag">METHODOLOGY</span>
-    <h2 class="section-title">我的工程方法论</h2>
+    <h2 class="section-title">我的方法论</h2>
   </div>
 
   <div class="workflow-banner">
@@ -37,6 +43,31 @@ const principles = [
         </svg>
       </a>
       <span class="wf-hint">0–17 共 18 个章节 · 档位 / 规格 / 测试 / 审查 / 复盘</span>
+    </div>
+  </div>
+
+  <div class="workflow-banner workflow-banner-alt">
+    <div class="wf-left">
+      <div class="wf-head">
+        <span class="wf-version">v3.0</span>
+        <h3 class="wf-title">AI 辅助 UI/UX 设计 SOP</h3>
+      </div>
+      <p class="wf-desc">
+        一套可复用、可配置的 AI 辅助设计流程：视觉风格、体验模式、动效语言三维独立决策；参考拆成规则而非照搬；动效分区配强度；九维基准 + P0–P3 分级验收——每个结论都要有真实截图与交互证据。
+      </p>
+      <div class="wf-chips">
+        {sopChips.map((p) => <span class={`wf-chip ${p.color}`}>{p.text}</span>)}
+      </div>
+    </div>
+
+    <div class="wf-right">
+      <a class="btn wf-link-btn" href={`${BASE_URL}design-sop/`}>
+        读提炼版
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M3 10H17M17 10L11 4M17 10L11 16" stroke="#FFDC58" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </a>
+      <span class="wf-hint">8 风格 × 5 模式 × 6 动效语言 · 九维验收 · 14 条执行准则</span>
     </div>
   </div>
 </section>

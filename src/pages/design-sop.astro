@@ -1,0 +1,324 @@
+---
+// AI 辅助 UI/UX 设计 SOP · 提炼版阅读页
+// 内容来源：AI Vibe Coding · 系统 UI/UX 设计与开发 SOP v3.0
+// 提炼原则：不上传全文，只保留对访问者（招聘方/合作方）有价值的决策框架与验收纪律
+import Layout from '../layouts/Layout.astro';
+const BASE_URL = import.meta.env.BASE_URL.endsWith("/") ? import.meta.env.BASE_URL : import.meta.env.BASE_URL + "/";
+---
+
+<Layout
+  fluid
+  title="AI 辅助 UI/UX 设计 SOP · Orin"
+  description="一套可复用、可配置的 AI 辅助产品设计与前端开发流程：视觉风格、体验模式、动效语言三维独立决策，九维基准验收，每个结论都要有真实证据。"
+>
+  <header class="site-header doc-header">
+    <a class="logo vt-logo" href={BASE_URL} aria-label="返回作品集首页">
+      <div class="logo-square"><span>O</span></div>
+      <span class="logo-name">ORIN.DEV</span>
+    </a>
+
+    <nav class="site-nav" aria-label="主导航">
+      <a href={BASE_URL}>返回作品集</a>
+      <a href={`${BASE_URL}reading/`}>阅读档案</a>
+      <a href={`${BASE_URL}workflow/`}>研发工作流</a>
+      <a href={`${BASE_URL}design-sop/`} class="active">设计 SOP</a>
+    </nav>
+
+    <div class="nav-right">
+      <button
+        class="theme-toggle vt-toggle"
+        id="theme-toggle-btn"
+        type="button"
+        role="switch"
+        aria-checked="false"
+        aria-label="切换深色 / 浅色主题"
+        title="切换深色 / 浅色主题"
+      >
+        <svg class="icon-sun" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <circle cx="7" cy="7" r="3" fill="#FFF5E6" />
+          <path d="M7 0.5V2.5M7 11.5V13.5M0.5 7H2.5M11.5 7H13.5M2.4 2.4L3.8 3.8M10.2 10.2L11.6 11.6M11.6 2.4L10.2 3.8M3.8 10.2L2.4 11.6" stroke="#FFF5E6" stroke-width="1.2" stroke-linecap="round" />
+        </svg>
+        <svg class="icon-moon" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M13 9C11.9 9.6 10.7 9.9 9.4 9.9C5.2 9.9 1.8 6.5 1.8 2.3C1.8 1.8 1.9 1.3 2 0.9C0.9 1.7 0.2 3 0.2 4.5C0.2 8.2 3.1 11.1 6.8 11.1C9.2 11.1 11.3 9.8 12.4 7.8L13 9Z" fill="#141414" />
+        </svg>
+        <span class="knob">
+          <svg class="knob-sun" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" style="position:absolute;top:5px;left:5px;">
+            <circle cx="7" cy="7" r="3" fill="#141414" />
+            <path d="M7 0.5V2.5M7 11.5V13.5M0.5 7H2.5M11.5 7H13.5M2.4 2.4L3.8 3.8M10.2 10.2L11.6 11.6M11.6 2.4L10.2 3.8M3.8 10.2L2.4 11.6" stroke="#141414" stroke-width="1.2" stroke-linecap="round" />
+          </svg>
+          <svg class="knob-moon" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" style="position:absolute;top:5px;left:5px;">
+            <path d="M13 9C11.9 9.6 10.7 9.9 9.4 9.9C5.2 9.9 1.8 6.5 1.8 2.3C1.8 1.8 1.9 1.3 2 0.9C0.9 1.7 0.2 3 0.2 4.5C0.2 8.2 3.1 11.1 6.8 11.1C9.2 11.1 11.3 9.8 12.4 7.8L13 9Z" fill="#141414" />
+          </svg>
+        </span>
+      </button>
+
+      <a class="btn btn-cta vt-cta" href={`${BASE_URL}#contact`}>聊聊合作</a>
+    </div>
+  </header>
+
+  <div class="doc-wrap">
+    <!-- ===== 文档头 ===== -->
+    <div class="doc-hero">
+      <span class="doc-hero-chip">v3.0 · 提炼版</span>
+      <h1 class="doc-title">AI 辅助 UI/UX 设计 SOP</h1>
+      <p class="doc-sub">
+        一套可复用、可配置的 AI 辅助产品设计与前端开发流程：把「让 AI 做出好设计」拆成可执行的决策链。
+      </p>
+      <p class="doc-meta">适用范围：Web 网站 · SaaS · AI Agent · 管理后台 · 作品集 · 交互式应用 · 3D 沉浸式体验</p>
+    </div>
+
+    <div class="doc-principles">
+      <span class="doc-prin doc-prin-yellow">视觉、体验、动效三维独立组合</span>
+      <span class="doc-prin doc-prin-pink">冲突按五级优先级裁决</span>
+      <span class="doc-prin doc-prin-blue">强度分区声明，拒绝笼统的「全站高互动」</span>
+      <span class="doc-prin doc-prin-green">无证据不验收</span>
+    </div>
+
+    <!-- ===== §1 三维度决策框架 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§1</span>
+        <h2 class="doc-sec-title">三维度决策框架</h2>
+      </div>
+
+      <p class="doc-p">
+        大多数「AI 做的界面」看起来同质化，根源是把视觉、体验和动效混成一团凭感觉拍板。这套 SOP 的核心做法是把它们拆成<strong>三个独立的决策维度</strong>：
+      </p>
+      <ul class="doc-ul">
+        <li><strong>视觉风格</strong>——界面<strong>看起来</strong>是什么样子；</li>
+        <li><strong>体验模式</strong>——用户<strong>如何探索和操作</strong>网站；</li>
+        <li><strong>动效语言</strong>——界面<strong>如何运动</strong>。</li>
+      </ul>
+      <p class="doc-p">
+        三者自由组合（例如 Neubrutalism 视觉 + 标准产品体验 + 弹性动效），但组合必须服务于产品任务，不能为追逐趋势而机械堆砌。
+      </p>
+
+      <h3 class="doc-h3">视觉风格库（选一个主风格）</h3>
+      <table class="doc-table">
+        <thead>
+          <tr><th>风格</th><th>特征</th><th>适用</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Minimalism / Swiss</td><td>网格、对齐、留白、克制色彩</td><td>SaaS、工具软件、企业站</td></tr>
+          <tr><td>Modern SaaS / Bento</td><td>模块卡片、功能分区、密度可控</td><td>AI 工具、管理后台、工作台</td></tr>
+          <tr><td>Neubrutalism</td><td>粗轮廓、高对比、硬边投影</td><td>作品集、创意工具、独立产品</td></tr>
+          <tr><td>Glassmorphism / Spatial</td><td>半透明面板、模糊、空间深度</td><td>AI 产品、科技品牌、控制台</td></tr>
+          <tr><td>Editorial / Typography</td><td>大标题、杂志排版、内容叙事</td><td>博客、媒体、品牌故事</td></tr>
+          <tr><td>3D Immersive</td><td>实时渲染、交互物体、粒子</td><td>产品展示、数字艺术</td></tr>
+          <tr><td>Dopamine / Playful</td><td>明亮色彩、趣味插画、灵活构图</td><td>教育、社区、年轻化品牌</td></tr>
+          <tr><td>Organic / Soft</td><td>柔和色彩、圆润形态、自然曲线</td><td>生活服务、个人管理</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="doc-h3">体验模式库（选一个主模式，可组合一个辅助）</h3>
+      <table class="doc-table">
+        <thead>
+          <tr><th>模式</th><th>核心特征</th><th>适用</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>A · 标准产品体验</td><td>结构清晰、任务路径直接、反馈明确</td><td>业务系统、效率工具、后台</td></tr>
+          <tr><td>B · 动效驱动高互动</td><td>动画与操作紧密关联、反馈丰富</td><td>创意工具、作品集、互动展示</td></tr>
+          <tr><td>C · 滚动叙事</td><td>滚动推动故事与场景逐步呈现</td><td>品牌官网、产品发布页、案例</td></tr>
+          <tr><td>D · 3D 空间交互</td><td>探索三维对象、镜头与空间关系</td><td>产品展示、数字艺术</td></tr>
+          <tr><td>E · 混合沉浸式</td><td>DOM、滚动叙事与 3D 场景协同</td><td>高品质品牌官网、沉浸作品集</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="doc-h3">动效语言（选一种主要运动风格）</h3>
+      <table class="doc-table">
+        <thead>
+          <tr><th>语言</th><th>特征</th><th>推荐场景</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Precise &amp; Restrained</td><td>精准、克制、短促</td><td>SaaS、工具、专业产品</td></tr>
+          <tr><td>Natural &amp; Springy</td><td>自然、弹性、物理反馈</td><td>AI 工具、交互应用</td></tr>
+          <tr><td>Cinematic &amp; Dramatic</td><td>分层、叙事、节奏感</td><td>品牌官网、作品集</td></tr>
+          <tr><td>Spatial &amp; Immersive</td><td>空间、视差、3D</td><td>科技展示、产品展示</td></tr>
+          <tr><td>Playful &amp; Elastic</td><td>活泼、弹跳、形变</td><td>社区、创意产品</td></tr>
+          <tr><td>Data &amp; Functional</td><td>状态明确、响应快速</td><td>数据产品、管理后台</td></tr>
+        </tbody>
+      </table>
+
+      <p class="doc-p">
+        动效 Token 起点固定为四档：Fast 120–180ms（微交互）、Normal 180–300ms（组件过渡）、Slow 350–600ms（重点转场）、Stagger 40–100ms（元素依次出现）；进入用 Ease Out、离开用 Ease In、状态切换用 Ease In Out、弹性用 Spring。
+      </p>
+    </section>
+
+    <!-- ===== §2 冲突裁决链 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§2</span>
+        <h2 class="doc-sec-title">冲突裁决链：五级优先级</h2>
+      </div>
+
+      <p class="doc-p">
+        设计目标永远会打架。这套 SOP 不靠个人品味裁决，而是给出一条固定的优先级链——冲突时按顺序判断，前一级永远赢过后一级：
+      </p>
+      <ol class="doc-ol">
+        <li>核心任务能否顺利完成。</li>
+        <li>信息、导航和交互是否清晰。</li>
+        <li>视觉层级和整体设计是否一致。</li>
+        <li>动画和沉浸式体验是否增强理解或参与感。</li>
+        <li>装饰性效果是否值得其性能和维护成本。</li>
+      </ol>
+      <p class="doc-p">
+        <strong>不能以「看起来更炫」作为牺牲可用性、可访问性或性能的理由。</strong>这条裁决链在实践里最常被用到的场景：滚动叙事拖慢了任务路径（第 4 级输给第 1 级）、装饰动画干扰阅读（第 5 级输给第 2 级）。
+      </p>
+    </section>
+
+    <!-- ===== §3 体验强度分区 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§3</span>
+        <h2 class="doc-sec-title">体验强度分区配置</h2>
+      </div>
+
+      <p class="doc-p">
+        「全站高互动」是一句没有信息量的话。每个项目必须按区域声明动效强度，才知道哪里可以放开、哪里必须克制：
+      </p>
+      <table class="doc-table">
+        <thead>
+          <tr><th>区域</th><th>可选强度</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Hero / 首屏</td><td>低 / 中 / 高</td><td>品牌第一印象，可承担主要视觉记忆点</td></tr>
+          <tr><td>叙事区</td><td>低 / 中 / 高</td><td>可使用滚动联动和场景变化</td></tr>
+          <tr><td>内容区</td><td>低 / 中 / 高</td><td>阅读和信息区，通常保持克制</td></tr>
+          <tr><td>导航</td><td>低 / 中 / 高</td><td>必须始终明确、容易使用</td></tr>
+          <tr><td>工具组件</td><td>低 / 中 / 高</td><td>高频操作优先反馈清晰和响应快速</td></tr>
+          <tr><td>3D 场景</td><td>关闭 / 局部 / 核心</td><td>明确 3D 是装饰、辅助还是主要内容</td></tr>
+        </tbody>
+      </table>
+      <p class="doc-p">
+        本站就是一次实际应用：Hero = 中（一次性入场编排）、内容区 = 低（轻量 reveal）、导航 = 低（hover 高亮 + scroll-spy）、工具组件 = 中（按压/抬升/箭头微移）、3D = 局部（仅 Hero 形象，且保留降级）。
+      </p>
+    </section>
+
+    <!-- ===== §4 九维验收基准 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§4</span>
+        <h2 class="doc-sec-title">九维验收基准与问题分级</h2>
+      </div>
+
+      <p class="doc-p">
+        设计好坏不能靠「我觉得挺好」收尾。每轮交付按九个维度打分（0 不符合 / 1 部分符合 / 2 符合），总分用于定位问题：
+      </p>
+      <table class="doc-table">
+        <thead>
+          <tr><th>维度</th><th>检查内容</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>风格一致性</td><td>是否符合主风格和项目视觉基因</td></tr>
+          <tr><td>信息层级</td><td>能否快速识别重点、导航和主要操作</td></tr>
+          <tr><td>布局与节奏</td><td>宽度、留白、网格、密度是否合理</td></tr>
+          <tr><td>组件一致性</td><td>同类组件的尺寸、状态和视觉规则是否统一</td></tr>
+          <tr><td>内容质量</td><td>内容层级合适，无空洞占位和重复文案</td></tr>
+          <tr><td>交互完整性</td><td>关键操作是否有真实行为、状态和反馈</td></tr>
+          <tr><td>动效质量</td><td>有目的、自然、克制且不妨碍任务</td></tr>
+          <tr><td>沉浸体验</td><td>场景连贯、操作可理解、保留用户控制</td></tr>
+          <tr><td>响应式表现</td><td>不同屏幕下清晰、可操作</td></tr>
+        </tbody>
+      </table>
+
+      <p class="doc-p">
+        <strong>阻断条款：</strong>核心任务无法完成、主要文字不可读、核心控件不可操作、严重布局溢出——任何一条出现即为阻断问题，<strong>不能用其他维度的高分抵消</strong>。
+      </p>
+
+      <h3 class="doc-h3">问题分级</h3>
+      <table class="doc-table">
+        <thead>
+          <tr><th>级别</th><th>定义</th><th>处理</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>P0 阻断</td><td>核心功能失效、内容不可读、严重错位、关键交互失效</td><td>必须先修</td></tr>
+          <tr><td>P1 高优先级</td><td>主要视觉方向偏离、首屏层级混乱、核心组件不一致</td><td>次优先</td></tr>
+          <tr><td>P2 普通</td><td>间距、字重、阴影、过渡节奏等细节问题</td><td>排期修</td></tr>
+          <tr><td>P3 可选</td><td>不影响任务的装饰细节和个人偏好</td><td>按值不值决定</td></tr>
+        </tbody>
+      </table>
+
+      <p class="doc-p">
+        验收视口固定四档：1440 × 900（桌面）、1280 × 800（小屏笔记本）、390 × 844（移动端）、一个窄屏查溢出。修复后必须在相同视口下重新截图回归，不能只改代码不验证结果。
+      </p>
+    </section>
+
+    <!-- ===== §5 工程纪律 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§5</span>
+        <h2 class="doc-sec-title">工程纪律：十四条执行准则</h2>
+      </div>
+
+      <ol class="doc-ol">
+        <li>先理解产品，再设计界面。</li>
+        <li>先选风格和体验模式，再拆解参考，最后制定规范。</li>
+        <li>先确认整体构图和信息层级，再打磨装饰细节。</li>
+        <li>每个参考必须说明用途，不允许无目的拼贴。</li>
+        <li>沉浸式项目先设计用户体验过程，再选择 Lenis、GSAP 或 3D 技术。</li>
+        <li>先完成代表性页面或完整场景，再推广到其他页面。</li>
+        <li>先保证功能和体验，再做视觉精修。</li>
+        <li>每个动画和交互都必须有明确目的。</li>
+        <li>不为追逐流行而引入不适合的设计或依赖。</li>
+        <li>不以复杂动效替代清晰内容和真实功能。</li>
+        <li>通过真实浏览器效果验证，不凭代码想象判断完成。</li>
+        <li>每轮修复后重新验证，确保局部优化没有破坏全局一致性。</li>
+        <li>未验证的内容必须明确标注，不得虚报完成。</li>
+        <li>将有效的设计经验沉淀到项目规则中。</li>
+      </ol>
+    </section>
+
+    <!-- ===== §6 AI 协作指令纪律 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§6</span>
+        <h2 class="doc-sec-title">AI 协作指令纪律</h2>
+      </div>
+
+      <p class="doc-p">
+        这套 SOP 同时约束人怎么给 AI 下指令——好的协作不是一句「帮我做个高级的网站」：
+      </p>
+      <ul class="doc-ul">
+        <li><strong>分阶段下指令</strong>——理解 → 选方向 → 拆参考 → 蓝图 → 代表页 → 推广 → 验收，不要求 AI 一轮无边界完成全部工作。</li>
+        <li><strong>先方案后代码</strong>——设计阶段明确要求「暂不修改代码」，先拿到可审查的方案。</li>
+        <li><strong>禁用抽象词当结论</strong>——「高级」「现代」「科技感」不能作为设计方向，必须解释落实成哪些视觉、交互和运动规则。</li>
+        <li><strong>区分事实、推测与不确定</strong>——静态截图不能证明真实动效；无法验证的内容要明确标注，不得虚报。</li>
+        <li><strong>要求证据链</strong>——运行了才能称已运行，截图了才能称已对比，操作过才能称已验证。</li>
+      </ul>
+    </section>
+
+    <!-- ===== §7 本站即实证 ===== -->
+    <section class="doc-section">
+      <div class="doc-sec-head">
+        <span class="doc-sec-num">§7</span>
+        <h2 class="doc-sec-title">本站即实证</h2>
+      </div>
+
+      <p class="doc-p">
+        这份 SOP 不是纸上方法论——你正在看的这个网站就是按它建设并验收的：动效先沉淀为蓝图文档再实现，每个 P0–P3 修复都记录在验收基准里，附真实视口截图与交互实测。四轮验收的九维评分轨迹：
+      </p>
+      <pre class="doc-pre">R1   12 → 15 / 18   P0 死链修复 · 导航反馈 · 动效 Token 收敛
+R2   15 → 16 / 18   入场编排 · 差异化 reveal · View Transitions
+R3   16 → 18 / 18   移动端断点重排（四视口实测零溢出）
+
+过程中的实证教训（均已沉淀为项目规则）：
+  · 软导航后需存活的脚本一律走 astro:page-load，不依赖元素级监听器
+  · View Transition 手写 clip-path 动画必须 fill: forwards，否则终态回闪
+  · 动效性能结论必须用 longtask 等非侵入指标交叉验证</pre>
+      <p class="doc-p">
+        设计规则与验收记录以文档形式随源码沉淀在仓库 <code class="doc-code">docs/design/</code> 下（MOTION_GUIDE、VISUAL_BENCHMARK、DESIGN_CONFIG），流程可复现、结论可追溯——这正是我把「AI 辅助设计」当作一条可管理的工程流程而非一次性运气的核心做法。
+      </p>
+    </section>
+
+    <!-- ===== 文档尾 ===== -->
+    <div class="doc-end">
+      <a class="btn wf-link-btn doc-back-btn" href={BASE_URL}>
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M17 10H3M3 10L9 4M3 10L9 16" stroke="#FFDC58" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        返回作品集
+      </a>
+      <span class="doc-end-note">AI 辅助 UI/UX 设计 SOP · 提炼自《AI Vibe Coding 系统 UI/UX 设计与开发 SOP》v3.0 · 完整版另含九阶段 PHASE 工作流与协作指令库</span>
+    </div>
+  </div>
+</Layout>

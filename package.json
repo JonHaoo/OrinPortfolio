@@ -12,6 +12,11 @@
     "@fontsource/archivo-black": "^5.1.0",
     "@fontsource/noto-sans-sc": "^5.1.0",
     "@fontsource/zcool-qingke-huangyou": "^5.1.0",
-    "astro": "^5.0.0"
+    "astro": "^5.0.0",
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "@gltf-transform/cli": "^4.5.1",
+    "@types/three": "^0.187.0"
   }
 }

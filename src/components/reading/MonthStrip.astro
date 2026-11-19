@@ -1,0 +1,90 @@
+---
+/**
+ * MonthStrip — 2026 年逐月阅读（12 根真实月度柱）
+ * 8–10 月加速段橙色高亮；12 月为尚未到来的未来（虚线占位，不显示为 0 数据）。
+ */
+import { WEREAD as W } from '../../data/reading';
+
+const max = Math.max(...W.months2026.map((m) => m.hours)); // 29.2（8月）
+const H = 72;
+const months = W.months2026.map((m) => ({
+  ...m,
+  h: Math.max(Math.round((m.hours / max) * H), 4),
+  future: m.m === 12,
+  hot: m.m >= 8 && m.m <= 10,
+}));
+const fmt = (v: number) => (v >= 10 ? v.toFixed(0) : v.toFixed(1));
+---
+
+<div class="rdx-monthstrip" role="img" aria-label="2026 年逐月阅读时长：1 月 8.6 小时、2 月 7.4 小时、3 月 19.4 小时、4 月 17.6 小时、5 月 11.7 小时、6 月 16.2 小时、7 月 15.4 小时、8 月 29.2 小时、9 月 25.2 小时、10 月 28.9 小时、11 月 15.9 小时（截至 13 日）、12 月尚未到来">
+  {months.map((m) => (
+    <div
+      class={`mcol${m.hot ? ' hot' : ''}${m.future ? ' future' : ''}`}
+      data-tip={m.future ? `<b>12 月</b> · 尚未到来` : `<b>${m.m} 月</b> · ${m.hours}h${m.hot ? ' · 加速段' : ''}`}
+    >
+      <span class="mnum">{m.future ? '—' : `${fmt(m.hours)}`}</span>
+      <span class="mbar" style={`--h:${m.h}px`}></span>
+      <span class="mlab">{m.m}</span>
+    </div>
+  ))}
+</div>
+
+<style>
+  .rdx-monthstrip {
+    display: flex;
+    align-items: flex-end;
+    gap: clamp(6px, 1.6vw, 16px);
+    padding: 14px 6px 0;
+    border-bottom: 2px solid var(--ink);
+    transition: border-color var(--dur-base) var(--ease-slide);
+  }
+
+  .mcol {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    padding-bottom: 8px;
+  }
+
+  .mnum {
+    font-family: var(--font-data);
+    font-size: 12px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .mbar {
+    width: 100%;
+    max-width: 44px;
+    height: var(--h, 4px);
+    background: var(--ink);
+    transition: background-color var(--dur-base) var(--ease-slide);
+  }
+
+  .hot .mbar { background: var(--orange); }
+  .hot .mnum { color: var(--orange); }
+
+  .future .mbar {
+    background: transparent;
+    border: 2px dashed var(--muted);
+    height: 6px;
+  }
+
+  .future .mnum { color: var(--muted); }
+
+  .mlab {
+    font-family: var(--font-data);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .hot .mlab { color: var(--orange); }
+</style>

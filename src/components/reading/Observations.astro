@@ -1,0 +1,164 @@
+---
+/**
+ * Observations — 数据背后的个人（杂志人物专栏式）
+ * 分层原则：数据事实（可直接证明） / 数据推断（带不确定性表述） / 个人自述（主观）三层明确标注。
+ * 事实层每条可溯源到页面内具体图表；推断层统一使用「更像 / 倾向」表述，不做人格断言。
+ */
+---
+
+<div class="rdx-obs">
+  <div class="obs-layer obs-fact">
+    <span class="obs-chip"><i class="chip-mark"></i>数据事实 · FACT</span>
+    <ul>
+      <li>成长 + 心理 + 经济理财占 <b>62%</b> 时长——阅读结构以提升与方法论为绝对主线。</li>
+      <li>心理学是<b>科班口径</b>：《津巴多普通心理学》《社会性动物》两本教科书都在时长并列前三。</li>
+      <li>计算机类时长占比从总体的 <b>3%</b> 升至 2026 年的 <b>13%</b>；2025 年起 AI 书密集出现且读完率高。</li>
+      <li><b>4370 条笔记</b>，读过之书平均 7.6 条/本——划线之外有持续的文字加工。</li>
+      <li>两个真实阅读高峰：<b>凌晨 2–3 点</b>与<b>午后 14 点</b>（单时段峰值 131.5h）；听书 280.8 小时补充通勤与碎片时间。</li>
+      <li>21 天挑战达成 <b>21 次</b>、连续阅读 <b>180 天</b>、阅读天数 <b>1000+</b>。</li>
+    </ul>
+  </div>
+
+  <div class="obs-layer obs-infer">
+    <span class="obs-chip"><i class="chip-mark"></i>数据推断 · INFERENCE</span>
+    <ul>
+      <li><i>推断</i>阅读结构更像<b>「目标驱动」</b>而非随性消遣——高挑战完成率与高笔记密度与之一致，但仅是模式观察，不是人格结论。</li>
+      <li><i>推断</i>心理学底子<b>偏科班</b>——教科书通读记录支持这个判断，深度未经逐章验证。</li>
+      <li><i>推断</i>AI 书单的密集出现<b>与其职业转型方向同步</b>——时间相关性明显，因果未证实。</li>
+    </ul>
+    <p class="obs-disclaimer">
+      推断基于真实数据的模式识别，<b>阅读行为不等于人格、专业能力或人生经历</b>——它只是「一个人如何分配注意力」的证据之一。
+    </p>
+  </div>
+
+  <div class="obs-layer obs-voice">
+    <span class="obs-chip"><i class="chip-mark"></i>个人自述 · VOICE（主观）</span>
+    <blockquote>
+      白天啃方法论，深夜在散文里喘口气；把阅读当输入端口，把笔记当处理流水线，
+      把自己当迭代对象。
+    </blockquote>
+    <p class="obs-voice-sub">
+      ——这是我对这些数字的自我解释，写在这里的部分只代表我自己，不代表数据。
+    </p>
+  </div>
+</div>
+
+<style>
+  .rdx-obs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 28px;
+    align-items: start;
+  }
+
+  .obs-layer {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 24px 26px 26px;
+    border: 3px solid var(--ink);
+    background: var(--surface);
+    transition: background-color var(--dur-base) var(--ease-slide),
+                border-color var(--dur-base) var(--ease-slide);
+  }
+
+  .obs-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    align-self: flex-start;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    border: 2px solid var(--ink);
+  }
+
+  .obs-fact .obs-chip { background: var(--yellow); color: #141414; }
+  .obs-infer .obs-chip { background: var(--orange); color: #fff; }
+  .obs-voice .obs-chip { background: var(--ink); color: var(--on-ink); }
+
+  .chip-mark { width: 9px; height: 9px; background: currentColor; }
+
+  .obs-layer ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .obs-layer li {
+    position: relative;
+    padding: 10px 0 10px 18px;
+    font-size: 13.5px;
+    line-height: 1.75;
+    font-weight: 500;
+    color: var(--ink);
+    border-bottom: 1.5px dashed var(--rd-line);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .obs-layer li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 17px;
+    width: 8px;
+    height: 8px;
+    background: var(--yellow);
+    border: 2px solid var(--ink);
+  }
+
+  .obs-infer li::before { background: var(--orange); }
+  .obs-voice li::before { background: var(--ink); }
+
+  .obs-layer li:last-child { border-bottom: none; }
+
+  .obs-layer b { font-weight: 900; }
+
+  .obs-layer li i {
+    font-style: normal;
+    margin-right: 8px;
+    padding: 1px 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    background: var(--orange);
+    border: 1.5px solid var(--ink);
+  }
+
+  .obs-disclaimer {
+    font-size: 12px;
+    line-height: 1.7;
+    font-weight: 500;
+    color: var(--muted);
+    border-top: 2px solid var(--rd-line);
+    padding-top: 14px;
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .obs-disclaimer b { color: var(--ink); font-weight: 700; }
+
+  .obs-voice blockquote {
+    font-family: var(--font-display);
+    font-size: clamp(22px, 2.4vw, 28px);
+    line-height: 1.55;
+    font-weight: 400;
+    color: var(--ink);
+    text-indent: 0;
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .obs-voice-sub {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  :root[data-theme='dark'] .obs-layer { background: #2B2B2B; }
+
+  @media (max-width: 1023px) {
+    .rdx-obs { grid-template-columns: 1fr; gap: 20px; }
+  }
+</style>

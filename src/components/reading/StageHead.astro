@@ -1,0 +1,110 @@
+---
+/**
+ * StageHead — 叙事阶段标题（编辑式章节眉）
+ * 用法：<StageHead index="02" latin="THE JOURNEY" title="阅读轨迹" kicker="..." />
+ */
+interface Props {
+  index: string;
+  latin: string;
+  title: string;
+  kicker?: string;
+  anchor?: string;
+}
+const { index, latin, title, kicker, anchor } = Astro.props;
+---
+
+<section class="rdx-stage-head" id={anchor} data-stage={index}>
+  <div class="rdx-stage-eyebrow">
+    <span class="idx-sq">{index}</span>
+    <span class="lat">{latin}</span>
+    <span class="line" aria-hidden="true"></span>
+  </div>
+  <h2 class="rdx-stage-title">{title}</h2>
+  {kicker && <p class="rdx-stage-kicker">{kicker}</p>}
+  <span class="rdx-stage-ghost" aria-hidden="true">{index}</span>
+</section>
+
+<style>
+  .rdx-stage-head {
+    position: relative;
+    margin-bottom: 44px;
+  }
+
+  .rdx-stage-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+
+  .idx-sq {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 44px;
+    height: 44px;
+    padding: 0 8px;
+    background: var(--ink);
+    color: var(--on-ink);
+    font-family: var(--font-data);
+    font-size: 22px;
+    font-weight: 700;
+    transition: background-color var(--dur-base) var(--ease-slide),
+                color var(--dur-base) var(--ease-slide);
+  }
+
+  .lat {
+    font-family: var(--font-data);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .line {
+    flex: 1;
+    height: 3px;
+    background: var(--ink);
+    transition: background-color var(--dur-base) var(--ease-slide);
+  }
+
+  .rdx-stage-title {
+    font-family: var(--font-display);
+    font-size: clamp(38px, 5.5vw, 64px);
+    line-height: 1.1;
+    font-weight: 400;
+    color: var(--ink);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .rdx-stage-kicker {
+    max-width: 720px;
+    margin-top: 14px;
+    font-size: 17px;
+    line-height: 1.75;
+    color: var(--ink);
+    opacity: 0.82;
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  /* 背景巨型章节数字：视差装饰（reduced-motion 下为静态水印） */
+  .rdx-stage-ghost {
+    position: absolute;
+    right: -12px;
+    top: -30px;
+    font-family: var(--font-latin);
+    font-size: clamp(120px, 18vw, 220px);
+    line-height: 1;
+    color: transparent;
+    -webkit-text-stroke: 2px var(--rd-line);
+    user-select: none;
+    pointer-events: none;
+  }
+
+  @media (max-width: 1023px) {
+    .rdx-stage-ghost { top: -14px; right: -4px; -webkit-text-stroke-width: 1.5px; }
+    .rdx-stage-kicker { font-size: 15px; }
+  }
+</style>

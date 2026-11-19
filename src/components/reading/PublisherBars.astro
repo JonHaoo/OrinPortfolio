@@ -1,0 +1,84 @@
+---
+/**
+ * PublisherBars — 偏好出版社（本数口径，微信读书官方偏好统计）
+ */
+import { WEREAD as W } from '../../data/reading';
+
+const max = Math.max(...W.publishers.map((p) => p.count)); // 中信 36
+const pubs = W.publishers.map((p) => ({ ...p, w: Math.max((p.count / max) * 100, 3) }));
+---
+
+<div class="rdx-pubbars" role="img" aria-label={`偏好出版社：${pubs.map((p) => `${p.name} ${p.count} 本`).join('、')}`}>
+  {pubs.map((p) => (
+    <div class="pb-row" data-tip={`<b>${p.name}</b> · ${p.count} 本`}>
+      <span class="pb-name">{p.name}</span>
+      <span class="pb-track"><span class="pb-bar" style={`width:${p.w}%`}></span></span>
+      <span class="pb-count">{p.count}</span>
+    </div>
+  ))}
+</div>
+
+<style>
+  .rdx-pubbars {
+    display: flex;
+    flex-direction: column;
+    border-top: 2px solid var(--ink);
+    transition: border-color var(--dur-base) var(--ease-slide);
+  }
+
+  .pb-row {
+    display: grid;
+    grid-template-columns: 170px 1fr 40px;
+    gap: 14px;
+    align-items: center;
+    padding: 7px 0;
+    border-bottom: 1.5px solid var(--rd-line);
+    cursor: default;
+  }
+
+  .pb-row:last-child { border-bottom: 2px solid var(--ink); }
+
+  .pb-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .pb-track {
+    display: block;
+    height: 9px;
+    position: relative;
+  }
+
+  .pb-bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 9px;
+    background: var(--ink);
+    opacity: 0.85;
+    transform-origin: left;
+    transition: background-color var(--dur-base) var(--ease-slide);
+  }
+
+  .pb-row:first-child .pb-bar { background: var(--yellow); opacity: 1; border: 1.5px solid var(--ink); }
+
+  .pb-count {
+    font-family: var(--font-data);
+    font-size: 12px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    color: var(--muted);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  @media (max-width: 1023px) {
+    .pb-row { grid-template-columns: 120px 1fr 34px; gap: 8px; }
+    .pb-name { font-size: 12px; }
+  }
+</style>

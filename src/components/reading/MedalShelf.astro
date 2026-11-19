@@ -1,0 +1,157 @@
+---
+/**
+ * MedalShelf — 勋章墙（全部 56 枚真实勋章，按名称聚合为 12 组）
+ * 收藏感陈列：主位给「21 天阅读挑战 ×21」，其余网格陈列。
+ */
+import { WEREAD as W } from '../../data/reading';
+
+const all = W.medals;
+const hero = all.find((m) => m.name === '21天阅读挑战')!;
+const rest = all.filter((m) => m.name !== '21天阅读挑战');
+---
+
+<div class="rdx-medals">
+  <div class="md-hero" data-tip="<b>21 天阅读挑战</b> · 达成 21 次 · 2024-08 首次成功后几乎月月达成">
+    <span class="md-count"><b>×21</b><i>CHALLENGES</i></span>
+    <span class="md-name">21 天阅读挑战 · 达成 21 次</span>
+    <span class="md-sub">2024 年 8 月首次成功后几乎月月达成——对一个 2022 年才养成阅读习惯的人来说，坚持本身成了习惯。</span>
+  </div>
+
+  <div class="md-grid">
+    {rest.map((m) => (
+      <div class="md-item" data-tip={`<b>${m.name}</b> · ${m.levels.length ? `等级 ${m.levels.join(' / ')}` : `×${m.count}`} · 微信读书官方勋章`}>
+        <span class="md-count"><b>×{m.count}</b></span>
+        <span class="md-name">{m.name}</span>
+        {m.levels.length > 0 && (
+          <span class="md-levels">
+            {m.levels.map((l) => <i>{l}</i>)}
+          </span>
+        )}
+      </div>
+    ))}
+  </div>
+
+  <p class="md-note">
+    共 <b>{all.reduce((s, m) => s + m.count, 0)}</b> 枚勋章，全部来自微信读书官方成就系统——
+    含阅读 500 本（全站第 315889 位）、阅读 1000 小时 / 1000 天、连续阅读 180 天、神作收藏家。
+  </p>
+</div>
+
+<style>
+  .rdx-medals { display: flex; flex-direction: column; gap: 22px; }
+
+  .md-hero {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 4px 22px;
+    align-items: center;
+    padding: 22px 26px;
+    background: var(--yellow);
+    border: 3px solid var(--ink);
+    box-shadow: var(--shadow-lg);
+    cursor: default;
+  }
+
+  .md-hero .md-count { grid-row: span 2; }
+
+  .md-hero .md-count b {
+    display: block;
+    font-family: var(--font-latin);
+    font-size: clamp(44px, 6vw, 72px);
+    line-height: 0.95;
+    color: #141414;
+  }
+
+  .md-hero .md-count i {
+    display: block;
+    font-family: var(--font-data);
+    font-style: normal;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: rgba(20, 20, 20, 0.6);
+  }
+
+  .md-hero .md-name {
+    font-size: 19px;
+    font-weight: 900;
+    color: #141414;
+  }
+
+  .md-hero .md-sub {
+    grid-column: 2;
+    font-size: 13.5px;
+    line-height: 1.7;
+    font-weight: 500;
+    color: rgba(20, 20, 20, 0.75);
+  }
+
+  .md-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .md-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 2px solid var(--ink);
+    cursor: default;
+    /* 悬浮位移用独立 translate 属性，避免与 GSAP transform 动画冲突 */
+    transition: translate var(--dur-fast) var(--ease-pop),
+                box-shadow var(--dur-fast) var(--ease-slide),
+                background-color var(--dur-base) var(--ease-slide);
+  }
+
+  .md-item:hover { translate: -2px -2px; box-shadow: var(--shadow-sm); }
+
+  .md-item .md-count b {
+    font-family: var(--font-latin);
+    font-size: 30px;
+    line-height: 1;
+    color: var(--ink);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .md-item .md-name {
+    font-size: 13px;
+    font-weight: 900;
+    color: var(--ink);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .md-levels { display: flex; flex-wrap: wrap; gap: 4px; }
+
+  .md-levels i {
+    font-family: var(--font-data);
+    font-style: normal;
+    font-size: 10px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    padding: 1px 5px;
+    color: var(--muted);
+    border: 1.5px solid var(--muted);
+  }
+
+  .md-note {
+    font-size: 13px;
+    line-height: 1.8;
+    font-weight: 500;
+    color: var(--muted);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .md-note b { font-family: var(--font-data); color: var(--ink); font-weight: 700; }
+
+  :root[data-theme='dark'] .md-item { background: #2B2B2B; }
+
+  @media (max-width: 1023px) {
+    .md-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .md-hero { grid-template-columns: 1fr; }
+    .md-hero .md-count { grid-row: auto; }
+    .md-hero .md-sub { grid-column: 1; }
+  }
+</style>

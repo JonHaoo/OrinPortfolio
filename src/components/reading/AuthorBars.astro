@@ -1,0 +1,119 @@
+---
+/**
+ * AuthorBars — 偏好作者（按真实阅读时长排序，readTime 中文串已在导出层解析为分钟）
+ */
+import { WEREAD as W } from '../../data/reading';
+
+const maxMin = Math.max(...W.authors.map((a) => a.minutes)); // 赫拉利 1844 分钟
+const fmtH = (min: number) => {
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  return m > 0 ? `${h}h${String(m).padStart(2, '0')}m` : `${h}h`;
+};
+const authors = W.authors.map((a) => ({
+  ...a,
+  w: Math.max((a.minutes / maxMin) * 100, 2),
+  hours: fmtH(a.minutes),
+}));
+---
+
+<div class="rdx-authorbars" role="img" aria-label={`偏好作者按阅读时长排序：${authors.map((a) => `${a.name} ${a.hours}（${a.books} 本）`).join('、')}`}>
+  {authors.map((a, i) => (
+    <div
+      class="ab-row"
+      data-tip={`<b>${a.name}</b> · ${a.hours} · ${a.books} 本`}
+    >
+      <span class="ab-rank">{String(i + 1).padStart(2, '0')}</span>
+      <span class="ab-name">{a.name}</span>
+      <span class="ab-track"><span class="ab-bar" style={`width:${a.w}%`}></span></span>
+      <span class="ab-books">{a.books} 本</span>
+      <span class="ab-hours">{a.hours}</span>
+    </div>
+  ))}
+</div>
+
+<style>
+  .rdx-authorbars {
+    display: flex;
+    flex-direction: column;
+    border-top: 3px solid var(--ink);
+    transition: border-color var(--dur-base) var(--ease-slide);
+  }
+
+  .ab-row {
+    display: grid;
+    grid-template-columns: 34px 118px 1fr 52px 74px;
+    gap: 14px;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 2px solid var(--rd-line);
+    cursor: default;
+  }
+
+  .ab-row:last-child { border-bottom: 2px solid var(--ink); }
+
+  .ab-rank {
+    font-family: var(--font-data);
+    font-size: 13px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .ab-row:first-child .ab-rank { color: #141414; background: var(--yellow); border: 2px solid var(--ink); text-align: center; padding: 1px 0; }
+
+  .ab-name {
+    font-size: 15px;
+    font-weight: 900;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .ab-track {
+    display: block;
+    height: 12px;
+    position: relative;
+  }
+
+  .ab-bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 12px;
+    background: var(--ink);
+    transform-origin: left;
+    transition: background-color var(--dur-base) var(--ease-slide);
+  }
+
+  .ab-row:first-child .ab-bar { background: var(--yellow); border: 2px solid var(--ink); }
+
+  .ab-books {
+    font-family: var(--font-data);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .ab-hours {
+    font-family: var(--font-data);
+    font-size: 14px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    color: var(--ink);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  @media (max-width: 1023px) {
+    .ab-row { grid-template-columns: 26px 86px 1fr 44px 64px; gap: 8px; }
+    .ab-name { font-size: 13px; }
+    .ab-hours { font-size: 12px; }
+  }
+</style>

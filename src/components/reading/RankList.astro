@@ -1,0 +1,295 @@
+---
+/**
+ * RankList — 读得最多（在架阅读时长排行）
+ * 真实口径：微信读书 readLongest Top10 中 1 条为已下架听书专辑（无书名）——
+ * 书籍榜实为 9 本，单独列出那条听书记录，不静默丢弃。
+ * 交互：details 展开行内详情：读完状态 / 微信读书原书链接（真实 deepLink）。
+ */
+import { WEREAD as W } from '../../data/reading';
+
+const BASE_URL = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : import.meta.env.BASE_URL + '/';
+
+const books = W.longest.filter((b) => !b.audio);
+const audio = W.longest.find((b) => b.audio);
+const max = Math.max(...books.map((b) => b.hours));
+const rows = books.map((b) => ({ ...b, w: (b.hours / max) * 100 }));
+---
+
+<div
+  class="rdx-ranklist"
+  role="img"
+  aria-label={`阅读时长排行：${rows.map((b, i) => `第 ${i + 1} 名《${b.title}》${b.hours} 小时`).join('；')}；另有 25.8 小时的记录为一张已下架听书专辑`}
+>
+  <div class="rk-head" aria-hidden="true">
+    <span>#</span><span>书名 / 作者</span><span class="rk-h">时长</span><span></span>
+  </div>
+
+  {rows.map((b, i) => (
+    <details class="rk-row">
+      <summary
+        class="rk-summary"
+        data-tip={`<b>${b.title}</b> · ${b.hours}h · ${b.author}`}
+      >
+        <span class="rk-rank">{String(i + 1).padStart(2, '0')}</span>
+        <span class="rk-book">
+          <span class="rk-title">{b.title}</span>
+          <span class="rk-author">{b.author}</span>
+          <span class="rk-bar" style={`--w:${b.w}%`}></span>
+        </span>
+        <span class="rk-hours">{b.hours}h</span>
+        <span class="rk-plus" aria-hidden="true"></span>
+      </summary>
+      <div class="rk-detail">
+        {b.cover && (
+          <img
+            class="rk-cover"
+            src={`${BASE_URL}${b.cover.src}`}
+            width={b.cover.w || 444}
+            height={b.cover.h || 640}
+            alt={`《${b.title}》封面`}
+            loading="lazy"
+            decoding="async"
+          />
+        )}
+        <div class="rk-detail-info">
+          <span class="rk-status">{b.finished ? '✓ 已读完' : '在架 · 未标记读完'}</span>
+          {b.deepLink && (
+            <a href={b.deepLink} target="_blank" rel="noopener noreferrer">
+              在微信读书查看原书 ↗
+            </a>
+          )}
+        </div>
+      </div>
+    </details>
+  ))}
+
+  {audio && (
+    <div class="rk-audio" data-tip={`<b>听书记录</b> · ${audio.hours}h · 专辑已下架，原始标题不可得`}>
+      <span class="rk-rank">—</span>
+      <span class="rk-audio-note">
+        另有一条 <b>{audio.hours}h</b> 的记录属于一张<b>已下架的听书专辑</b>——
+        原始书名已不可得。它是真实档案的一部分，如实列出，不计入书籍榜。
+      </span>
+      <span class="rk-hours">{audio.hours}h</span>
+    </div>
+  )}
+</div>
+
+<p class="rk-note">
+  <b>口径说明：</b>按在架累计阅读时长排序；微信读书不提供按书笔记数，
+  无法按笔记数另排（笔记数为全账号合计 4370 条）。前九名无一册小说——
+  两本心理学教科书（津巴多、社会性动物）整本啃完，是科班底子的证据。
+</p>
+
+<style>
+  .rdx-ranklist {
+    display: flex;
+    flex-direction: column;
+    border-top: 3px solid var(--ink);
+    transition: border-color var(--dur-base) var(--ease-slide);
+  }
+
+  .rk-head {
+    display: grid;
+    grid-template-columns: 44px 1fr 84px 26px;
+    gap: 14px;
+    padding: 10px 0 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .rk-h { text-align: right; }
+
+  details.rk-row { border-bottom: 2px solid var(--rd-line); }
+
+  details.rk-row:last-of-type { border-bottom: 2px solid var(--ink); }
+
+  .rk-summary {
+    display: grid;
+    grid-template-columns: 44px 1fr 84px 26px;
+    gap: 14px;
+    align-items: center;
+    padding: 12px 0;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+  }
+
+  .rk-summary::-webkit-details-marker { display: none; }
+
+  .rk-rank {
+    font-family: var(--font-data);
+    font-size: 15px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  details.rk-row:nth-child(-n + 4) .rk-rank {
+    color: #141414;
+    background: var(--yellow);
+    border: 2px solid var(--ink);
+    text-align: center;
+    padding: 2px 0;
+  }
+
+  .rk-book {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 2px 0 6px;
+    min-width: 0;
+  }
+
+  .rk-title {
+    font-size: 15px;
+    font-weight: 900;
+    color: var(--ink);
+    line-height: 1.4;
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .rk-author {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .rk-bar {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 3px;
+    width: var(--w, 0%);
+    max-width: 100%;
+    background: var(--yellow);
+    border-right: 2px solid var(--ink);
+    transition: background-color var(--dur-base) var(--ease-slide);
+  }
+
+  .rk-hours {
+    font-family: var(--font-data);
+    font-size: 16px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    color: var(--ink);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .rk-plus {
+    position: relative;
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--ink);
+    display: grid;
+    place-items: center;
+    background: var(--bg);
+    transition: background-color var(--dur-base) var(--ease-slide);
+  }
+
+  .rk-plus::before,
+  .rk-plus::after {
+    content: '';
+    position: absolute;
+    background: var(--ink);
+    transition: background-color var(--dur-base) var(--ease-slide);
+  }
+
+  .rk-plus::before { width: 10px; height: 2px; }
+  .rk-plus::after { width: 2px; height: 10px; }
+
+  details[open] .rk-plus::after { opacity: 0; }
+  details[open] .rk-plus { background: var(--yellow); }
+
+  .rk-detail {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 20px;
+    align-items: flex-start;
+    padding: 0 0 14px 58px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    opacity: 0.85;
+  }
+
+  .rk-cover {
+    display: block;
+    width: 64px;
+    height: auto;
+    border: 2px solid var(--ink);
+    flex-shrink: 0;
+  }
+
+  .rk-detail-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .rk-detail .rk-status {
+    display: inline-flex;
+    padding: 3px 8px;
+    border: 2px solid var(--ink);
+    font-weight: 700;
+  }
+
+  .rk-detail a {
+    color: var(--ink);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: var(--orange);
+    text-decoration-thickness: 2px;
+  }
+
+  .rk-detail a:hover { color: var(--orange); }
+
+  .rk-audio {
+    display: grid;
+    grid-template-columns: 44px 1fr 84px;
+    gap: 14px;
+    align-items: center;
+    padding: 12px 0 14px;
+    border-bottom: 2px solid var(--ink);
+    cursor: help;
+  }
+
+  .rk-audio .rk-rank { text-align: left; }
+
+  .rk-audio-note {
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.7;
+    color: var(--muted);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .rk-audio-note b { color: var(--ink); font-weight: 700; }
+
+  .rk-note {
+    margin: 14px 0 0;
+    font-size: 13px;
+    line-height: 1.8;
+    font-weight: 500;
+    color: var(--muted);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .rk-note b { font-weight: 700; color: var(--ink); }
+
+  @media (max-width: 1023px) {
+    .rk-head, .rk-summary { grid-template-columns: 30px 1fr 64px 20px; gap: 10px; }
+    .rk-title { font-size: 14px; }
+    .rk-hours { font-size: 13px; }
+    .rk-detail { padding-left: 40px; }
+    .rk-audio { grid-template-columns: 30px 1fr 64px; }
+  }
+</style>

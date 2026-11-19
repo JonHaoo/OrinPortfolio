@@ -1,0 +1,179 @@
+---
+/**
+ * YearBars — 年度阅读轨迹（编辑式柱状图，纯 CSS 渲染，JS 仅做入场动画与 tooltip）
+ * 数据：weread.json years（真实年度总时长）。2026 为进行中：橙色斜纹 + 不可与完整年度直接比较。
+ */
+import { WEREAD as W } from '../../data/reading';
+
+const CHART_H = 280;
+const max = Math.max(...W.years.map((y) => y.hours)); // 338.1（2024）
+
+const cols = W.years.map((y, i) => {
+  const prev = i > 0 ? W.years[i - 1].hours : null;
+  let delta: string | null = null;
+  if (prev !== null && !y.ongoing && y.hours > 1 && prev > 1) {
+    const pct = Math.round(((y.hours - prev) / prev) * 100);
+    delta = `${pct >= 0 ? '+' : ''}${pct}%`;
+  }
+  const h = Math.max(Math.round((y.hours / max) * CHART_H), y.hours > 0 ? 5 : 2);
+  return { ...y, h, delta };
+});
+
+const fmtHours = (v: number) => (v >= 100 ? v.toFixed(0) : v > 0 ? v.toFixed(1) : '0');
+const tag = (year: number): string | null =>
+  year === 2022 ? '觉醒' : year === 2024 ? '峰值' : year === 2026 ? '进行中' : null;
+---
+
+<div
+  class="rdx-yearchart"
+  role="img"
+  aria-label={`年度阅读时长柱状图：2019 年 0.4 小时、2020 年 0.1 小时、2021 年 0 小时，2022 年觉醒至 140.2 小时，2023 年 290.5 小时，2024 年峰值 338.1 小时，2025 年 301.3 小时，2026 年 1 至 11 月进行中 195.4 小时`}
+>
+  {cols.map((c) => (
+    <div
+      class={`ycol${c.ongoing ? ' ongoing' : ''}${c.hours <= 1 ? ' flat' : ''}${c.year === 2024 ? ' peak' : ''}`}
+      data-tip={`<b>${c.year}</b> · ${c.hours}h${c.ongoing ? '（1–11 月，进行中）' : c.delta ? ` · 较上年 ${c.delta}` : ''}${c.year === 2024 ? ' · 峰值，日均近 1 小时' : ''}${c.year === 2022 ? ' · 从这里开始认真读' : ''}`}
+    >
+      <span class="ytag-slot">{tag(c.year) && <span class="ytag">{tag(c.year)}</span>}</span>
+      <span class="ynum">{c.hours > 0 ? `${fmtHours(c.hours)}h` : '0'}</span>
+      <span class="ybar" style={`--h:${c.h}px`}></span>
+      <span class="ylab">{c.year}</span>
+    </div>
+  ))}
+</div>
+
+<div class="y-notes" aria-hidden="true">
+  <span class="yn">注册后的三年，几乎没有打开过</span>
+  <span class="yn">2022 觉醒年</span>
+  <span class="yn">2024 峰值 · 日均近 1h</span>
+  <span class="yn">此后稳定在 300h 量级</span>
+</div>
+
+<p class="y-caption">
+  从 2019 年注册到 2026 年，这条轨迹和「从迷茫到系统化自我提升」的节奏完全同步；
+  <b>2026 为 1–11 月进行中数据</b>，8–10 月明显加速，不与完整年度做无条件比较。单位：小时/年。
+</p>
+
+<style>
+  .rdx-yearchart {
+    display: flex;
+    align-items: flex-end;
+    gap: clamp(8px, 2vw, 22px);
+    padding: 20px 8px 0;
+    border-bottom: 3px solid var(--ink);
+    transition: border-color var(--dur-base) var(--ease-slide);
+  }
+
+  .ycol {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    height: 100%;
+    padding-bottom: 10px;
+    cursor: default;
+  }
+
+  .ytag-slot { height: 22px; display: flex; }
+
+  .ytag {
+    align-self: stretch;
+    padding: 2px 8px;
+    background: var(--yellow);
+    border: 2px solid var(--ink);
+    color: #141414;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .ongoing .ytag { background: var(--orange); color: #fff; }
+
+  .ynum {
+    font-family: var(--font-data);
+    font-size: 14px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    white-space: nowrap;
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .flat .ynum { color: var(--muted); font-size: 12px; }
+
+  .ybar {
+    width: 100%;
+    max-width: 72px;
+    height: var(--h, 4px);
+    background: var(--ink);
+    transition: background-color var(--dur-base) var(--ease-slide);
+  }
+
+  /* 峰值年：黄色 */
+  .peak .ybar { background: var(--yellow); border: 2px solid var(--ink); }
+
+  /* 进行中年：橙色斜纹 */
+  .ongoing .ybar {
+    background: repeating-linear-gradient(135deg, var(--orange) 0 7px, #FFD9C4 7px 13px);
+    border: 2px solid var(--ink);
+  }
+
+  /* 无效年份：细线 */
+  .flat .ybar { background: var(--muted); opacity: 0.55; }
+
+  .ylab {
+    font-family: var(--font-data);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .ongoing .ylab, .peak .ylab { color: var(--ink); }
+
+  /* 图下注释带 */
+  .y-notes {
+    display: flex;
+    padding: 10px 8px 0;
+    gap: 10px;
+  }
+
+  .yn {
+    flex: 1;
+    min-width: 0;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--muted);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .yn:nth-child(1) { flex: 3; }
+  .yn:nth-child(2) { flex: 2; }
+  .yn:nth-child(3) { flex: 3; }
+  .yn:nth-child(4) { flex: 3; }
+
+  .y-caption {
+    margin: 18px 0 0;
+    font-size: 14px;
+    line-height: 1.8;
+    font-weight: 500;
+    color: var(--ink);
+    opacity: 0.78;
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .y-caption b { font-weight: 700; color: var(--ink); opacity: 1; }
+
+  @media (max-width: 1023px) {
+    .ynum { font-size: 11px; }
+    .ylab { font-size: 11px; }
+    .ytag { font-size: 10px; padding: 1px 5px; }
+    .y-notes { flex-direction: column; gap: 4px; padding: 8px 4px 0; }
+    .yn { flex: none !important; }
+  }
+</style>

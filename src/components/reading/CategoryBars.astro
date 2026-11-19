@@ -1,0 +1,354 @@
+---
+/**
+ * CategoryBars — 类型分布 + 真实的「总体 vs 2026」对比（兴趣变化的诚实呈现）
+ * 微信读书不提供逐年分类数据——这里用两个真实口径的占比对比替代逐年趋势，不虚构。
+ * 交互：<details> 原生手风琴（无 JS 可用、键盘可访问），展开即该分类焦点面板：
+ * 双口径数字 + 该分类 2026 年读完的书（书架真实记录）。
+ */
+import { WEREAD as W } from '../../data/reading';
+
+const totalHours = W.totals.hours;
+const hours2026Total = W.cats.reduce((s, c) => s + c.hours2026, 0); // 166.0h
+const shareMax = Math.max(
+  ...W.cats.map((c) => Math.round((c.hours / totalHours) * 100)),
+  ...W.cats.map((c) => Math.round((c.hours2026 / hours2026Total) * 100)),
+); // 31%（2026 个人成长）
+
+const catRows = W.cats.map((c) => {
+  const share = Math.round((c.hours / totalHours) * 100);
+  const share26 = c.hours2026 > 0 ? Math.round((c.hours2026 / hours2026Total) * 100) : 0;
+  return {
+    ...c,
+    share,
+    share26,
+    w: (share / shareMax) * 100,
+    w26: (share26 / shareMax) * 100,
+    delta: share26 - share,
+    books26: c.books2026 > 0 ? W.finished2026.filter((b) => (b.category || '').split('-')[0] === c.name) : [],
+  };
+});
+
+/** 分类色标：主要分类用品牌色，其余结构黑 */
+function catColor(name: string): string {
+  const map: Record<string, string> = {
+    个人成长: 'var(--yellow)',
+    心理: 'var(--pink)',
+    经济理财: 'var(--blue)',
+    文学: 'var(--green)',
+    计算机: 'var(--orange)',
+  };
+  return map[name] ?? 'var(--ink)';
+}
+---
+
+<div class="rdx-catbars" role="list" aria-label="阅读类型分布与 2026 年对比">
+  <div class="cb-head" aria-hidden="true">
+    <span class="cb-cat">分类</span>
+    <span class="cb-bars">
+      <span class="cb-legend">
+        <i class="lg-all"></i>总体占比 <i>2019–2026</i>
+        <i class="lg-26"></i>2026 占比 <i>进行中</i>
+      </span>
+    </span>
+    <span class="cb-val">时长 / 本数</span>
+  </div>
+
+  {catRows.map((c, i) => (
+    <details class="cb-row" data-cat={i} role="listitem">
+      <summary class="cb-summary" data-tip={`<b>${c.name}</b> · 总体 ${c.hours}h / ${c.books} 本（占 ${c.share}%）；2026 ${c.hours2026}h / ${c.books2026} 本（占 ${c.share26}%）`}>
+        <span class="cb-cat"><i class="cc" style={`background:${catColor(c.name)}`}></i>{c.name}</span>
+        <span class="cb-bars">
+          <span class="bar-track">
+            <span class="bar bar-all" style={`width:${c.w}%`}></span>
+          </span>
+          <span class="bar-track">
+            <span class="bar bar-26" style={`width:${Math.max(c.w26, 1.2)}%`}></span>
+          </span>
+          {c.delta !== 0 && (
+            <span class={`delta ${c.delta > 0 ? 'up' : 'down'}`}>
+              {c.delta > 0 ? '+' : ''}{c.delta}pp
+            </span>
+          )}
+        </span>
+        <span class="cb-val">
+          <b>{c.hours}h</b> · {c.books} 本
+          <i class="v26">{c.hours2026 > 0 ? `26年 ${c.hours2026}h` : '26年 —'}</i>
+        </span>
+        <span class="cb-plus" aria-hidden="true"></span>
+      </summary>
+
+      <div class="cb-panel">
+        <div class="cb-panel-stats">
+          <span>总体 <b>{c.hours}h</b> · {c.books} 本 · 占 {c.share}%</span>
+          <span>2026 <b>{c.hours2026 > 0 ? `${c.hours2026}h` : '暂无'}</b> · {c.books2026} 本 · 占 {c.share26}%</span>
+        </div>
+        {c.books26.length > 0 ? (
+          <div class="cb-panel-books">
+            <span class="pb-lab">2026 读完（在架记录）：</span>
+            <ul>
+              {c.books26.map((b) => (
+                <li>
+                  <span class="bk-t">{b.title}</span>
+                  <span class="bk-m">{b.author} · {b.month} 月</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <p class="cb-panel-empty">该分类 2026 年暂无「在架 + 标记读完」的书记录。</p>
+        )}
+      </div>
+    </details>
+  ))}
+</div>
+
+<p class="cb-note">
+  <b>口径说明：</b>上方为微信读书官方「偏好分类」时长权重的两个真实口径——
+  总体（2019–2026）与 2026（进行中）。微信读书不提供逐年分类数据，
+  故不虚构逐年趋势；能真实看到的是：<b class="up-t">计算机从 3% 升至 13%</b>（转型弹药），
+  <b class="down-t">经济理财从 16% 降至 8%</b>。历史类 2026 年尚无时长记录。
+</p>
+
+<style>
+  .rdx-catbars {
+    border-top: 3px solid var(--ink);
+    transition: border-color var(--dur-base) var(--ease-slide);
+  }
+
+  .cb-head {
+    display: grid;
+    grid-template-columns: 130px 1fr 190px 28px;
+    gap: 16px;
+    align-items: center;
+    padding: 12px 0 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .cb-bars { display: flex; flex-direction: column; gap: 3px; }
+
+  .cb-legend {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .cb-legend i { font-style: normal; color: var(--muted); font-size: 11px; }
+
+  .lg-all, .lg-26 {
+    width: 16px;
+    height: 9px;
+    border: 1.5px solid var(--ink);
+    margin: 0 2px 0 6px;
+  }
+
+  .lg-all { background: var(--ink); }
+  .lg-26 { background: var(--orange); }
+
+  details.cb-row { border-bottom: 2px solid var(--rd-line); }
+
+  details.cb-row:last-of-type { border-bottom: 2px solid var(--ink); }
+
+  details.cb-row[open] { background: var(--surface); }
+  :root[data-theme='dark'] details.cb-row[open] { background: #2B2B2B; }
+
+  .cb-summary {
+    display: grid;
+    grid-template-columns: 130px 1fr 190px 28px;
+    gap: 16px;
+    align-items: center;
+    padding: 13px 0;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+    transition: background-color var(--dur-fast) var(--ease-slide);
+  }
+
+  .cb-summary::-webkit-details-marker { display: none; }
+
+  .cb-summary:hover { background: rgba(255, 220, 88, 0.16); }
+
+  .cb-cat {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 900;
+    color: var(--ink);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .cc {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+    border: 2px solid var(--ink);
+  }
+
+  .bar-track {
+    display: block;
+    height: 10px;
+    position: relative;
+  }
+
+  .bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 10px;
+    min-width: 3px;
+    transform-origin: left;
+  }
+
+  .bar-all { background: var(--ink); transition: background-color var(--dur-base) var(--ease-slide); }
+  .bar-26 {
+    background: repeating-linear-gradient(135deg, var(--orange) 0 5px, #FFD9C4 5px 9px);
+    border: 1.5px solid var(--ink);
+  }
+
+  .delta {
+    position: absolute;
+    right: 0;
+    top: -3px;
+    font-family: var(--font-data);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 2px 5px;
+    color: #fff;
+    border: 1.5px solid var(--ink);
+    transform: translateX(-4px);
+  }
+
+  .delta.up { background: var(--orange); }
+  .delta.down { background: var(--muted); }
+
+  .cb-val {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    font-family: var(--font-data);
+    font-size: 13px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    text-align: right;
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .cb-val .v26 { font-style: normal; font-size: 11px; font-weight: 500; color: var(--muted); }
+
+  .cb-plus {
+    position: relative;
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--ink);
+    display: grid;
+    place-items: center;
+    background: var(--bg);
+    transition: background-color var(--dur-base) var(--ease-slide), transform var(--dur-fast) var(--ease-slide);
+  }
+
+  .cb-plus::before,
+  .cb-plus::after {
+    content: '';
+    position: absolute;
+    background: var(--ink);
+    transition: background-color var(--dur-base) var(--ease-slide);
+  }
+
+  .cb-plus::before { width: 10px; height: 2px; }
+  .cb-plus::after { width: 2px; height: 10px; }
+
+  details[open] .cb-plus::after { transform: rotate(90deg); opacity: 0; }
+
+  details[open] .cb-plus { background: var(--yellow); }
+
+  /* 焦点面板 */
+  .cb-panel {
+    padding: 4px 16px 18px 146px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .cb-panel-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 24px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    opacity: 0.85;
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .cb-panel-stats b { font-family: var(--font-data); font-weight: 700; }
+
+  .cb-panel-books .pb-lab {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .cb-panel-books ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .cb-panel-books li {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 12px;
+    background: var(--yellow);
+    border: 2px solid var(--ink);
+  }
+
+  .cb-panel-books .bk-t { font-size: 13px; font-weight: 900; color: #141414; }
+  .cb-panel-books .bk-m { font-size: 11px; font-weight: 500; color: rgba(20, 20, 20, 0.65); }
+
+  .cb-panel-empty {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+  }
+
+  .cb-note {
+    margin: 16px 0 0;
+    font-size: 13px;
+    line-height: 1.8;
+    font-weight: 500;
+    color: var(--muted);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .cb-note b { font-weight: 700; color: var(--ink); }
+  .cb-note b.up-t { color: var(--orange); }
+  .cb-note b.down-t { color: var(--ink); opacity: 0.6; }
+
+  @media (max-width: 1023px) {
+    .cb-head, .cb-summary { grid-template-columns: 76px minmax(0, 1fr) auto 20px; gap: 8px; }
+    .cb-cat { font-size: 12.5px; gap: 5px; }
+    .cc { width: 9px; height: 9px; }
+    .cb-val { font-size: 11px; max-width: 96px; }
+    .cb-val .v26 { font-size: 10px; }
+    .cb-panel { padding: 4px 8px 16px 10px; }
+  }
+
+  @media (max-width: 359px) {
+    .cb-head, .cb-summary { grid-template-columns: 64px minmax(0, 1fr) auto 18px; gap: 6px; }
+    .cb-cat { font-size: 12px; }
+    .cb-val { max-width: 84px; font-size: 10px; }
+    .cb-val .v26 { font-size: 9px; }
+  }
+</style>

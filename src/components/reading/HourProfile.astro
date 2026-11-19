@@ -1,0 +1,123 @@
+---
+/**
+ * HourProfile — 24 小时阅读分布（全部记录聚合的真实数据）
+ * 两个真实高峰：凌晨 3 点 / 午后 14 点。官方判定「偏好夜晚阅读」一并呈现，不歪曲数据。
+ */
+import { WEREAD as W } from '../../data/reading';
+
+const h24 = W.hours24;
+const max = Math.max(...h24); // 131.5（14 时）
+const H = 150;
+const bars = h24.map((v, h) => ({
+  h,
+  v,
+  height: Math.max(Math.round((v / max) * H), v > 0 ? 4 : 2),
+  peak: v === max,
+  second: false,
+}));
+// 第二高峰（不同于最大值的最大者）
+const sorted = [...h24].sort((a, b) => b - a);
+const secondVal = sorted.find((v) => v !== max) ?? 0;
+bars.forEach((b) => { if (b.v === secondVal) b.second = true; });
+
+const fmt = (v: number) => (v >= 10 ? v.toFixed(0) : v.toFixed(1));
+const label = (h: number) => (h % 3 === 0 ? String(h).padStart(2, '0') : '');
+---
+
+<div class="rdx-hourchart" role="img" aria-label="24 小时阅读分布：最高峰为午后 14 至 15 点 131.5 小时，次高峰为凌晨 3 至 4 点 121.8 小时；深夜 2 至 3 点亦是主力时段，白天上午与傍晚相对较少">
+  {bars.map((b) => (
+    <div
+      class={`hcol${b.peak ? ' peak' : ''}${b.second ? ' second' : ''}${b.v === 0 ? ' zero' : ''}`}
+      data-tip={`<b>${String(b.h).padStart(2, '0')}:00–${String((b.h + 1) % 24).padStart(2, '0')}:00</b> · ${fmt(b.v)}h`}
+    >
+      <span class="htag-slot">
+        {b.peak && <span class="htag">午后峰</span>}
+        {b.second && <span class="htag">凌晨峰</span>}
+      </span>
+      <span class="hbar" style={`--h:${b.height}px`}></span>
+      <span class="hlab">{label(b.h) || '\u00A0'}</span>
+    </div>
+  ))}
+</div>
+
+<p class="h-caption">
+  按全部阅读记录的 24 小时聚合：<b>两个真实高峰</b>——午后 14 点与凌晨 3 点，
+  深夜 2–3 点同样是主力时段；微信读书官方判定「偏好夜晚阅读」。夜晚读大部头，
+  午后啃方法论，凌晨留给最容易沉浸的那本。
+</p>
+
+<style>
+  .rdx-hourchart {
+    display: flex;
+    align-items: flex-end;
+    gap: clamp(3px, 0.9vw, 10px);
+    padding: 8px 4px 0;
+    border-bottom: 3px solid var(--ink);
+    transition: border-color var(--dur-base) var(--ease-slide);
+  }
+
+  .hcol {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    height: 100%;
+    padding-bottom: 8px;
+  }
+
+  .htag-slot { height: 20px; display: flex; }
+
+  .htag {
+    padding: 1px 6px;
+    background: var(--yellow);
+    border: 2px solid var(--ink);
+    color: #141414;
+    font-size: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .hbar {
+    width: 100%;
+    max-width: 40px;
+    height: var(--h, 2px);
+    background: var(--ink);
+    transition: background-color var(--dur-base) var(--ease-slide);
+  }
+
+  .peak .hbar { background: var(--yellow); border: 2px solid var(--ink); }
+  .second .hbar { background: var(--orange); border: 2px solid var(--ink); }
+  .zero .hbar { background: var(--muted); opacity: 0.4; }
+
+  .hlab {
+    font-family: var(--font-data);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .peak .hlab, .second .hlab { color: var(--ink); }
+
+  .h-caption {
+    margin: 16px 0 0;
+    font-size: 14px;
+    line-height: 1.8;
+    font-weight: 500;
+    color: var(--ink);
+    opacity: 0.78;
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .h-caption b { font-weight: 700; opacity: 1; }
+
+  @media (max-width: 1023px) {
+    .htag { font-size: 9px; padding: 0 4px; }
+    .hlab { font-size: 9px; }
+  }
+</style>

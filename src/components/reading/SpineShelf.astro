@@ -1,0 +1,229 @@
+---
+/**
+ * SpineShelf — 最近读完（封面网格 + 书脊层）
+ * 口径：书架在架 + finishReading 标记 + 按最近阅读时间（readUpdateTime）排序。
+ * 封面为本地下载的真实封面（weread-data/download_covers.py → public/covers/），
+ * <img> 带 width/height 预留空间避免 CLS；loading="lazy" 33 张封面不阻塞首屏。
+ * 分类色标与全站一致：成长黄 / 心理粉 / 财经蓝 / 文学绿 / 计算机橙 / 其他白——
+ * 封面底部的月份徽章 + 边框色即分类编码，悬停显示完整信息。
+ */
+import { WEREAD as W } from '../../data/reading';
+
+const BASE_URL = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : import.meta.env.BASE_URL + '/';
+
+interface Cover {
+  title: string;
+  author: string;
+  category: string;
+  month: number;
+  cover: { src: string; w: number; h: number } | '';
+  border: string;
+  chipBg: string;
+  chipFg: string;
+}
+
+function catStyle(category: string): { border: string; chipBg: string; chipFg: string } {
+  const top = (category || '').split('-')[0];
+  switch (top) {
+    case '个人成长': return { border: 'var(--yellow)', chipBg: 'var(--yellow)', chipFg: '#141414' };
+    case '心理': return { border: 'var(--pink)', chipBg: 'var(--pink)', chipFg: '#141414' };
+    case '经济理财': return { border: 'var(--blue)', chipBg: 'var(--blue)', chipFg: '#141414' };
+    case '文学': return { border: 'var(--green)', chipBg: 'var(--green)', chipFg: '#141414' };
+    case '计算机': return { border: 'var(--orange)', chipBg: 'var(--orange)', chipFg: '#FFFFFF' };
+    default: return { border: 'var(--ink)', chipBg: 'var(--ink)', chipFg: 'var(--on-ink)' };
+  }
+}
+
+const toCover = (b: (typeof W.finished2026)[number]): Cover => ({
+  title: b.title,
+  author: b.author,
+  category: b.category,
+  month: b.month,
+  cover: (b as { cover?: Cover['cover'] }).cover || '',
+  ...catStyle(b.category),
+});
+
+const y2026 = W.finished2026.map(toCover);
+const y2025 = W.finished2025h2.map(toCover);
+
+const legend = [
+  { t: '个人成长', c: 'var(--yellow)' },
+  { t: '心理', c: 'var(--pink)' },
+  { t: '经济理财', c: 'var(--blue)' },
+  { t: '文学', c: 'var(--green)' },
+  { t: '计算机', c: 'var(--orange)' },
+  { t: '其他', c: 'var(--ink)' },
+];
+---
+
+<div class="rdx-shelves">
+  <div class="sh-meta">
+    <div class="sh-legend" aria-hidden="true">
+      {legend.map((l) => <span class="lg"><i style={`background:${l.c}`}></i>{l.t}</span>)}
+    </div>
+    <span class="sh-scope">口径：书架在架 + 标记读完 · 按最近阅读时间排序 · 封面为微信读书真实封面（本地化）</span>
+  </div>
+
+  {[
+    { list: y2026, title: '2026', label: '本读完', accent: true },
+    { list: y2025, title: '2025 下半年', label: '本', accent: false },
+  ].map((sec) => (
+    <section class="sh-shelf" aria-label={`${sec.title} 读完 ${sec.list.length} 本`}>
+      <h3 class="sh-title">{sec.title} · <b>{sec.list.length}</b> {sec.label}</h3>
+      <div class="cv-grid">
+        {sec.list.map((b) => (
+          <figure
+            class="cv-card"
+            data-tip={`<b>${b.title}</b><br>${b.author} · ${b.category} · ${b.month} 月读完`}
+          >
+            {b.cover ? (
+              <img
+                src={`${BASE_URL}${b.cover.src}`}
+                width={b.cover.w || 444}
+                height={b.cover.h || 640}
+                alt={`《${b.title}》封面`}
+                loading="lazy"
+                decoding="async"
+              />
+            ) : (
+              <span class="cv-fallback">{b.title}</span>
+            )}
+            <figcaption class="cv-month" style={`--bg:${b.chipBg};--fg:${b.chipFg}`}>
+              {String(b.month).padStart(2, '0')}
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+    </section>
+  ))}
+
+  <p class="sh-note">
+    2026 年书单里 AI 类 4 本（FDE、Harness 工程、Agent 橙皮书、AI 未来已来）——
+    转型方向的阅读弹药，比简历先行一步。
+  </p>
+</div>
+
+<style>
+  .rdx-shelves { display: flex; flex-direction: column; gap: 34px; }
+
+  .sh-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+  }
+
+  .sh-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+
+  .sh-legend .lg {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .sh-legend .lg i {
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--ink);
+  }
+
+  .sh-scope { font-size: 12px; font-weight: 500; color: var(--muted); }
+
+  .sh-title {
+    font-size: 17px;
+    font-weight: 900;
+    color: var(--ink);
+    margin-bottom: 14px;
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .sh-title b { font-family: var(--font-data); color: var(--orange); }
+
+  /* 封面网格：响应式列，间距紧凑，编辑式陈列 */
+  .cv-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+    gap: 14px;
+  }
+
+  .cv-card {
+    position: relative;
+    margin: 0;
+    border: 3px solid var(--card-line);
+    background: var(--surface);
+    /* 悬浮位移用独立 translate 属性（避免与 GSAP 入场 transform 冲突） */
+    transition: translate var(--dur-fast) var(--ease-pop),
+                box-shadow var(--dur-fast) var(--ease-slide),
+                border-color var(--dur-base) var(--ease-slide);
+  }
+
+  .cv-card:hover {
+    translate: -3px -3px;
+    box-shadow: var(--shadow-sm);
+    z-index: 2;
+  }
+
+  .cv-card img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 444 / 640;
+    object-fit: cover;
+  }
+
+  /* 无封面的回退：分类色块 + 书名 */
+  .cv-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 444 / 640;
+    padding: 12px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 900;
+    line-height: 1.5;
+    color: var(--ink);
+    background: var(--bg);
+  }
+
+  /* 月份徽章：读完时间的真实标记，颜色即分类编码 */
+  .cv-month {
+    position: absolute;
+    right: -3px;
+    bottom: -3px;
+    display: flex;
+    align-items: center;
+    padding: 3px 7px;
+    background: var(--bg, var(--ink));
+    color: var(--fg, var(--on-ink));
+    border: 2px solid var(--card-line);
+    font-family: var(--font-data);
+    font-size: 11px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+
+  .sh-note {
+    font-size: 13.5px;
+    line-height: 1.8;
+    font-weight: 500;
+    color: var(--ink);
+    opacity: 0.78;
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  @media (max-width: 1023px) {
+    .cv-grid { grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 10px; }
+    .sh-scope { width: 100%; }
+  }
+
+  @media (max-width: 359px) {
+    .cv-grid { grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); }
+  }
+</style>

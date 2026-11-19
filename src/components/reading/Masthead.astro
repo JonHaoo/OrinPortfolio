@@ -1,0 +1,496 @@
+---
+/**
+ * Masthead — 档案封面 + §01 THE NUMBERS 数字墙
+ * 首屏强视觉：巨型标题、跑马灯、大数字（JS 计数动画，HTML 内已是终值）、2026 进行中快照。
+ * 无 JS / reduced-motion：内容完整可见。
+ */
+import { WEREAD as W } from '../../data/reading';
+
+const facts = W.totals;
+const y26 = W.y2026;
+const daysWhole = Math.round(facts.hours / 24);
+const notesPerBook = (facts.notes / facts.booksRead).toFixed(1);
+const lead = [
+  { value: facts.booksRead, unit: '本', label: '读过', tip: '微信读书「读过」口径' },
+  { value: facts.booksFinished, unit: '本', label: '读完', tip: '封面到底，读完率 21%' },
+  { value: facts.notes, unit: '条', label: '笔记', tip: `平均 ${notesPerBook} 条 / 本` },
+  { value: facts.readDays, unit: '天', label: '有效阅读', tip: '单日 ≥ 1 分钟' },
+];
+---
+
+<header class="rdx-masthead" id="top">
+  <div class="mast-meta">
+    <span class="meta-left">
+      <span class="vol">VOL.<b>08</b></span>
+      <span class="meta-name">READING&nbsp;ARCHIVE&nbsp;/&nbsp;ORIN</span>
+    </span>
+    <span class="meta-right">数据快照 <b>{W.asOf}</b> · 微信读书 Agent API</span>
+  </div>
+
+  <h1 class="mast-title">
+    <span class="t-zh">阅读<mark>档案</mark></span>
+    <span class="t-lat" aria-hidden="true">EIGHT YEARS OF READING, MEASURED.</span>
+  </h1>
+
+  <p class="mast-lede">
+    2019 年注册微信读书，2022 年真正开始读。这份档案把八年的阅读数据全部摊开：
+    读了什么、什么时候读、读完多少——以及这些数字背后的一个人。
+  </p>
+
+  <div class="rdx-ticker" aria-hidden="true">
+    <div class="ticker-track">
+      {
+        [0, 1].map(() => (
+      <span class="ticker-seq">
+        <span>1266 HOURS</span><i />
+        <span>573 BOOKS READ</span><i />
+        <span>121 FINISHED</span><i />
+        <span>4370 NOTES</span><i />
+        <span>1491 DAYS</span><i />
+        <span>56 MEDALS</span><i />
+        <span>19 FINISHED IN 2026</span><i />
+        <span>NIGHT READER</span><i />
+        <span>DATA-DRIVEN</span><i />
+        <span>SNAPSHOT 2026.11.13</span><i />
+      </span>
+        ))
+      }
+    </div>
+  </div>
+
+  <!-- 数字墙：不对称网格，关键数字即视觉主体 -->
+  <div class="rdx-numberwall" aria-label={`总阅读时长 ${facts.hours} 小时，约 ${daysWhole} 个整天；读过 ${facts.booksRead} 本，读完 ${facts.booksFinished} 本，笔记 ${facts.notes} 条，有效阅读 ${facts.readDays} 天`}>
+    <div class="nw-hero">
+      <span class="nw-big"><b data-count={facts.hours}>1266</b><i>h</i></span>
+      <span class="nw-hero-label">总阅读时长 ≈ <b>{daysWhole}</b> 个整天</span>
+    </div>
+
+    <div class="nw-side">
+      <div class="nw-finish">
+        <span class="nw-num"><b data-count={facts.booksFinished}>121</b><i>本</i></span>
+        <span class="nw-lab">读完 · 读完率 {facts.finishedRatePct}%</span>
+      </div>
+      <div class="nw-lead">
+        {lead.map((n) => (
+          <div class="nw-lead-item" data-tip={n.tip}>
+            <span class="nw-num"><b data-count={n.value}>{n.value}</b><i>{n.unit}</i></span>
+            <span class="nw-lab">{n.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div class="nw-strip">
+      <span>书架 <b>{facts.shelfItems}</b> 个条目</span>
+      <span>涉猎 <b>{facts.authors}</b> 位作者</span>
+      <span>笔记密度 <b>{notesPerBook} 条/本</b></span>
+      <span class="strip-note">读完率 21%——会筛选、敢弃书，读是为了用</span>
+    </div>
+  </div>
+
+  <!-- 2026 · 进行中：唯一的硬阴影焦点块 -->
+  <aside class="rdx-y26" aria-label="2026 年进行中数据快照">
+    <div class="y26-head">
+      <span class="y26-tag">IN&nbsp;PROGRESS</span>
+      <h3 class="y26-title">2026 · 进行中<span class="y26-sub">（1–11 月，截至 {W.asOf}）</span></h3>
+      <span class="y26-caveat">进行中的年度，不与完整年度直接比较</span>
+    </div>
+    <div class="y26-grid">
+      <div><b data-count={y26.hours} data-decimal="1">195.4</b><i>h</i><span>阅读时长</span></div>
+      <div><b data-count={y26.booksRead}>180</b><i>本</i><span>读过</span></div>
+      <div><b data-count={y26.booksFinished}>30</b><i>本</i><span>读完</span></div>
+      <div><b data-count={y26.readDays}>250</b><i>天</i><span>阅读天数</span></div>
+      <div><b data-count={y26.notes}>412</b><i>条</i><span>笔记</span></div>
+      <div><b data-count={y26.dailyAvgMin}>37</b><i>分钟</i><span>日均阅读</span></div>
+    </div>
+    <div class="y26-foot">
+      <span>日均同比 <b class="down">{y26.yoyDailyPct}%</b>（年初两个月低谷拖低）</span>
+      <span>听书 <b>{y26.listenHours}h</b>——通勤与碎片时间的第二输入口</span>
+    </div>
+  </aside>
+
+  <p class="mast-note">
+    以上均来自微信读书官方统计口径；本页是某一时点的快照，每天仍在阅读，数字会继续增长。
+  </p>
+</header>
+
+<style>
+  .rdx-masthead {
+    padding-top: clamp(40px, 5vw, 64px);
+  }
+
+  /* 报眉 */
+  .mast-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--ink);
+    font-family: var(--font-data);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--ink);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .meta-left { display: inline-flex; align-items: baseline; gap: 14px; }
+
+  .vol { color: var(--muted); }
+  .vol b { color: var(--ink); }
+
+  .meta-right { color: var(--muted); font-weight: 500; }
+  .meta-right b { color: var(--ink); font-weight: 700; }
+
+  /* 巨型标题 */
+  .mast-title {
+    margin: 24px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .t-zh {
+    font-family: var(--font-display);
+    font-size: clamp(64px, 11vw, 148px);
+    line-height: 1.02;
+    font-weight: 400;
+    color: var(--ink);
+    letter-spacing: 0.02em;
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .t-zh mark {
+    background: var(--yellow);
+    color: #141414;
+    padding: 0 0.08em;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+
+  .t-lat {
+    font-family: var(--font-latin);
+    font-size: clamp(13px, 1.6vw, 19px);
+    letter-spacing: 0.3em;
+    color: var(--ink);
+    opacity: 0.55;
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .mast-lede {
+    max-width: 760px;
+    margin: 20px 0 0;
+    font-size: clamp(16px, 2vw, 19px);
+    line-height: 1.85;
+    color: var(--ink);
+    opacity: 0.88;
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  /* 跑马灯：全出血横条。
+     用 width:100vw + 居中 transform 实现（不占布局宽度，杜绝窄屏横向溢出），
+     负 margin 方案会让 body scrollWidth 超出视口。 */
+  .rdx-ticker {
+    margin: 28px 0 0;
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    border-block: 3px solid var(--ink);
+    background: var(--ink);
+    color: var(--on-ink);
+    overflow: hidden;
+    transition: background-color var(--dur-base) var(--ease-slide),
+                color var(--dur-base) var(--ease-slide);
+  }
+
+  .ticker-track {
+    display: flex;
+    width: max-content;
+    animation: rdx-ticker 22s linear infinite;
+  }
+
+  .ticker-seq {
+    display: inline-flex;
+    align-items: center;
+    gap: 22px;
+    padding: 11px 11px 11px 22px;
+    font-family: var(--font-latin);
+    font-size: 15px;
+    letter-spacing: 0.12em;
+    white-space: nowrap;
+  }
+
+  .ticker-seq i {
+    width: 10px;
+    height: 10px;
+    background: var(--yellow);
+    flex-shrink: 0;
+  }
+
+  @keyframes rdx-ticker {
+    to { transform: translateX(-50%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ticker-track { animation: none; }
+  }
+
+  /* 数字墙：不对称网格 */
+  .rdx-numberwall {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: 24px 40px;
+    margin-top: 32px;
+    align-items: stretch;
+  }
+
+  .nw-hero {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-bottom: 20px;
+    border-bottom: 3px solid var(--ink);
+  }
+
+  .nw-big {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .nw-big b {
+    font-family: var(--font-data);
+    font-size: clamp(88px, 12vw, 168px);
+    line-height: 0.95;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .nw-big i {
+    font-family: var(--font-latin);
+    font-style: normal;
+    font-size: clamp(28px, 4vw, 52px);
+    color: var(--orange);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .nw-hero-label {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--ink);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .nw-hero-label b { font-family: var(--font-data); }
+
+  .nw-side {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .nw-finish {
+    background: var(--yellow);
+    border: 3px solid var(--ink);
+    padding: 18px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-self: flex-start;
+    min-width: 56%;
+  }
+
+  .nw-lead {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 20px;
+  }
+
+  .nw-lead-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-bottom: 12px;
+    border-bottom: 2px dashed var(--rd-line-strong);
+    cursor: help;
+  }
+
+  .nw-num {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  .nw-num b {
+    font-family: var(--font-data);
+    font-size: clamp(34px, 4vw, 46px);
+    line-height: 1;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .nw-num i {
+    font-style: normal;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--muted);
+  }
+
+  .nw-lab {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .nw-lead .nw-lab, .nw-finish .nw-lab { color: var(--ink); opacity: 0.75; }
+
+  /* 底部事实条 */
+  .nw-strip {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 28px;
+    padding: 14px 0 0;
+    border-top: 2px solid var(--ink);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .nw-strip b { font-family: var(--font-data); }
+
+  .strip-note { margin-left: auto; font-weight: 500; color: var(--muted); }
+
+  /* 2026 进行中快照 */
+  .rdx-y26 {
+    margin-top: 36px;
+    background: var(--surface);
+    border: 3px solid var(--ink);
+    box-shadow: var(--shadow-lg);
+    transition: background-color var(--dur-base) var(--ease-slide),
+                border-color var(--dur-base) var(--ease-slide);
+  }
+
+  .y26-head {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+    padding: 14px 20px;
+    border-bottom: 3px solid var(--ink);
+  }
+
+  .y26-tag {
+    padding: 4px 10px;
+    background: var(--orange);
+    color: #fff;
+    font-family: var(--font-data);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+  }
+
+  .y26-title {
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--ink);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .y26-sub { font-size: 13px; font-weight: 500; color: var(--muted); }
+
+  .y26-caveat {
+    margin-left: auto;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+  }
+
+  .y26-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .y26-grid > div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 18px 16px 14px;
+    border-right: 2px solid var(--rd-line);
+  }
+
+  .y26-grid > div:last-child { border-right: none; }
+
+  .y26-grid b {
+    font-family: var(--font-data);
+    font-size: clamp(26px, 3vw, 34px);
+    line-height: 1;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .y26-grid i {
+    font-style: normal;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    margin-left: 3px;
+  }
+
+  .y26-grid span {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .y26-foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 24px;
+    padding: 12px 20px;
+    border-top: 2px dashed var(--rd-line-strong);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    opacity: 0.8;
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .y26-foot b { font-family: var(--font-data); font-weight: 700; }
+  .y26-foot b.down { color: var(--orange); }
+
+  .mast-note {
+    margin: 20px 0 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  :root[data-theme='dark'] .rdx-y26 { background: #2B2B2B; }
+
+  @media (max-width: 1023px) {
+    .rdx-numberwall { grid-template-columns: 1fr; gap: 24px; }
+    .nw-finish { min-width: 100%; }
+    .nw-strip .strip-note { margin-left: 0; width: 100%; }
+    .y26-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .y26-grid > div:nth-child(3n) { border-right: none; }
+    .y26-grid > div { border-bottom: 2px solid var(--rd-line); }
+    .y26-grid > div:nth-last-child(-n + 3) { border-bottom: none; }
+    .y26-caveat { margin-left: 0; width: 100%; }
+  }
+</style>

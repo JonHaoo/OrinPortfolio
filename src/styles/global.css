@@ -55,6 +55,31 @@
   --card-line: #FFF5E6;
 }
 
+/* ---------- 阅读档案（READING ARCHIVE）扩展 Token：编辑式数据叙事页 ----------
+   职责约束（READING_DESIGN §2）：
+   - 黑白 = 结构与层级；黄 = 关键数据与视觉焦点；橙 = 2026/进行中/变化量；
+     粉/蓝/绿 = 分类编码；muted = 次要信息。强调色只给焦点，不做装饰。 */
+:root {
+  /* Secondary Accent：亮橙——进行中年度、2026 对比条、增量 */
+  --orange: #FF6B2B;
+  /* Muted：低饱和灰——辅助文字、空数据 */
+  --muted: #8A8474;
+
+  /* 数据专用字体：Space Grotesk（数字/拉丁标签，tnum 表格数字） */
+  --font-data: 'Space Grotesk', 'Noto Sans SC', sans-serif;
+
+  /* 编辑式结构线：比卡片描边更轻的分割线 */
+  --rd-line: rgba(20, 20, 20, 0.18);
+  --rd-line-strong: rgba(20, 20, 20, 0.85);
+}
+
+:root[data-theme='dark'] {
+  --orange: #FF6B2B;
+  --muted: #948E7E;
+  --rd-line: rgba(245, 235, 220, 0.22);
+  --rd-line-strong: rgba(245, 235, 220, 0.9);
+}
+
 /* ---------- 基础 ---------- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -657,19 +682,18 @@ body.hero-3d-mode .hero-mode-toggle {
 }
 
 /* ---------- 区块 reveal（MOTION_GUIDE §2.2，scroll-driven CSS 渐进增强）----------
-   差异化：Works 三卡逐卡"拍上去"（阴影生长+scale，无位移）；
+   差异化：Works 两卡逐卡"拍上去"（阴影生长+scale，无位移）；
    About/Stats 区块抬升 + section-tag pop；WorkflowTeaser 色块自下而上覆盖。
    @supports 不满足时静态呈现——无动画≠坏体验。 */
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
-    /* Works 三卡：拍上去（scale 0→1 + 阴影用外层伪色块表达，卡片本体无位移） */
+    /* Works 两卡：拍上去（scale 0→1 + 阴影用外层伪色块表达，卡片本体无位移） */
     .project-card {
       animation: reveal-stamp 320ms var(--ease-pop) both;
       animation-timeline: view();
       animation-range: entry 0% entry 55%;
     }
     .project-card:nth-child(2) { animation-delay: 50ms; }
-    .project-card:nth-child(3) { animation-delay: 100ms; }
 
     @keyframes reveal-stamp {
       from { opacity: 0.4; transform: scale(0.9); }
@@ -790,42 +814,52 @@ body.hero-3d-mode .hero-mode-toggle {
   transition: color var(--dur-base) var(--ease-slide);
 }
 
+/* 两张横向大卡：纵排堆叠，偶数卡封面翻到右侧（zigzag） */
 .cards-row {
   display: flex;
-  gap: 32px;
+  flex-direction: column;
+  gap: 40px;
 }
 
 .project-card {
-  flex: 1;
   display: flex;
-  flex-direction: column;
+  align-items: stretch;
   background: #FFFFFF;
   border: 3px solid var(--card-line);
   box-shadow: 8px 8px 0 0 var(--shadow-color);
   transition: box-shadow var(--dur-base) var(--ease-pop), transform var(--dur-base) var(--ease-pop), border-color var(--dur-base) var(--ease-slide);
 }
 
+.project-card:nth-child(even) { flex-direction: row-reverse; }
+
 .project-card:hover {
-  transform: translateY(-6px) rotate(-1.5deg);
+  transform: translateY(-6px);
   box-shadow: 14px 14px 0 0 var(--shadow-color);
 }
 
+/* 彩色封面块：大号编号在上、类型徽章贴底，宽度固定撑起色块 */
 .project-cover {
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 20px 24px;
-  height: 200px;
+  width: 340px;
+  flex-shrink: 0;
+  padding: 32px;
 }
 
 .project-cover .num {
   font-family: var(--font-latin);
-  font-size: 72px;
+  font-size: 88px;
+  line-height: 0.9;
   color: #141414;
 }
 
 .project-cover .type {
-  font-size: 14px;
+  padding: 6px 14px;
+  background: #FFFFFF;
+  border: 2px solid #141414;
+  font-size: 13px;
   font-weight: 700;
   color: #141414;
 }
@@ -834,29 +868,32 @@ body.hero-3d-mode .hero-mode-toggle {
 .project-cover.cover-pink { background: var(--pink); }
 .project-cover.cover-green { background: var(--green); }
 
-.project-divider { height: 3px; background: #141414; }
+.project-divider { width: 3px; flex-shrink: 0; background: #141414; }
 
 .project-body {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 24px;
+  gap: 16px;
+  padding: 36px 40px;
+  min-width: 0;
 }
 
 .project-title {
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 900;
   color: #141414;
 }
 
 .project-desc {
-  font-size: 15px;
-  line-height: 26px;
+  font-size: 16px;
+  line-height: 28px;
   color: #141414;
 }
 
 .project-chips {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -1806,8 +1843,22 @@ body.hero-3d-mode .hero-mode-toggle {
   .section-title { font-size: 36px; }
   .section-sub { font-size: 15px; }
 
-  /* 作品三卡：纵排 */
-  .cards-row { flex-direction: column; gap: 28px; }
+  /* 作品两卡：纵排回归，封面块变横向页眉（编号 + 徽章同行），分隔线转横向 */
+  .cards-row { gap: 28px; }
+  .project-card,
+  .project-card:nth-child(even) { flex-direction: column; }
+  .project-cover {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px;
+  }
+  .project-cover .num { font-size: 52px; }
+  .project-divider { width: 100%; height: 3px; }
+  .project-body { padding: 24px; gap: 14px; }
+  .project-title { font-size: 22px; }
+  .project-desc { font-size: 15px; line-height: 26px; }
 
   /* 关于我：卡片与正文纵排 */
   .about-row { flex-direction: column; gap: 36px; }
@@ -2431,3 +2482,166 @@ body.hero-3d-mode .hero-mode-toggle {
   .site-nav a { font-size: 12px; white-space: nowrap; padding-left: 0; padding-right: 0; }
 }
 
+
+/* ---------- READING ARCHIVE 页面框架（编辑式数据叙事页，/reading/ 专用） ----------
+   布局原则（READING_DESIGN §6）：开放版式 + 黑色结构线 + 大留白，
+   拒绝全站统一卡片模板；硬阴影块只给焦点模块（2026 快照、焦点面板、勋章墙）。
+   动效初始态一律由 JS（reading-motion.ts）设置，CSS 不预隐藏——
+   无 JS / prefers-reduced-motion / SEO 爬虫看到的是完整内容。 */
+.rdx-page {
+  min-height: 100vh;
+  background: var(--bg);
+  transition: background-color var(--dur-base) var(--ease-slide);
+}
+
+/* 章节子导航：粘在主导航下方，滚动进度条 + 四阶段锚点 */
+.rdx-subnav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--bg);
+  border-bottom: 2px solid var(--ink);
+  transition: background-color var(--dur-base) var(--ease-slide);
+}
+
+.rdx-subnav-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 10px clamp(20px, 4vw, 48px);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.rdx-progress {
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  height: 2px;
+  width: 100%;
+  background: var(--orange);
+  transform: scaleX(0);
+  transform-origin: left;
+  will-change: transform;
+}
+
+.rdx-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.rdx-chips::-webkit-scrollbar { display: none; }
+
+.rdx-chip {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 2px solid var(--rd-line-strong);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background-color var(--dur-fast) var(--ease-slide),
+              color var(--dur-fast) var(--ease-slide),
+              border-color var(--dur-fast) var(--ease-slide);
+}
+
+.rdx-chip .n {
+  font-family: var(--font-data);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  transition: color var(--dur-fast) var(--ease-slide);
+}
+
+.rdx-chip:hover { border-color: var(--ink); }
+
+.rdx-chip.is-active {
+  background: var(--yellow);
+  border-color: var(--ink);
+  color: #141414;
+}
+
+.rdx-chip.is-active .n { color: #141414; }
+
+.rdx-snap {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-family: var(--font-data);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  white-space: nowrap;
+  transition: color var(--dur-base) var(--ease-slide);
+}
+
+.rdx-snap b { color: var(--ink); font-weight: 700; }
+
+/* 悬浮 tooltip：由 JS 移动定位（全局类——动态创建的元素不进 scoped 体系） */
+.rdx-tip {
+  position: fixed;
+  z-index: 90;
+  max-width: 280px;
+  padding: 8px 12px;
+  background: var(--ink);
+  color: var(--on-ink);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-slide);
+}
+
+.rdx-tip.is-on { opacity: 1; }
+
+.rdx-tip b { font-family: var(--font-data); font-weight: 700; }
+
+/* 回到顶部 */
+.rdx-totop {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 60;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  background: var(--yellow);
+  border: 3px solid var(--ink);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: opacity var(--dur-base) var(--ease-slide),
+              transform var(--dur-base) var(--ease-slide),
+              box-shadow var(--dur-fast) var(--ease-slide);
+}
+
+.rdx-totop.is-on { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+.rdx-totop:hover { box-shadow: var(--shadow-md); transform: translate(-2px, -2px); }
+
+.rdx-totop:active { box-shadow: var(--shadow-sm); transform: translate(1px, 1px); }
+
+@media (max-width: 1023px) {
+  .rdx-subnav-inner { padding: 8px 16px; gap: 12px; }
+  .rdx-chip { padding: 5px 10px; font-size: 12px; }
+  .rdx-snap { display: none; }
+  .rdx-totop { right: 14px; bottom: 14px; width: 44px; height: 44px; }
+}
+
+/* ---------- Lenis 平滑滚动（阅读档案页运行时注入 html.lenis） ---------- */
+html.lenis,
+html.lenis body { height: auto; }
+
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+
+.lenis.lenis-stopped { overflow: hidden; }

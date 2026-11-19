@@ -7,12 +7,14 @@
 - [Astro](https://astro.build/) — 静态站点框架
 - 原生 CSS（自定义属性实现明暗双主题）+ 原生 TS
 - [three.js](https://threejs.org/) — Hero Q 版 3D 形象（按需加载，WebGL 不可用时自动回退平面图）
-- 字体自托管：ZCOOL QingKe HuangYou / Archivo Black / Noto Sans SC（@fontsource）
+- [GSAP](https://gsap.com/) + ScrollTrigger、[Lenis](https://lenis.darkroom.engineering/) — `/reading/` 阅读档案页专属（滚动叙事 + 平滑滚动；触摸与 prefers-reduced-motion 走原生路径）
+- 字体自托管：ZCOOL QingKe HuangYou / Archivo Black / Noto Sans SC / Space Grotesk（@fontsource）
 
 ## 功能
 
 - 首页：Hero / 作品 / 关于我 / 底气 / 阅读账本 / 方法论 / 页脚
-- 独立页面：`/reading/` 阅读报告、`/workflow/` 研发工作流规范、`/design-sop/` 设计 SOP
+- 独立页面：`/reading/` 阅读档案（编辑式数据叙事：四叙事阶段 / 逐日热力图 / 双口径分类对比 / 交互式图表）、`/workflow/` 研发工作流规范、`/design-sop/` 设计 SOP
+- 阅读数据管线：`weread-data/export_site_data.py` 把微信读书 Agent API 原始快照加工为 `src/data/weread.json`（站点唯一数据源，更新数据只需重跑脚本）
 - 明暗主题切换（右上角开关，localStorage 持久化）
 - 1440px 设计稿等比缩放渲染；≤1023px 切流式布局
 - 微交互：按钮按压回弹、卡片悬浮、跑马灯无缝滚动（支持 prefers-reduced-motion）
@@ -23,11 +25,11 @@
 ├── public/            # 静态资源（Hero 形象图、3D 模型、favicon）
 ├── docs/design/       # 设计配置 / 动效规范 / 视觉验收基准
 ├── src/
-│   ├── components/    # 页面区块组件
-│   ├── data/          # 站点数据源（阅读数据快照）
+│   ├── components/    # 页面区块组件（reading/ 子目录 = 阅读档案页组件）
+│   ├── data/          # 站点数据源（weread.json 唯一数据快照 + reading.ts 视图层）
 │   ├── layouts/       # 布局（字体加载、主题初始化、缩放脚本）
 │   ├── pages/         # 页面入口
-│   ├── scripts/       # 浏览器端 TS（3D 形象）
+│   ├── scripts/       # 浏览器端 TS（3D 形象 / 阅读档案页动效岛）
 │   └── styles/        # 全局样式与主题变量
 └── astro.config.mjs
 ```
@@ -55,4 +57,6 @@ npm run preview  # 本地预览构建产物
 ## 说明
 
 - 页面内容基于真实经历整理，项目与数据均为可核实信息；文案在 `src/components/` 与 `src/pages/` 中调整。
-- 阅读数据为快照，核心数字与类型分布集中在 `src/data/reading.ts`，更新时只改该文件，首页与报告页同步生效。
+- 阅读数据为快照：原始 JSON 由微信读书 Agent API 抓取（`weread-data/`），`export_site_data.py` 加工为 `src/data/weread.json`，`src/data/reading.ts` 只做视图层派生——更新时重跑脚本，首页与档案页自动同步。
+
+> AI生成

@@ -1,0 +1,72 @@
+---
+/**
+ * BestsGrid — 读书之最（微信读书官方 preferBooks，12 个真实标签）
+ * 编辑部推荐式排布：标签 + 书名 + 作者。
+ */
+import { WEREAD as W } from '../../data/reading';
+---
+
+<div class="rdx-bests">
+  {W.bests.map((b) => (
+    <div class="bs-item">
+      <span class="bs-lab">{b.label}</span>
+      <span class="bs-book">《{b.title}》</span>
+      <span class="bs-author">{b.author || '—'}</span>
+    </div>
+  ))}
+</div>
+
+<style>
+  .rdx-bests {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0;
+    border-top: 3px solid var(--ink);
+    border-left: 2px solid var(--rd-line);
+    transition: border-color var(--dur-base) var(--ease-slide);
+  }
+
+  .bs-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px 18px 18px;
+    border-right: 2px solid var(--rd-line);
+    border-bottom: 2px solid var(--rd-line);
+    transition: background-color var(--dur-fast) var(--ease-slide);
+  }
+
+  .bs-item:hover { background: rgba(255, 220, 88, 0.18); }
+
+  .bs-lab {
+    align-self: flex-start;
+    padding: 3px 9px;
+    background: var(--ink);
+    color: var(--on-ink);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    transition: background-color var(--dur-base) var(--ease-slide),
+                color var(--dur-base) var(--ease-slide);
+  }
+
+  .bs-book {
+    font-size: 14.5px;
+    font-weight: 900;
+    line-height: 1.5;
+    color: var(--ink);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .bs-author {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  @media (max-width: 1023px) {
+    .rdx-bests { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+</style>

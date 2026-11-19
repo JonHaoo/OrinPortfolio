@@ -1,0 +1,268 @@
+---
+/**
+ * DayHeatmap — 2026 逐日阅读热力图（GitHub Contribution 风格）
+ * 数据真实：readdata_2026.dailyReadTimes（365 天逐日分钟数，截至 2026-11-13）。
+ * 无逐日数据的年份不伪造；仅展示 2026 真实快照。
+ * 行 = 周一→周日；列 = 周；11-13 之后为「尚未到来」（虚线占位），与真实零阅读日区分。
+ */
+import { WEREAD as W } from '../../data/reading';
+
+const STEP = 17; // cell 14 + gap 3
+
+// 日历几何：2026-01-01 是周四，周一为首行
+const startDate = new Date(2026, 0, 1);
+const firstWeekday = (startDate.getDay() + 6) % 7; // 周四 → 3
+const asOfDate = new Date(W.asOf);
+const asOfIndex = Math.round((asOfDate.getTime() - startDate.getTime()) / 86400000);
+
+const days = W.days2026;
+
+// 强度分级（分钟）
+const levelOf = (m: number) => (m <= 0 ? 0 : m < 15 ? 1 : m < 30 ? 2 : m < 60 ? 3 : 4);
+const fmtMin = (m: number) => {
+  if (m <= 0) return '0 分钟';
+  const h = Math.floor(m / 60);
+  const mm = m % 60;
+  return h > 0 ? `${h} 小时 ${String(mm).padStart(2, '0')} 分` : `${m} 分钟`;
+};
+
+// 月份标签：每月第一天所在的周列（left 像素）
+const monthMarks: { m: number; left: number }[] = [];
+for (let m = 1; m <= 12; m++) {
+  const first = new Date(2026, m - 1, 1);
+  const doy = Math.round((first.getTime() - startDate.getTime()) / 86400000);
+  const week = Math.floor((firstWeekday + doy) / 7);
+  monthMarks.push({ m, left: week * STEP });
+}
+
+// 峰值标记：单日阅读最长
+const peakIdx = days.indexOf(Math.max(...days));
+const peakDate = new Date(2026, 0, 1 + peakIdx);
+const peakLeft = Math.floor((firstWeekday + peakIdx) / 7) * STEP + 7;
+
+// 统计
+const readDaysY26 = W.y2026.readDays; // 官方口径 250
+let streak = 0;
+let best = 0;
+for (let i = 0; i <= asOfIndex; i++) {
+  if (days[i] > 0) { streak++; best = Math.max(best, streak); } else streak = 0;
+}
+
+const legend = [
+  { c: 'l0', t: '无' },
+  { c: 'l1', t: '<15' },
+  { c: 'l2', t: '15–29' },
+  { c: 'l3', t: '30–59' },
+  { c: 'l4', t: '≥60 分' },
+];
+---
+
+<div class="rdx-heatmap">
+  <div class="hm-head">
+    <h3 class="hm-title">2026 · 逐日阅读<span class="hm-lat">DAILY&nbsp;GRID</span></h3>
+    <div class="hm-legend" aria-hidden="true">
+      {legend.map((l) => (
+        <span class="lg"><i class={`cell ${l.c}`}></i>{l.t}</span>
+      ))}
+    </div>
+  </div>
+
+  <div class="hm-scroll">
+    <div class="hm-body">
+      <div class="hm-months" aria-hidden="true">
+        {monthMarks.map((mk) => (
+          <span style={`left:${mk.left}px`}>{mk.m}月</span>
+        ))}
+        <span class="hm-peak" style={`left:${peakLeft}px`}>↑ {peakDate.getMonth() + 1}–{peakDate.getDate()} 峰值 {fmtMin(days[peakIdx])}</span>
+      </div>
+
+      <div class="hm-grid-area">
+        <div class="hm-weekdays" aria-hidden="true">
+          <span>一</span><span></span><span>三</span><span></span><span>五</span><span></span><span>日</span>
+        </div>
+        <div
+          class="hm-grid"
+          role="img"
+          aria-label={`2026 年逐日阅读热力图：截至 11 月 13 日共 ${readDaysY26} 天有阅读；最活跃的是 ${peakDate.getMonth() + 1} 月 ${peakDate.getDate()} 日（${fmtMin(days[peakIdx])}）；2026 年内最长连续阅读 ${best} 天`}
+        >
+          {Array.from({ length: firstWeekday }).map(() => <i class="cell ph" aria-hidden="true"></i>)}
+          {days.map((minute, i) => {
+            const date = new Date(2026, 0, 1 + i);
+            return (
+              <i
+                class={`cell l${levelOf(minute)}${i > asOfIndex ? ' future' : ''}${i === peakIdx ? ' peak' : ''}`}
+                data-tip={`<b>${date.getMonth() + 1} 月 ${date.getDate()} 日</b> · ${i > asOfIndex ? '尚未到来' : fmtMin(minute)}`}
+              ></i>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hm-stats">
+    <span><b>{readDaysY26}</b> / 365 天有阅读</span>
+    <span>活跃率 <b>{Math.round((readDaysY26 / (asOfIndex + 1)) * 100)}%</b>（按已过去的 {asOfIndex + 1} 天）</span>
+    <span>2026 最长连续 <b>{best}</b> 天</span>
+    <span>单日峰值 <b>{fmtMin(days[peakIdx])}</b></span>
+  </div>
+</div>
+
+<style>
+  .rdx-heatmap {
+    border: 3px solid var(--ink);
+    padding: 18px 20px 16px;
+    background: var(--bg);
+    transition: background-color var(--dur-base) var(--ease-slide),
+                border-color var(--dur-base) var(--ease-slide);
+  }
+
+  :root[data-theme='dark'] .rdx-heatmap { background: #2B2B2B; }
+
+  .hm-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin-bottom: 16px;
+  }
+
+  .hm-title {
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--ink);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .hm-lat {
+    margin-left: 10px;
+    font-family: var(--font-data);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+  }
+
+  .hm-legend {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .hm-legend .lg { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+
+  .hm-scroll { overflow-x: auto; padding-bottom: 4px; }
+
+  .hm-body { width: max-content; min-width: 100%; }
+
+  .hm-months {
+    position: relative;
+    height: 20px;
+    margin-left: 30px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink);
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .hm-months > span {
+    position: absolute;
+    top: 0;
+    white-space: nowrap;
+  }
+
+  .hm-peak {
+    position: absolute;
+    top: 22px;
+    transform: translateX(-50%);
+    padding: 2px 7px;
+    background: var(--orange);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+    z-index: 2;
+  }
+
+  .hm-grid-area { display: flex; gap: 8px; }
+
+  .hm-weekdays {
+    display: grid;
+    grid-template-rows: repeat(7, 14px);
+    gap: 3px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    width: 22px;
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .hm-weekdays span { height: 14px; display: flex; align-items: center; justify-content: flex-end; }
+
+  .hm-grid {
+    display: grid;
+    grid-template-rows: repeat(7, 14px);
+    grid-auto-flow: column;
+    grid-auto-columns: 14px;
+    gap: 3px;
+  }
+
+  .cell {
+    width: 14px;
+    height: 14px;
+    background: var(--hm-c, transparent);
+    box-shadow: inset 0 0 0 1px var(--hm-b, transparent);
+  }
+
+  /* 强度色阶：黄→橙热力渐进（L4 最热） */
+  .cell.l0 { --hm-c: #EDE5CF; --hm-b: rgba(20, 20, 20, 0.06); }
+  .cell.l1 { --hm-c: #FFF3A6; --hm-b: rgba(20, 20, 20, 0.35); }
+  .cell.l2 { --hm-c: #FFDC58; --hm-b: rgba(20, 20, 20, 0.55); }
+  .cell.l3 { --hm-c: #FFB23C; --hm-b: rgba(20, 20, 20, 0.8); }
+  .cell.l4 { --hm-c: #FF6B2B; --hm-b: #141414; }
+
+  :root[data-theme='dark'] .cell.l0 { --hm-c: #383838; --hm-b: rgba(255, 245, 230, 0.08); }
+  :root[data-theme='dark'] .cell.l1 { --hm-c: #7A6B2C; --hm-b: rgba(255, 245, 230, 0.2); }
+
+  .cell.future {
+    background: transparent;
+    box-shadow: inset 0 0 0 1.5px var(--muted);
+    opacity: 0.5;
+  }
+
+  .cell.peak { outline: 2px solid var(--ink); outline-offset: 1px; position: relative; z-index: 3; }
+
+  .cell.ph { visibility: hidden; }
+
+  .hm-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 22px;
+    margin-top: 18px;
+    padding-top: 12px;
+    border-top: 2px dashed var(--rd-line-strong);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    opacity: 0.82;
+    transition: color var(--dur-base) var(--ease-slide);
+  }
+
+  .hm-stats b {
+    font-family: var(--font-data);
+    font-weight: 700;
+    opacity: 1;
+  }
+
+  @media (max-width: 1023px) {
+    .rdx-heatmap { padding: 14px 12px 12px; }
+    .hm-legend { gap: 8px; font-size: 11px; }
+    .hm-months { margin-left: 26px; }
+    .hm-peak { display: none; }
+  }
+</style>

@@ -1,64 +1,91 @@
 ---
-// 作品区：两张横向大卡（01 客户侧 AI 交付 / 02 企业级前端工程）
-// 布局：彩色封面块 + 竖分隔线 + 正文横向展开；偶数卡封面翻到右侧，形成 zigzag 节奏
-interface Project {
-  num: string;
-  type: string;
-  title: string;
-  desc: string;
-  coverClass: string;
-  chips: string[];
-}
+// 精选作品 —— 主从切换（左侧索引 / 右侧档案面板）
+// 2026-11-19 第五轮：用户要求各模块用不同布局与交互，不要统一成一种规格表。
+// 这里采用「档案馆」语言：左边是可点选的索引条目，右边是单张展开的档案页，
+// 面板右上角压一个大号空心编号作为图形元素（不放色块）。
+import { workCases } from '../data/works';
 
-const projects: Project[] = [
-  {
-    num: '01',
-    type: 'AI 交付案例',
-    title: '招聘智能助手',
-    desc: '从客户招聘流程拆出岗位解析、候选人问答、面试题生成三个环节；确定性内容走知识库、开放对话走 LLM，控制幻觉与答非所问。交付后驻场辅导 HR 团队，把真实反馈回收成提示词迭代。',
-    coverClass: 'cover-blue',
-    chips: ['Prompt 工程', '知识库配置', '交付辅导'],
-  },
-  {
-    num: '02',
-    type: '企业级前端案例',
-    title: '投放数据分析系统',
-    desc: '与运营、投放团队梳理数据源与流转，交付投放效果分析、市场竞品分析等可视化模块；同期负责广告投放 CRM、短剧版权交易平台等企业级系统的前端架构与长期迭代。',
-    coverClass: 'cover-green',
-    chips: ['Vue', 'ECharts', 'TypeScript'],
-  },
-];
+const BASE_URL = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : import.meta.env.BASE_URL + '/';
 ---
 
 <section class="works" id="works">
   <div class="section-header">
     <span class="section-tag">SELECTED WORKS</span>
     <h2 class="section-title">精选作品</h2>
-    <p class="section-sub">一条线把 AI 交付给客户，一条线把企业级系统做稳——都从需求谈到落地，全程可闭环。</p>
+    <p class="section-sub">
+      三类项目分别对应交付落地、系统集成与业务侧应用。选中左侧一条看完整档案。
+    </p>
+    <span class="section-meta">03 ENTRIES · 点选切换</span>
   </div>
 
-  <div class="cards-row">
-    {projects.map((p) => (
-      <article class="project-card">
-        <div class={`project-cover ${p.coverClass}`}>
-          <span class="num">{p.num}</span>
-          <span class="type">{p.type}</span>
-        </div>
-        <div class="project-divider"></div>
-        <div class="project-body">
-          <h3 class="project-title">{p.title}</h3>
-          <p class="project-desc">{p.desc}</p>
-          <div class="project-chips">
-            {p.chips.map((c) => <span class="chip">{c}</span>)}
+  <div class="wk-switch" data-works>
+    <div class="wk-index" role="tablist" aria-label="项目索引" aria-orientation="vertical">
+      {workCases.map((p, i) => (
+        <button
+          type="button"
+          class:list={['wk-tab', { 'is-on': i === 0 }]}
+          role="tab"
+          id={`wk-tab-${i}`}
+          aria-selected={i === 0 ? 'true' : 'false'}
+          aria-controls={`wk-panel-${i}`}
+          tabindex={i === 0 ? 0 : -1}
+          data-wk-tab={i}
+        >
+          <span class="wk-tab-no">{p.num}</span>
+          <span class="wk-tab-main">
+            <span class="wk-tab-title">{p.title}{p.titleAccent}</span>
+            <span class="wk-tab-type">{p.type}</span>
+          </span>
+          <span class="wk-tab-mark" aria-hidden="true"></span>
+        </button>
+      ))}
+      <p class="wk-hint">↑ ↓ 键可切换 · 每条都是一个完整的决策记录</p>
+    </div>
+
+    <div class="wk-panels">
+      {workCases.map((p, i) => (
+        <article
+          class:list={['wk-panel', { 'is-in': i === 0 }]}
+          role="tabpanel"
+          id={`wk-panel-${i}`}
+          aria-labelledby={`wk-tab-${i}`}
+          data-wk-panel={i}
+          hidden={i !== 0}
+        >
+          <span class="wk-ghost" aria-hidden="true">{p.num}</span>
+
+          <div class="wk-panel-top">
+            <span class="wk-panel-case">CASE {p.num}</span>
+            <span class="wk-panel-type">{p.type}</span>
           </div>
-          <a class="project-link" href="#contact" aria-label={`聊聊这个项目：${p.title}`}>
-            聊聊这个项目
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-              <path d="M3 9H15M15 9L10 4M15 9L10 14" stroke="#141414" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </a>
-        </div>
-      </article>
-    ))}
+
+          <h3 class="wk-panel-title">
+            {p.title}<span class="wk-panel-accent">{p.titleAccent}</span>
+          </h3>
+
+          <p class="wk-panel-lead">{p.lead}</p>
+
+          <ul class="wk-panel-chips">
+            {p.chips.map((c) => <li>{c}</li>)}
+          </ul>
+
+          <div class="wk-panel-foot">
+            <a class="wk-panel-link" href={`${BASE_URL}works/${p.slug}/`}>
+              打开过程档案
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path
+                  d="M3 10H17M17 10L11 4M17 10L11 16"
+                  stroke="currentColor"
+                  stroke-width="2.4"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </a>
+            <span class="wk-panel-note">问题背景 / 关键决策 / 方法细节 / 反思</span>
+          </div>
+        </article>
+      ))}
+    </div>
   </div>
 </section>

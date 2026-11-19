@@ -1,0 +1,136 @@
+---
+// 提示词库 · /prompts/
+// 内容源：src/data/prompts.ts（整理自个人 Obsidian 常用 Prompt 笔记）
+// 交互：src/scripts/prompts-page.ts（复制全文 + 分类筛选，渐进增强；
+//       无 JS 时 details 原生展开仍可用，页面完整可读）
+import Layout from '../layouts/Layout.astro';
+import ThemeToggle from '../components/ThemeToggle.astro';
+import { promptCategories, prompts } from '../data/prompts';
+
+const BASE_URL = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : import.meta.env.BASE_URL + '/';
+
+const catById = new Map(promptCategories.map((c) => [c.id, c]));
+const countByCat = new Map<string, number>();
+prompts.forEach((p) => countByCat.set(p.category, (countByCat.get(p.category) ?? 0) + 1));
+// 短提示词默认展开，长提示词默认折叠（阈值随库生长自适应）
+const OPEN_THRESHOLD = 300;
+
+/** 全文按【填空位】切分（渲染时在模板里按前缀高亮，复制取 pre.textContent 即原文） */
+function phSegs(text: string): string[] {
+  return text.split(/(【[^】]+】)/g);
+}
+---
+
+<Layout
+  fluid
+  title={`提示词库 · ${prompts.length} 条可复用 Prompt · Orin`}
+  description="我自己高频复用的提示词库：按问清问题、学习、解决问题、决策、认识自己、工程开发六类整理，点「复制全文」即取用，【方括号】内替换为你的具体情况。"
+>
+  <header class="site-header doc-header">
+    <a class="logo vt-logo" href={BASE_URL} aria-label="返回作品集首页">
+      <div class="logo-square"><span>O</span></div>
+      <span class="logo-name">ORIN.DEV</span>
+    </a>
+
+    <nav class="site-nav" aria-label="主导航">
+      <a href={`${BASE_URL}reading/`}>阅读</a>
+      <a href={`${BASE_URL}workflow/`}>工作流</a>
+      <a href={`${BASE_URL}design-sop/`}>设计 SOP</a>
+      <a href={`${BASE_URL}prompts/`} class="active">提示词库</a>
+    </nav>
+
+    <div class="nav-right">
+      <ThemeToggle />
+
+      <a class="btn btn-cta vt-cta" href={`${BASE_URL}#contact`}>联系我</a>
+    </div>
+  </header>
+
+  <div class="doc-wrap pk-wrap" data-prompts-page>
+    <!-- ===== 文档头 ===== -->
+    <div class="doc-hero">
+      <span class="doc-hero-chip">v1 · {prompts.length} 条 · {promptCategories.length} 类 · 持续收集</span>
+      <h1 class="doc-title">提示词库</h1>
+      <p class="doc-sub">
+        真正在我日常里跑的提示词，不是收藏夹里落灰的链接——每条都反复使用并修订过。点「复制全文」取用，把【方括号】里的内容换成你的具体情况。
+      </p>
+      <p class="doc-meta">整理自个人 Obsidian 常用 Prompt 笔记 · 覆盖：问清问题 / 学习 / 解决问题 / 决策 / 认识你自己 / 工程开发</p>
+    </div>
+
+    <div class="doc-principles">
+      <span class="doc-prin doc-prin-yellow">先问清问题，再要答案</span>
+      <span class="doc-prin doc-prin-pink">事实、推断和假设分开</span>
+      <span class="doc-prin doc-prin-blue">结论要有可验证的证据</span>
+      <span class="doc-prin doc-prin-green">小实验优先于宏大方案</span>
+    </div>
+
+    <!-- ===== 分类筛选 ===== -->
+    <div class="pk-filter" role="group" aria-label="按分类筛选提示词">
+      <button class="pk-filter-btn is-active" type="button" data-cat="all" aria-pressed="true">
+        全部<b>{prompts.length}</b>
+      </button>
+      {promptCategories.map((c) => (
+        <button class="pk-filter-btn" type="button" data-cat={c.id} aria-pressed="false">
+          {c.name}<b>{countByCat.get(c.id) ?? 0}</b>
+        </button>
+      ))}
+    </div>
+
+    <!-- ===== 提示词卡片 ===== -->
+    <ol class="pk-list">
+      {prompts.map((p, i) => {
+        const cat = catById.get(p.category);
+        return (
+          <li class="pk-card" data-cat={p.category}>
+            <div class="pk-card-head">
+              <div class="pk-card-titles">
+                <div class="pk-card-tags">
+                  <span class="pk-num">{String(i + 1).padStart(2, '0')}</span>
+                  {cat && <span class={`pk-cat pk-cat-${cat.color}`}>{cat.name}</span>}
+                </div>
+                <h2 class="pk-card-title">{p.title}</h2>
+              </div>
+              <button class="pk-copy" type="button" data-copy data-title={p.title}>
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <rect x="5" y="5" width="9" height="9" stroke="currentColor" stroke-width="1.8" />
+                  <path d="M11 5V2.5H2.5V11H5" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+                </svg>
+                <span class="pk-copy-label">复制全文</span>
+              </button>
+            </div>
+
+            <p class="pk-usefor"><b>适用：</b>{p.useFor}</p>
+
+            <details class="pk-details" open={p.text.length <= OPEN_THRESHOLD ? true : undefined}>
+              <summary class="pk-summary">
+                <svg width="12" height="8" viewBox="0 0 12 8" fill="none" aria-hidden="true">
+                  <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                提示词全文
+                <span class="pk-hint">【】内为填空位，复制后替换</span>
+              </summary>
+              <pre class="pk-pre">{phSegs(p.text).map((seg) => seg.startsWith('【') ? <span class="pk-ph">{seg}</span> : seg)}</pre>
+            </details>
+          </li>
+        );
+      })}
+    </ol>
+
+    <span class="pk-live" aria-live="polite" id="pk-live"></span>
+
+    <!-- ===== 文档尾 ===== -->
+    <div class="doc-end">
+      <a class="btn wf-link-btn doc-back-btn" href={BASE_URL}>
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M17 10H3M3 10L9 4M3 10L9 16" stroke="#FFDC58" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        返回作品集
+      </a>
+      <span class="doc-end-note">提示词库 · 持续收集修订 · 长对话类提示词建议配合多轮对话模型使用</span>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  import '../scripts/prompts-page';
+</script>

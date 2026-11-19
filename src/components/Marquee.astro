@@ -1,9 +1,18 @@
 ---
-// 黑色跑马灯：无缝循环滚动，悬停暂停（对应设计稿 2:40）
-const items = 'AI 方案洽谈 / Prompt 工程 / 智能助手交付 / 知识库 RAG / LLM 评测 / 客户落地辅导 / 数据流梳理 / AI 研发工作流 / ';
+// 跑马灯：无缝循环滚动，悬停暂停
+// tone='acid' 酸绿正向（正文语义）/ tone='violet' 电紫反向（拉丁标签，做节奏对比）
+interface Props {
+  text?: string;
+  tone?: 'acid' | 'violet';
+}
+const {
+  text = 'AI 应用开发 ★ 提示词工程 ★ 智能助手交付 ★ 知识库 RAG ★ LLM 评测 ★ 客户落地辅导 ★ 企业级前端 ★ 数据可视化 ★ AI 研发工作流 ★ ',
+  tone = 'acid',
+} = Astro.props;
+const items = text.endsWith(' ') ? text : text + ' ';
 ---
 
-<div class="marquee" aria-hidden="true">
+<div class:list={['marquee', tone === 'violet' && 'marquee--violet']} aria-hidden="true">
   <div class="marquee-track">
     <span>{items.repeat(4)}</span>
     <span>{items.repeat(4)}</span>

@@ -1,17 +1,45 @@
 ---
-// 方法论区：研发工作流规范 + 设计 SOP 两张提炼卡（各自链接到完整阅读页）
+// 我的方法论 —— 双折页
+// 2026-11-19 第五轮：与上面三块都不同，这里用「翻开」这个动作。
+// 正面只留版本、标题与一句话；点「翻开」后卡片绕 Y 轴转 180°，露出四条原则与入口。
+// 无障碍：两个面各有一个 button 控制 aria-expanded，Esc 收起并把焦点送回正面。
 const BASE_URL = import.meta.env.BASE_URL.endsWith("/") ? import.meta.env.BASE_URL : import.meta.env.BASE_URL + "/";
-const principles = [
-  { color: 'wf-chip-yellow', text: '人负责方向与取舍' },
-  { color: 'wf-chip-pink', text: 'AI 负责加速执行' },
-  { color: 'wf-chip-blue', text: '测试提供证据，而非制造安全感' },
-  { color: 'wf-chip-green', text: '流程强度与风险匹配' },
-];
-const sopChips = [
-  { color: 'wf-chip-yellow', text: '视觉·体验·动效三维独立组合' },
-  { color: 'wf-chip-pink', text: '冲突按五级优先级裁决' },
-  { color: 'wf-chip-blue', text: '强度分区声明' },
-  { color: 'wf-chip-green', text: '无证据不验收' },
+
+const docs = [
+  {
+    no: '01',
+    version: 'v1.0',
+    title: 'AI 辅助研发工作流规范',
+    desc: '把「AI 写代码」变成「AI 在一条可验证的研发流程里干活」——按风险分快慢车道，小步实现，人保留产品判断。',
+    meta: '18 章节 · 4 条原则',
+    topics: '档位 · 规格 · 测试 · 审查 · 复盘',
+    principles: [
+      '人负责方向与取舍',
+      'AI 负责加速执行',
+      '测试提供证据，而非制造安全感',
+      '流程强度与风险匹配',
+    ],
+    href: `${BASE_URL}workflow/`,
+    cta: '读完整规范',
+    hint: '0–17 共 18 个章节 · 档位 / 规格 / 测试 / 审查 / 复盘',
+  },
+  {
+    no: '02',
+    version: 'v3.0',
+    title: 'AI 辅助 UI/UX 设计 SOP',
+    desc: '一套可复用、可配置的 AI 辅助设计流程：视觉风格、体验模式、动效语言三维独立决策，每个结论都要有证据。',
+    meta: '3 维决策 · 九维验收',
+    topics: '风格 · 模式 · 动效 · 验收',
+    principles: [
+      '视觉·体验·动效三维独立组合',
+      '冲突按五级优先级裁决',
+      '强度分区声明',
+      '无证据不验收',
+    ],
+    href: `${BASE_URL}design-sop/`,
+    cta: '读提炼版',
+    hint: '8 风格 × 5 模式 × 6 动效语言 · 九维验收 · 14 条执行准则',
+  },
 ];
 ---
 
@@ -19,55 +47,73 @@ const sopChips = [
   <div class="section-header">
     <span class="section-tag">METHODOLOGY</span>
     <h2 class="section-title">我的方法论</h2>
+    <p class="section-sub">
+      两套自己写完并在用的规范。<br />翻开是四条落地原则。
+    </p>
+    <span class="section-meta">02 DOCS · 点击翻开</span>
   </div>
 
-  <div class="workflow-banner">
-    <div class="wf-left">
-      <div class="wf-head">
-        <span class="wf-version">v1.0</span>
-        <h3 class="wf-title">AI 辅助研发工作流规范</h3>
-      </div>
-      <p class="wf-desc">
-        我自己沉淀并正在使用的一套流程：把「AI 写代码」变成「AI 在一条可验证的研发流程里干活」——按风险分快慢车道，小步实现，每个结论都要有证据，人保留产品判断和高风险决策权。
-      </p>
-      <div class="wf-chips">
-        {principles.map((p) => <span class={`wf-chip ${p.color}`}>{p.text}</span>)}
-      </div>
-    </div>
+  <div class="wf-deck">
+    {docs.map((d) => (
+      <article class="wf-flip" data-flip>
+        <div class="wf-flip-inner">
+          <!-- 正面 -->
+          <div class="wf-face wf-front">
+            <div class="wf-front-top">
+              <span class="wf-no">{d.no}</span>
+              <span class="wf-ver">{d.version}</span>
+            </div>
 
-    <div class="wf-right">
-      <a class="btn wf-link-btn" href={`${BASE_URL}workflow/`}>
-        读完整规范
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-          <path d="M3 10H17M17 10L11 4M17 10L11 16" stroke="#FFDC58" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-      </a>
-      <span class="wf-hint">0–17 共 18 个章节 · 档位 / 规格 / 测试 / 审查 / 复盘</span>
-    </div>
-  </div>
+            <h3 class="wf-front-title">{d.title}</h3>
+            <p class="wf-front-sub">{d.desc}</p>
 
-  <div class="workflow-banner workflow-banner-alt">
-    <div class="wf-left">
-      <div class="wf-head">
-        <span class="wf-version">v3.0</span>
-        <h3 class="wf-title">AI 辅助 UI/UX 设计 SOP</h3>
-      </div>
-      <p class="wf-desc">
-        一套可复用、可配置的 AI 辅助设计流程：视觉风格、体验模式、动效语言三维独立决策；参考拆成规则而非照搬；动效分区配强度；九维基准 + P0–P3 分级验收——每个结论都要有真实截图与交互证据。
-      </p>
-      <div class="wf-chips">
-        {sopChips.map((p) => <span class={`wf-chip ${p.color}`}>{p.text}</span>)}
-      </div>
-    </div>
+            <p class="wf-front-topics">
+              <span class="wf-front-topics-label">目录</span>{d.topics}
+            </p>
 
-    <div class="wf-right">
-      <a class="btn wf-link-btn" href={`${BASE_URL}design-sop/`}>
-        读提炼版
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-          <path d="M3 10H17M17 10L11 4M17 10L11 16" stroke="#FFDC58" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-      </a>
-      <span class="wf-hint">8 风格 × 5 模式 × 6 动效语言 · 九维验收 · 14 条执行准则</span>
-    </div>
+            <div class="wf-front-foot">
+              <span class="wf-front-meta">{d.meta}</span>
+              <button type="button" class="wf-flip-btn" data-flip-btn data-flip-front aria-expanded="false">
+                翻开
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                  <path d="M10 3V17M10 17L4 11M10 17L16 11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- 背面 -->
+          <div class="wf-face wf-back" aria-hidden="false">
+            <div class="wf-back-head">
+              <span class="wf-back-label">四条原则</span>
+              <span class="wf-ver wf-ver--ghost">{d.version}</span>
+            </div>
+
+            <ol class="wf-back-list">
+              {d.principles.map((p, i) => (
+                <li>
+                  <span class="wf-back-no">{String(i + 1).padStart(2, '0')}</span>
+                  <span>{p}</span>
+                </li>
+              ))}
+            </ol>
+
+            <div class="wf-back-foot">
+              <a class="wf-link" href={d.href}>
+                {d.cta}
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                  <path d="M3 10H17M17 10L11 4M17 10L11 16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </a>
+              <button type="button" class="wf-flip-btn wf-flip-btn--ghost" data-flip-btn data-flip-back aria-expanded="false">
+                收起
+              </button>
+            </div>
+
+            <span class="wf-back-hint">{d.hint}</span>
+          </div>
+        </div>
+      </article>
+    ))}
   </div>
 </section>

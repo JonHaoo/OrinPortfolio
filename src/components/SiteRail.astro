@@ -1,0 +1,49 @@
+---
+// 站点导航 —— 左侧「书脊」
+// 2026-11-19 第六轮：顶部横条改为贴左的竖向脊柱（参考 TYPE/FORM 的 side rail、
+// Porto Rocha 的固定侧栏）。理由：首页是一篇长文，导航更像目录而不是栏目；
+// 竖向书脊不占首屏高度，也能和每节左侧的编号列形成同一条竖线。
+// 交互：编号 + 中文短标签常驻（不做 hover 才展开，避免不可发现），
+// 当前节高亮 + 右缘 2px 进度线随滚动增长。
+// ≤1023px：书脊折成顶部一条可横滑的编号条。
+import ThemeToggle from './ThemeToggle.astro';
+
+const BASE_URL = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : import.meta.env.BASE_URL + '/';
+
+const items = [
+  { no: '01', label: '关于我', href: '#about' },
+  { no: '02', label: '作品', href: '#works' },
+  { no: '03', label: '底气', href: '#stats' },
+  { no: '04', label: '阅读', href: `${BASE_URL}reading/`, spy: 'reading' },
+  { no: '05', label: '工作流', href: `${BASE_URL}workflow/`, spy: 'workflow' },
+  { no: '06', label: '提示词库', href: `${BASE_URL}prompts/` },
+  { no: '07', label: '联系', href: '#contact' },
+];
+---
+
+<aside class="site-rail" aria-label="站点导航">
+  <a class="rail-logo" href={`${BASE_URL}#top`} aria-label="回到首页顶部">
+    <span class="rail-logo-mark">O</span>
+    <span class="rail-logo-word">ORIN.DEV</span>
+  </a>
+
+  <nav class="rail-nav" aria-label="主导航">
+    <span class="rail-nav-cap" aria-hidden="true">INDEX</span>
+    {items.map((it, i) => (
+      <a
+        class:list={['rail-item', `rail-item--${(i % 4) + 1}`, { active: i === 0 }]}
+        href={it.href}
+        data-spy={it.spy}
+      >
+        <span class="rail-no">{it.no}</span>
+        <span class="rail-label">{it.label}</span>
+      </a>
+    ))}
+  </nav>
+
+  <div class="rail-foot">
+    <ThemeToggle />
+  </div>
+
+  <span class="rail-progress" aria-hidden="true"></span>
+</aside>

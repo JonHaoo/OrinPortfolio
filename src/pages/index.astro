@@ -1,6 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Header from '../components/Header.astro';
+import SiteRail from '../components/SiteRail.astro';
 import Hero from '../components/Hero.astro';
 import Marquee from '../components/Marquee.astro';
 import Works from '../components/Works.astro';
@@ -12,13 +12,17 @@ import Footer from '../components/Footer.astro';
 ---
 
 <Layout>
-  <Header />
+  <SiteRail slot="rail" />
   <Hero />
   <Marquee />
-  <Works />
   <About />
+  <Works />
   <Stats />
   <Reading />
   <WorkflowTeaser />
+  <Marquee
+    tone="violet"
+    text="PROMPT ENGINEERING ✳ KNOWLEDGE BASE ✳ RAG PIPELINE ✳ LLM EVAL ✳ AI WORKFLOW ✳ DELIVERY ✳ "
+  />
   <Footer />
 </Layout>

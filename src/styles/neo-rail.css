@@ -1,0 +1,321 @@
+/* ============================================================
+   NEO_RAIL — 左侧「书脊」导航
+   2026-11-19 第六轮：顶部横条改竖向书脊。
+   参考：TYPE / FORM 的 side rail（导航贴左缘、竖排、像书脊）、
+        Porto Rocha / David Fiz 的固定侧栏（编号 + 短标签）。
+   取舍：不做「hover 才展开标签」——标签常驻更好用；
+        书脊只放编号与中文短标签，颜色仍只做标记（当前项色条 + 数字）。
+   ============================================================ */
+
+.site-rail {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  width: 96px;
+  background: var(--bg);
+  border-right: 2px solid var(--ink);
+  transition: background-color var(--dur-base, 0.3s) var(--ease-slide, ease);
+}
+
+/* ---- 标识 ---- */
+.rail-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  height: 96px;
+  border-bottom: 1px solid var(--hair);
+}
+
+.rail-logo-word {
+  font-family: var(--mono);
+  font-size: 7.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--ink);
+  opacity: 0.62;
+}
+
+.rail-logo-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--ink);
+  color: var(--bg);
+  font-family: var(--sans);
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1;
+  transition: background-color 0.22s, color 0.22s;
+}
+
+.rail-logo:hover .rail-logo-mark {
+  background: var(--acc, var(--c1));
+  color: #fff;
+}
+
+/* ---- 目录 ---- */
+.rail-nav {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.rail-nav-cap {
+  flex: none;
+  padding: 0 0 10px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--hair);
+  font-family: var(--mono);
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-align: center;
+  color: var(--ink);
+  opacity: 0.62;
+}
+
+/* 四条色循环：hover 时整条带子被填满，颜色各不相同——
+   像一排书签，划到哪一条哪一条亮 */
+.rail-item--1 { --it-accent: var(--c1); --it-on: #fff; }
+.rail-item--2 { --it-accent: var(--c2); --it-on: #0a0a0a; }
+.rail-item--3 { --it-accent: var(--c3); --it-on: #0a0a0a; }
+.rail-item--4 { --it-accent: var(--c4); --it-on: #0a0a0a; }
+
+.rail-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  /* 条目等分书脊高度：从 logo 到主题开关之间铺满，像一个真正的目录脊椎 */
+  flex: 1 1 0;
+  min-height: 52px;
+  color: var(--ink);
+  text-align: center;
+  animation: rail-in 0.42s cubic-bezier(0.2, 0.8, 0.25, 1) both;
+}
+
+/* 进场：从左侧依次推入 */
+.rail-item:nth-child(2) { animation-delay: 0.02s; }
+.rail-item:nth-child(3) { animation-delay: 0.06s; }
+.rail-item:nth-child(4) { animation-delay: 0.1s; }
+.rail-item:nth-child(5) { animation-delay: 0.14s; }
+.rail-item:nth-child(6) { animation-delay: 0.18s; }
+.rail-item:nth-child(7) { animation-delay: 0.22s; }
+.rail-item:nth-child(8) { animation-delay: 0.26s; }
+
+@keyframes rail-in {
+  from { opacity: 0; transform: translateX(-12px); }
+  to { opacity: 1; transform: none; }
+}
+
+.rail-item + .rail-item { border-top: 1px solid var(--hair); }
+
+/* 色块从左向右刷上来 */
+.rail-item::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--it-accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.26s cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+
+/* 书签角：从书脊右缘探出一小块，带一点回弹 */
+.rail-item::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -10px;
+  width: 10px;
+  height: 10px;
+  background: var(--it-accent);
+  opacity: 0;
+  transform: translate(-6px, -50%) scale(0.4);
+  transition: transform 0.28s cubic-bezier(0.2, 1.5, 0.4, 1), opacity 0.18s;
+}
+
+.rail-item:hover::before,
+.rail-item.active::before { transform: none; }
+
+.rail-item:hover::after,
+.rail-item.active::after {
+  opacity: 1;
+  transform: translate(0, -50%) scale(1);
+}
+
+/* 填色时上边线让位给色块本身 */
+.rail-item:hover,
+.rail-item.active { border-top-color: transparent; }
+
+.rail-no,
+.rail-label { position: relative; z-index: 1; }
+
+.rail-no {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  opacity: 0.62;
+  transition: color 0.2s, opacity 0.2s, transform 0.3s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+.rail-label {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  opacity: 0.62;
+  transition: color 0.2s, opacity 0.2s, transform 0.3s cubic-bezier(0.2, 1.2, 0.4, 1);
+}
+
+.rail-item:hover .rail-no,
+.rail-item.active .rail-no {
+  color: var(--it-on, #fff);
+  opacity: 1;
+  transform: translateY(-1px) scale(1.14);
+}
+
+.rail-item:hover .rail-label,
+.rail-item.active .rail-label {
+  color: var(--it-on, #fff);
+  opacity: 1;
+  transform: translateX(2px);
+}
+
+/* ---- 底部 ---- */
+.rail-foot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: auto;
+  padding: 16px 0 20px;
+  border-top: 1px solid var(--hair);
+}
+
+/* ---- 阅读进度：四色分段的书脊尺，随滚动长出来 ---- */
+.rail-progress {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  width: 3px;
+  height: 100%;
+  /* 硬分段的四色（不是渐变过渡），像标尺上的刻度带 */
+  background: linear-gradient(
+    to bottom,
+    var(--c1) 0 25%,
+    var(--c4) 25% 50%,
+    var(--c3) 50% 75%,
+    var(--c2) 75% 100%
+  );
+  clip-path: inset(0 0 calc((1 - var(--rail-p, 0)) * 100%) 0);
+  pointer-events: none;
+}
+
+/* 视口很矮时让条目继续压缩，而不是被裁掉 */
+@media (max-height: 640px) and (min-width: 1024px) {
+  .rail-item { min-height: 0; }
+  .rail-logo { height: 72px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail-item { animation: none; }
+  .rail-item::before,
+  .rail-item::after,
+  .rail-no,
+  .rail-label { transition: none; }
+}
+
+/* ============================================================
+   ≤1023px：书脊折成一条可横滑的编号条
+   ============================================================ */
+@media (max-width: 1023px) {
+  .site-rail {
+    position: sticky;
+    bottom: auto;
+    flex-direction: row;
+    align-items: stretch;
+    width: 100%;
+    height: 56px;
+    border-right: none;
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .rail-logo {
+    height: auto;
+    width: 56px;
+    flex: none;
+    gap: 0;
+    border-bottom: none;
+    border-right: 1px solid var(--hair);
+  }
+
+  .rail-logo-word { display: none; }
+
+  .rail-logo-mark { width: 30px; height: 30px; font-size: 15px; }
+
+  .rail-nav-cap { display: none; }
+
+  .rail-nav {
+    flex-direction: row;
+    justify-content: flex-start;
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .rail-item {
+    flex: none;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+    min-height: 0;
+    height: auto;
+    padding: 0 11px;
+  }
+
+  .rail-item + .rail-item {
+    border-top: none;
+    border-left: 1px solid var(--hair);
+  }
+
+  /* 横条上色块直接铺满整格，书签角没有意义 */
+  .rail-item::before { transform-origin: center bottom; }
+
+  .rail-item::after { display: none; }
+
+  /* 触屏没有 hover，只让当前项上色；编号不缩放，避免抖动 */
+  .rail-item.active .rail-no,
+  .rail-item.active .rail-label { transform: none; }
+
+  .rail-foot {
+    margin-top: 0;
+    padding: 0 10px;
+    border-top: none;
+    border-left: 1px solid var(--hair);
+    flex: none;
+  }
+
+  .rail-progress { display: none; }
+}
+
+@media (max-width: 420px) {
+  /* 保留标签（只留编号会看不懂），靠横向滚动容纳 7 项 */
+  .rail-item { padding: 0 9px; }
+  .rail-foot { padding: 0 6px; }
+}

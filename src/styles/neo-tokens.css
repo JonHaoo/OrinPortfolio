@@ -1,0 +1,87 @@
+/* ============================================================
+   NEO_TOKENS — violet 配色层（用户 2026-11-19 选定「第一套」）
+   在 global.css 之后引入：只覆盖颜色/材质令牌，不改布局规则。
+   设计依据：design-lab/docs/design/NEO_BRUTAL_TOKENS.md
+   实现依据：design-lab/neo-brutal.html（已获视觉认可）
+
+   映射原则（重要）：
+   现有站点的 --yellow/--pink/--blue/--green 都是「浅饱和底 + 深色文字」，
+   因此不能直接换成电紫（#6C3BFF 上放黑字不可读）。
+   电紫只用于显式设了浅色文字的块（Hero 高亮块、Craft 实验室、CTA）。
+   ============================================================ */
+
+:root {
+  /* --- 基础材质 --- */
+  --bg: #FFF8E7;            /* cream paper */
+  --ink: #0A0A0A;
+  --black: #0A0A0A;
+  --surface: #FFFFFF;
+  /* 抬升面：hover / 选中时的底色，深色态不能直接用白色 */
+  --raise: #FFFFFF;
+  --card-line: #0A0A0A;
+  --shadow-color: #0A0A0A;
+
+  /* 黑底上的文字：原亮黄 → 酸绿 */
+  --on-ink: #D9FF43;
+
+  /* --- 四色系统：保持「浅底深字」的可读性，同时把紫引入分类编码 --- */
+  --yellow: #D9FF43;        /* acid — 主强调，替代原亮黄 */
+  --pink:   #FF5C35;        /* 橙红 — 第一套配色的 c3，替代原荧光粉 */
+  --blue:   #2BA8FF;
+  --green:  #A78BFA;        /* 浅紫 — violet 的浅色调，深字仍可读 */
+  --green-dot: #6C3BFF;
+  --orange: #FF5C35;
+  --muted: #8A8474;
+
+  /* --- violet 设计语言新增令牌 --- */
+  --paper: #FFF8E7;
+  --c1: #6C3BFF;            /* 电紫：紫底白字专用 */
+  --c2: #D9FF43;            /* 酸绿 */
+  --c3: #FF5C35;            /* 橙红 */
+  --c4: #2BA8FF;            /* 蓝 */
+  --shadow: #0A0A0A;
+  --bd: 3px;
+  --sh: 8px;
+
+  --sans: 'Arial Black', 'Noto Sans SC', 'PingFang SC', system-ui, sans-serif;
+  --mono: 'SF Mono', ui-monospace, Menlo, 'Courier New', monospace;
+
+  /* 硬阴影统一收紧到 0 blur（新粗野主义三条硬规则之一） */
+  --shadow-sm: 4px 4px 0 0 var(--shadow-color);
+  --shadow-md: 6px 6px 0 0 var(--shadow-color);
+  --shadow-lg: 8px 8px 0 0 var(--shadow-color);
+  --shadow-xl: 10px 10px 0 0 var(--shadow-color);
+
+  --rd-line: rgba(10, 10, 10, 0.18);
+  --rd-line-strong: rgba(10, 10, 10, 0.85);
+}
+
+:root[data-theme='dark'] {
+  --bg: #17161C;
+  --ink: #F7F3E6;
+  --card-line: #F7F3E6;
+  --on-ink: #0A0A0A;
+  /* 卡片表面在深色态保持白色：原站大量正文硬编码 #141414，
+     若把卡片也翻成深色会变成黑字压黑底。纸底翻深、卡片留白，层次反而更清楚。 */
+  --shadow-color: #000000;
+  --raise: #211F29;
+  --shadow: #000000;
+  --paper: #17161C;
+  --muted: #948E7E;
+  --rd-line: rgba(247, 243, 230, 0.22);
+  --rd-line-strong: rgba(247, 243, 230, 0.9);
+  /* 四色强调在深色下保持不变：饱和色在暗底上仍是焦点 */
+}
+
+/* --- 旋转 / 破格元素不许撑开横向滚动 ---
+   clip 比 hidden 彻底：不生成滚动容器，不影响 position: sticky */
+html, body { overflow-x: clip; }
+
+/* --- 键盘焦点：改用橙红虚线，和 violet 语言一致 --- */
+:focus-visible {
+  outline: 3px dashed var(--c3);
+  outline-offset: 4px;
+}
+
+/* --- 选中态 --- */
+::selection { background: var(--c1); color: #fff; }

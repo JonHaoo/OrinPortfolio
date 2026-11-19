@@ -1,70 +1,148 @@
 ---
-// 能力标签区：四张撞色能力卡 + 两张交付笔记卡（对应设计稿 2:137）
-interface Strength {
-  word: string;
-  latin?: boolean;
-  label: string;
-  colorClass: string;
+// 能力与方法 —— 横向卡带（可拖动 / 按钮翻页 / 进度条）
+// 2026-11-19 第五轮：与作品区的「主从切换」区分开，这里用横向滚动卡组，
+// 卡片顶部做成档案抽屉的标签页（folder tab），颜色只出现在标签与顶部色条上。
+// 内容依据：简历里真实做过的项目 + 市场对 AI 交付 / FDE 类岗位的常见要求
+//（部署与配置、系统集成、LLM 应用、技术—业务转译）。
+// 隐私边界：不出现公司名、任职时间线、学校、教育背景；只写做过的事。
+interface Capability {
+  no: string;
+  title: string;
+  en: string;
+  desc: string;
+  evidence: string[];
+  tags: string[];
 }
 
-const strengths: Strength[] = [
-  { word: '0 → 1', latin: true, label: '企业级前端系统，从零搭到能用', colorClass: 'stat-yellow' },
-  { word: '全链路', label: 'AI 落地五环节独立闭环，不甩锅', colorClass: 'stat-pink' },
-  { word: '控幻觉', label: '分层边界设计，成本与准确率双可控', colorClass: 'stat-blue' },
-  { word: '双向转译', label: '业务拆给 AI，技术讲给客户', colorClass: 'stat-green' },
-];
-
-interface Note {
-  markClass: string;
-  heading: string;
-  content: string;
-  source: string;
-}
-
-const notes: Note[] = [
+const capabilities: Capability[] = [
   {
-    markClass: 'mark-blue',
-    heading: '交付不是终点，用起来才是',
-    content: '招聘智能助手上线后，客户 HR 反馈「提问方式不符合预期」。我没有把它归为使用问题，而是回收成提示词迭代的输入——助手的最终形态，是在真实使用里长出来的。',
-    source: '交付笔记 01 · 招聘智能助手',
+    no: '01',
+    title: '交付落地',
+    en: 'DEPLOYMENT',
+    desc: '把系统从「可配置」带到「可用」：环境、权限、部署与培训，交付后对方能自己跑起来。',
+    evidence: [
+      '企业智能对话助手：配置、交付与使用培训',
+      '公司官网：设计、开发与部署上线',
+      '面向客户的讲解与技术支持',
+    ],
+    tags: ['交付', '部署', '培训'],
   },
   {
-    markClass: 'mark-pink',
-    heading: '先划边界，再谈模型',
-    content: '招聘助手交付时，先划边界再谈模型：确定性问答走知识库、开放对话走 LLM，知识库覆盖不到的宁可明说「暂无资料」，也不让模型自由发挥。把算力花在只有模型能解决的地方，成本与准确率才都可控。',
-    source: '交付笔记 02 · 架构取舍',
+    no: '02',
+    title: '系统集成',
+    en: 'INTEGRATION',
+    desc: '让系统与既有的数据、权限和流程对接，而不是另起一套并行逻辑。',
+    evidence: [
+      '数据源与流转路径梳理（Vue + ECharts）',
+      '路由与操作层权限控制',
+      'OSS + Docker 增量部署',
+      '批量导入导出与号码解析',
+    ],
+    tags: ['API', '数据流转', 'Docker'],
+  },
+  {
+    no: '03',
+    title: '应用 AI',
+    en: 'APPLIED AI',
+    desc: '提示词、知识库与评测：让模型在具体业务里稳定工作，而不只是演示时可用。',
+    evidence: [
+      '提示词设计与按反馈迭代',
+      '企业知识库配置（RAG 方向）',
+      'AI 生图与品牌 GEO',
+      '关注 LLM 评测与检索召回',
+    ],
+    tags: ['Prompt', 'RAG', 'LLM 评测'],
+  },
+  {
+    no: '04',
+    title: '双向转译',
+    en: 'TRANSLATION',
+    desc: '把业务问题拆成技术任务，也把系统能力讲成客户能操作的用法。',
+    evidence: [
+      '面向客户讲解与教学 AI 聚合系统',
+      '售前演示与技术支持',
+      '协调前端、设计与后端对齐实现',
+    ],
+    tags: ['客户沟通', '文档', '协作'],
   },
 ];
+
+const methods = [
+  { no: 'M1', title: '先定范围', desc: '从模糊诉求中界定可落地的环节与边界，范围清楚后再进入实现。' },
+  { no: 'M2', title: '跑通再交', desc: '以完整可用链路作为交付标准，而不是一份功能清单。' },
+  { no: 'M3', title: '写成可复用', desc: '把结论沉淀为开发规范与公共组件，减少口头约定。' },
+  { no: 'M4', title: '双向对齐', desc: '与研发对齐实现细节，与业务对齐可用范围。' },
+];
+
+const evidenceCount = capabilities.reduce((n, c) => n + c.evidence.length, 0);
 ---
 
 <section class="stats" id="stats">
   <div class="section-header">
-    <span class="section-tag">STRENGTHS &amp; NOTES</span>
-    <h2 class="section-title">我的底气</h2>
+    <span class="section-tag">CAPABILITIES</span>
+    <h2 class="section-title">能力与方法</h2>
+    <p class="section-sub">
+      按 AI 交付类岗位的实际要求拆成四个能力面。拖动卡带或点箭头翻页，每张只列做过的事。
+    </p>
+    <span class="section-meta">4 AREAS · {evidenceCount} 条证据</span>
   </div>
 
-  <div class="stats-row">
-    {strengths.map((s) => (
-      <div class={`stat-block ${s.colorClass}`}>
-        <span class={`stat-word${s.latin ? ' stat-latin' : ''}`}>{s.word}</span>
-        <span class="stat-label">{s.label}</span>
+  <div class="cap-strip" data-strip>
+    <div class="cap-track" data-strip-track>
+      {capabilities.map((c, i) => (
+        <article class:list={['cap-card', `cap-card--${i + 1}`]}>
+          <span class="cap-card-tab" aria-hidden="true">{c.no}</span>
+          <span class="cap-card-en">{c.en}</span>
+          <h3 class="cap-card-title">{c.title}</h3>
+          <p class="cap-card-desc">{c.desc}</p>
+
+          <span class="cap-card-label">做过的事</span>
+          <ul class="cap-card-list">
+            {c.evidence.map((e) => <li>{e}</li>)}
+          </ul>
+
+          <ul class="cap-card-tags">
+            {c.tags.map((t) => <li>{t}</li>)}
+          </ul>
+        </article>
+      ))}
+    </div>
+
+    <div class="cap-ctrl">
+      <div class="cap-ctrl-left">
+        <span class="cap-ctrl-hint">拖动卡带 / 点箭头翻页 · 共 4 个能力面</span>
+        <span class="cap-progress" aria-hidden="true"><span class="cap-progress-bar" data-strip-bar></span></span>
       </div>
-    ))}
+      <div class="cap-ctrl-right">
+        <span class="cap-count" data-strip-count>01 / 04</span>
+        <button type="button" class="cap-btn" data-strip-prev aria-label="上一张能力卡">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="M17 10H3M3 10L9 4M3 10L9 16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+        <button type="button" class="cap-btn" data-strip-next aria-label="下一张能力卡">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="M3 10H17M17 10L11 4M17 10L11 16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+      </div>
+    </div>
   </div>
 
-  <div class="quotes-row">
-    {notes.map((t) => (
-      <figure class="quote-card">
-        <span class={`quote-mark ${t.markClass}`}>“</span>
-        <blockquote>
-          <h3 class="note-heading">{t.heading}</h3>
-          <p class="quote-content">{t.content}</p>
-        </blockquote>
-        <figcaption class="quote-person">
-          <span class="note-dot"></span>
-          <span class="note-label">{t.source}</span>
-        </figcaption>
-      </figure>
-    ))}
+  <!-- 协作方法：横排四条，编号 + 一句，做成「工作准则」而不是卡片 -->
+  <div class="method-block">
+    <div class="method-head">
+      <h3 class="method-title">协作方法</h3>
+      <span class="method-note">四条准则 · 不随项目变化</span>
+    </div>
+    <ol class="method-grid">
+      {methods.map((m) => (
+        <li class="method-item">
+          <span class="method-no">{m.no}</span>
+          <h4 class="method-name">{m.title}</h4>
+          <p class="method-desc">{m.desc}</p>
+        </li>
+      ))}
+    </ol>
   </div>
 </section>

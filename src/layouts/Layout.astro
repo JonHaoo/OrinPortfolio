@@ -10,6 +10,13 @@ import '@fontsource/space-grotesk/400.css';
 import '@fontsource/space-grotesk/500.css';
 import '@fontsource/space-grotesk/700.css';
 import '../styles/global.css';
+// violet 令牌层 + 首页视觉/交互层（必须在 global.css 之后：只覆盖，不重写）
+import '../styles/neo-tokens.css';
+import '../styles/neo-home.css';
+import '../styles/neo-sections.css';
+import '../styles/neo-rail.css';
+// 案例详情页样式：放在 Layout 里而非页面内，保证 ClientRouter 软导航后不丢样式
+import '../styles/neo-case.css';
 
 interface Props {
   title?: string;
@@ -18,8 +25,8 @@ interface Props {
 }
 
 const {
-  title = 'Orin · AI 解决方案工程师 / FDE 作品集',
-  description = '从客户需求到配置交付，再到使用辅导与反馈回收——把 AI 真正落地到业务里的完整链路。作品集：招聘智能助手、企业级数据分析系统。',
+  title = 'Orin · AI 应用开发工程师作品集',
+  description = '专注企业级前端工程与 AI 应用落地：提示词工程、智能助手交付、技术与业务的双向转译。作品集：企业智能对话助手、短剧版权交易平台、投放数据分析系统。',
   fluid = false,
 } = Astro.props;
 
@@ -45,6 +52,14 @@ const BASE_URL = import.meta.env.BASE_URL.endsWith('/')
         var theme = 'light';
         try { theme = localStorage.getItem('theme') || 'light'; } catch (e) {}
         document.documentElement.dataset.theme = theme;
+        // 滚动揭示：在首帧前就打上 rv-ready，避免"先可见再隐藏"的闪跳。
+        // 放在这里而不是 body 末尾，是因为本脚本同步执行于解析期；
+        // 若脚本被禁用则不会执行，内容自然保持可见（不会永久隐藏）。
+        try {
+          if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.documentElement.classList.add('rv-ready');
+          }
+        } catch (e) {}
       })();
     </script>
     <!-- 主题切换圆形扩散的动画定义（MOTION_GUIDE §2.4-B）：
@@ -77,6 +92,7 @@ const BASE_URL = import.meta.env.BASE_URL.endsWith('/')
         <slot />
       </div>
     ) : (
+      <slot name="rail" />
       <div class="viewport-scaler" id="viewport-scaler">
         <div class="page" id="page">
           <slot />
@@ -96,6 +112,9 @@ const BASE_URL = import.meta.env.BASE_URL.endsWith('/')
         var resizeBound = false;
         var pageRO = null;
         var spyObserver = null;
+        var revealObserver = null;
+        var revealTimer = null;
+        var printBound = false;
 
         // ---- 画布等比缩放：1440px 设计稿居中渲染 ----
         // ≤1023px 切流式布局（CSS 断点重排接管），清除内联缩放；≥1024 保持等比缩放（系数 ≥0.71，可读）。
@@ -111,9 +130,12 @@ const BASE_URL = import.meta.env.BASE_URL.endsWith('/')
             scaler.style.height = '';
             return;
           }
-          var viewportWidth = document.documentElement.clientWidth;
+          // 书脊占据视口左侧固定宽度：可用宽度与居中基准都要减掉它
+          var rail = document.querySelector('.site-rail');
+          var railW = rail ? Math.round(rail.getBoundingClientRect().width) : 0;
+          var viewportWidth = document.documentElement.clientWidth - railW;
           var scale = Math.min(viewportWidth / PAGE_WIDTH, 1);
-          var left = (viewportWidth - PAGE_WIDTH * scale) / 2;
+          var left = railW + (viewportWidth - PAGE_WIDTH * scale) / 2;
           page.style.transform = 'scale(' + scale + ')';
           page.style.left = left + 'px';
           scaler.style.height = page.offsetHeight * scale + 'px';
@@ -145,8 +167,18 @@ const BASE_URL = import.meta.env.BASE_URL.endsWith('/')
 
           function applyTheme(next) {
             document.documentElement.dataset.theme = next;
+            // role="switch" 的语义状态由我们维护：样式走 [data-theme]，
+            // 但屏幕阅读器只读 aria-checked，不同步等于永远播报"关闭"
+            toggle.setAttribute('aria-checked', next === 'dark' ? 'true' : 'false');
             try { localStorage.setItem('theme', next); } catch (e) {}
           }
+
+          // 首帧同步：软导航换页后新按钮是静态 aria-checked="false"，
+          // 与已存在的深色主题不一致，这里按当前主题校正一次
+          toggle.setAttribute(
+            'aria-checked',
+            document.documentElement.dataset.theme === 'dark' ? 'true' : 'false'
+          );
 
           toggle.addEventListener('click', function (e) {
             var root = document.documentElement;
@@ -189,7 +221,7 @@ const BASE_URL = import.meta.env.BASE_URL.endsWith('/')
         // 锚点链接按 href 推断目标 id；跨页链接（如「工作流」）用 data-spy 显式声明。
         // 无匹配区块的页面（如 workflow 规范页）自动跳过，初始 active 保持不变。
         function initScrollSpy() {
-          var links = document.querySelectorAll('.site-nav a[href^="#"], .site-nav a[data-spy]');
+          var links = document.querySelectorAll('.site-nav a[href^="#"], .site-nav a[data-spy], .site-rail a[href^="#"], .site-rail a[data-spy]');
           if (!links.length || !('IntersectionObserver' in window)) return;
           var map = {};
           Array.prototype.forEach.call(links, function (a) {
@@ -208,7 +240,7 @@ const BASE_URL = import.meta.env.BASE_URL.endsWith('/')
           // 软导航后旧 observer 观察的是死节点，先断开再重建
           if (spyObserver) { spyObserver.disconnect(); spyObserver = null; }
 
-          var current = document.querySelector('.site-nav a.active');
+          var current = document.querySelector('.site-nav a.active, .site-rail a.active');
           function setActive(a) {
             if (!a || current === a) return;
             if (current) current.classList.remove('active');
@@ -217,32 +249,89 @@ const BASE_URL = import.meta.env.BASE_URL.endsWith('/')
           }
 
           // 检测带：视口 35%~40% 高度区间的窄条，区块穿过时切换高亮。
-          // Hero 先于 sections 注册：顶部时占据检测带 → 高亮「作品」（首区块前导）；
-          // 同帧 Hero 与 Works 同时占带时 sections 后注册，回调后处理、结果正确。
+          // Hero 先于 sections 注册：顶部时占据检测带 → 高亮「关于我」（首区块前导）；
+          // 同帧 Hero 与 About 同时占带时 sections 后注册，回调后处理、结果正确。
           spyObserver = new IntersectionObserver(function (entries) {
             entries.forEach(function (entry) {
               if (!entry.isIntersecting) return;
               if (entry.target.classList.contains('hero')) {
-                setActive(map.works);
+                setActive(map.about);
               } else {
                 setActive(map[entry.target.id]);
               }
             });
           }, { rootMargin: '-35% 0px -60% 0px', threshold: 0 });
           var hero = document.querySelector('.hero');
-          if (hero && map.works) spyObserver.observe(hero);
+          if (hero && map.about) spyObserver.observe(hero);
           sections.forEach(function (s) { spyObserver.observe(s); });
+        }
+
+        // ---- 滚动揭示：交互直接落在真实元素上（不设演示区块）----
+        // 只做一次淡入 + 上移，不循环、不跟随鼠标；reduced-motion 下整段不启用。
+        // 观察器在软导航后必须重建：旧实例观察的是已被丢弃的节点。
+        function initReveal() {
+          if (!('IntersectionObserver' in window)) {
+            document.documentElement.classList.remove('rv-ready');
+            return;
+          }
+          if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+          if (revealObserver) { revealObserver.disconnect(); revealObserver = null; }
+
+          var nodes = document.querySelectorAll(
+            '.section-header, .section-sub, .ab-grid, .ab-route, .ab-vocab, .wk-switch, .cap-strip, .rd-chart, .wf-deck'
+          );
+          if (!nodes.length) return;
+
+          revealObserver = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+              if (!entry.isIntersecting) return;
+              entry.target.classList.add('rv-in');
+              revealObserver.unobserve(entry.target);
+            });
+          }, { rootMargin: '0px 0px -10% 0px', threshold: 0.05 });
+
+          Array.prototype.forEach.call(nodes, function (n) {
+            if (n.classList.contains('rv-in')) return;
+            n.classList.add('rv');
+            revealObserver.observe(n);
+          });
+
+          // 兜底：全页截图、打印、JS 观察器未触发、或用户停在首屏不滚动时，
+          // 视口外元素若一直保持 opacity:0 就会呈现大片空白。
+          // 6s 后把剩余元素全部显现——宁可少一点揭示效果，也不能让内容消失。
+          if (revealTimer) clearTimeout(revealTimer);
+          var revealAll = function () {
+            document.querySelectorAll('.rv:not(.rv-in)').forEach(function (n) {
+              n.classList.add('rv-in');
+            });
+          };
+          revealTimer = setTimeout(revealAll, 6000);
+          if (!printBound) {
+            window.addEventListener('beforeprint', revealAll);
+            printBound = true;
+          }
         }
 
         function initPageScripts() {
           initScaler();
           initThemeToggle();
           initScrollSpy();
+          initReveal();
         }
 
         document.addEventListener('astro:page-load', initPageScripts);
         initPageScripts();
       })();
+    </script>
+
+
+    <!-- 首页四个模块的交互（主从切换 / 横向卡带 / 图表联动 / 折页翻开）。
+         用独立模块而不是塞进上面的内联脚本：这些只在首页存在，
+         挂在 astro:page-load 上保证软导航回来后重新绑定。 -->
+    <script>
+      import { initHomeInteractions } from '../scripts/home-interactions';
+      document.addEventListener('astro:page-load', initHomeInteractions);
+      initHomeInteractions();
     </script>
   </body>
 </html>

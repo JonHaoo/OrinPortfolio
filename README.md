@@ -13,7 +13,7 @@
 ## 功能
 
 - 首页：Hero / 作品 / 关于我 / 底气 / 阅读账本 / 方法论 / 页脚
-- 独立页面：`/reading/` 阅读档案（编辑式数据叙事：四叙事阶段 / 逐日热力图 / 双口径分类对比 / 交互式图表）、`/workflow/` 研发工作流规范、`/design-sop/` 设计 SOP
+- 独立页面：`/reading/` 阅读档案（编辑式数据叙事：四叙事阶段 / 逐日热力图 / 双口径分类对比 / 交互式图表）、`/workflow/` 研发工作流规范、`/design-sop/` 设计 SOP、`/prompts/` 提示词库（个人常用 Prompt 六类整理，一键复制 + 分类筛选）
 - 阅读数据管线：`weread-data/export_site_data.py` 把微信读书 Agent API 原始快照加工为 `src/data/weread.json`（站点唯一数据源，更新数据只需重跑脚本）
 - 明暗主题切换（右上角开关，localStorage 持久化）
 - 1440px 设计稿等比缩放渲染；≤1023px 切流式布局
@@ -26,10 +26,10 @@
 ├── docs/design/       # 设计配置 / 动效规范 / 视觉验收基准
 ├── src/
 │   ├── components/    # 页面区块组件（reading/ 子目录 = 阅读档案页组件）
-│   ├── data/          # 站点数据源（weread.json 唯一数据快照 + reading.ts 视图层）
+│   ├── data/          # 站点数据源（weread.json 唯一数据快照 + reading.ts 视图层 + prompts.ts 提示词库）
 │   ├── layouts/       # 布局（字体加载、主题初始化、缩放脚本）
 │   ├── pages/         # 页面入口
-│   ├── scripts/       # 浏览器端 TS（3D 形象 / 阅读档案页动效岛）
+│   ├── scripts/       # 浏览器端 TS（3D 形象 / 阅读档案页动效岛 / 提示词库页交互）
 │   └── styles/        # 全局样式与主题变量
 └── astro.config.mjs
 ```

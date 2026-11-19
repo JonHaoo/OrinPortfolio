@@ -1,0 +1,436 @@
+/* ============================================================
+   NEO_HOME — violet 新粗野主义：首页视觉与「直接落在元素上」的交互
+   在 global.css 之后引入。只覆盖颜色、排版尺度、材质与动效，
+   不改信息架构，不新增演示性组件（用户 2026-11-19 16:39 明确不做交互实验室）。
+
+   三条硬规则（不可柔化，见 NEO_BRUTAL_TOKENS.md §1）：
+   1. 2–5px 粗边框   2. 硬阴影 blur 必须为 0   3. 平面饱和色，不用渐变
+   ============================================================ */
+
+/* ---------- 1. 纸面材质：网点 ---------- */
+/* 直接写在元素 background-image 上（不用伪元素）：
+   伪元素要压到内容下方得靠负 z-index + isolation，容易和现有层级打架 */
+.hero,
+.works,
+.about,
+.stats,
+.reading,
+.workflow-teaser {
+  background-image: radial-gradient(rgba(10, 10, 10, 0.13) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* 白色底区块改用极淡网点，避免和纸底撞成一片 */
+.about,
+.reading {
+  background-image: radial-gradient(rgba(10, 10, 10, 0.07) 1px, transparent 1px);
+}
+
+:root[data-theme='dark'] .hero,
+:root[data-theme='dark'] .works,
+:root[data-theme='dark'] .about,
+:root[data-theme='dark'] .stats,
+:root[data-theme='dark'] .reading,
+:root[data-theme='dark'] .workflow-teaser {
+  background-image: radial-gradient(rgba(247, 243, 230, 0.1) 1px, transparent 1px);
+}
+
+/* ---------- 2. Hero：巨大中文标题 + 紫高亮块 + 描边字 ---------- */
+.hero {
+  background-color: var(--paper);
+  border-bottom: var(--bd) solid var(--ink);
+  /* 第六轮：顶部横条改成左侧书脊后，首屏上方少了约 80px 的头部高度，
+     这里补回来，避免标题顶到画布上沿 */
+  padding: 88px 64px 76px;
+  gap: 48px;
+  align-items: flex-start;
+}
+
+.hero-left {
+  gap: 26px;
+  padding-top: 8px;
+}
+
+.hero-badge {
+  background: var(--c3);
+  color: #fff;
+  border: var(--bd) solid var(--ink);
+  box-shadow: 5px 5px 0 var(--shadow);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  padding: 7px 13px;
+  transform: rotate(-2.4deg);
+}
+
+.hero-badge:hover {
+  transform: rotate(-2.4deg) translate(-2px, -2px);
+  box-shadow: 7px 7px 0 var(--shadow);
+}
+
+.hero-title {
+  font-family: var(--sans);
+  font-size: 104px;
+  line-height: 0.96;
+  letter-spacing: -0.055em;
+  font-weight: 900;
+  color: var(--ink);
+  /* 轻微描边让笔画在小字重回退时也不塌 */
+  -webkit-text-stroke: 0.6px var(--ink);
+}
+
+/* 描边空心字：紫填充 + 墨描边，和实心标题拉开层次 */
+.hero-title .hl-out {
+  color: var(--c1);
+  -webkit-text-stroke: 2.5px var(--ink);
+}
+
+.hero-title-marker {
+  background: var(--c1);
+  color: #fff;
+  border: var(--bd) solid var(--ink);
+  box-shadow: 9px 9px 0 var(--shadow);
+  padding: 0 16px 6px;
+  margin-top: 6px;
+  transform: rotate(-1.4deg);
+}
+
+.hero-title-marker:hover {
+  transform: rotate(0deg) translate(-3px, -3px);
+  box-shadow: 13px 13px 0 var(--shadow);
+}
+
+.hero-sub {
+  font-size: 16.5px;
+  line-height: 1.9;
+  color: var(--ink);
+  max-width: 62ch;
+}
+
+/* 关键词：酸绿荧光笔，替代原黑底黄字 */
+.hero-sub strong {
+  background: var(--c2);
+  color: var(--ink);
+  border: 1.5px solid var(--ink);
+  padding: 0 7px;
+  font-weight: 800;
+}
+
+.hero-cta-row { gap: 18px; }
+
+.btn-primary {
+  background: var(--c1);
+  color: #fff;
+  border: var(--bd) solid var(--ink);
+  box-shadow: 7px 7px 0 var(--shadow);
+  font-weight: 800;
+}
+
+.btn-primary:hover {
+  box-shadow: 10px 10px 0 var(--shadow);
+  transform: translate(-2px, -2px);
+}
+
+.btn-primary:active {
+  transform: translate(7px, 7px);
+  box-shadow: 0 0 0 var(--shadow);
+}
+
+.btn-secondary {
+  background: var(--surface);
+  color: var(--ink);
+  border: var(--bd) solid var(--ink);
+  box-shadow: 7px 7px 0 var(--shadow);
+  font-weight: 800;
+}
+
+.btn-secondary:hover {
+  box-shadow: 10px 10px 0 var(--shadow);
+  transform: translate(-2px, -2px);
+}
+
+.btn-secondary:active {
+  transform: translate(7px, 7px);
+  box-shadow: 0 0 0 var(--shadow);
+}
+
+.hero-trust { color: var(--ink); font-size: 14px; }
+
+.trust-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--c3);
+  border: 2px solid var(--ink);
+}
+
+/* Hero 相框：反向旋转 + 更硬的阴影，和标题块形成对角张力 */
+.hero-image-card {
+  border: 4px solid var(--ink);
+  box-shadow: 12px 12px 0 var(--shadow);
+  transform: rotate(-2deg);
+}
+
+.hero-image-card:hover {
+  transform: rotate(-1deg) translate(-3px, -3px);
+  box-shadow: 16px 16px 0 var(--shadow);
+}
+
+.hero-mode-toggle {
+  border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--shadow);
+  color: var(--ink);
+}
+
+body.hero-3d-mode .hero-mode-toggle {
+  background: var(--c1);
+  color: #fff;
+}
+
+/* 开放合作徽章：酸绿圆标，压在相框右上角 */
+.hero-status-badge {
+  background: var(--c2);
+  color: var(--ink);
+  border: var(--bd) solid var(--ink);
+  box-shadow: 5px 5px 0 var(--shadow);
+  font-family: var(--mono);
+  font-weight: 700;
+  transform: rotate(9deg);
+}
+
+/* ---------- 3. 双跑马灯：酸绿正向 + 电紫反向 ---------- */
+.marquee {
+  background: var(--c2);
+  border-top: var(--bd) solid var(--ink);
+  border-bottom: var(--bd) solid var(--ink);
+  padding: 9px 0;
+}
+
+.marquee-track span {
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.marquee--violet {
+  background: var(--c1);
+  border-top: none;
+  padding: 7px 0;
+}
+
+.marquee--violet .marquee-track span {
+  color: #fff;
+  font-size: 11px;
+}
+
+.marquee--violet .marquee-track {
+  animation-duration: 34s;
+  animation-direction: reverse;
+}
+
+/* ---------- 4. 区块头：编号 + 巨大标题 + 通栏细线 ---------- */
+.page { counter-reset: sechead; }
+
+.section-header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-bottom: var(--bd) solid var(--ink);
+  padding-bottom: 16px;
+  counter-increment: sechead;
+}
+
+.section-tag {
+  align-self: flex-start;
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  padding: 6px 11px;
+  transform: rotate(-2deg);
+  box-shadow: 3px 3px 0 rgba(108, 59, 255, 0.9);
+}
+
+/* 编号自动生成：不改组件标记，靠 counter 给每个区块头加序号 */
+.section-tag::before {
+  content: '0' counter(sechead) ' / ';
+  opacity: 0.65;
+  margin-right: 2px;
+}
+
+.section-title {
+  font-family: var(--sans);
+  font-size: 58px;
+  font-weight: 900;
+  letter-spacing: -0.045em;
+  line-height: 1.02;
+  color: var(--ink);
+}
+
+.section-sub {
+  font-size: 16px;
+  color: var(--ink);
+  opacity: 0.82;
+  max-width: 68ch;
+}
+
+/* 原站 @supports(animation-timeline:view()) 让 about/stats 区块头从 opacity:.2 淡入，
+   区块在视口外时（长截图 / 分享图 / 打印）会永久卡在灰字；
+   且与本文件统一的 .rv IntersectionObserver 揭示重复控制同一元素。
+   统一由 .rv 接管，关掉 scroll-driven 动画。 */
+.about .section-header,
+.about .section-tag {
+  animation: none !important;
+}
+
+.col-title {
+  font-family: var(--sans);
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: #0A0A0A;
+}
+
+/* ---------- 6. 页脚：黑底 + 酸绿标题 ---------- */
+.site-footer {
+  background: #0A0A0A;
+  border-top: var(--bd) solid var(--ink);
+}
+
+.footer-headline {
+  font-family: var(--sans);
+  font-size: 56px;
+  font-weight: 900;
+  letter-spacing: -0.045em;
+  color: var(--c2);
+}
+
+.footer-sub { color: #EFE9DA; }
+
+.footer-mail-btn {
+  background: var(--c2);
+  color: #0A0A0A;
+  border: var(--bd) solid #FFF8E7;
+  box-shadow: 6px 6px 0 0 rgba(255, 248, 231, 1);
+  font-weight: 800;
+}
+
+.footer-mail-btn:hover {
+  box-shadow: 9px 9px 0 0 rgba(255, 248, 231, 1);
+  transform: translate(-2px, -2px);
+}
+
+/* ---------- 7. 交互直接落在元素上：滚动揭示 ---------- */
+/* 用独立的 translate 属性而不是 transform ——
+   卡片本来就有 rotate()，共用 transform 会互相覆盖 */
+@media (prefers-reduced-motion: no-preference) {
+  html.rv-ready .rv {
+    opacity: 0;
+    translate: 0 20px;
+  }
+
+  html.rv-ready .rv.rv-in {
+    opacity: 1;
+    translate: 0 0;
+    transition: opacity 0.5s var(--ease-lift), translate 0.55s var(--ease-lift);
+  }
+}
+
+/* ---------- 8. 移动端：新版式在流式断点下收紧 ---------- */
+@media (max-width: 1023px) {
+  .hero {
+    padding: 40px 20px 52px;
+    gap: 36px;
+  }
+
+  .hero-left { padding-top: 0; }
+
+  .hero-title {
+    font-size: clamp(44px, 12.5vw, 76px);
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
+  .hero-title-marker {
+    box-shadow: 6px 6px 0 var(--shadow);
+    padding: 0 10px 4px;
+  }
+
+  .hero-sub { font-size: 15.5px; line-height: 1.8; }
+
+  .section-title { font-size: clamp(32px, 8vw, 44px); }
+
+  .footer-headline { font-size: clamp(30px, 7.4vw, 40px); }
+  .col-title { font-size: 20px; }
+}
+
+@media (max-width: 480px) {
+  .hero-title { font-size: clamp(38px, 13vw, 54px); }
+  .btn-primary,
+  .btn-secondary { width: 100%; }
+  .hero-cta-row { flex-direction: column; align-items: stretch; }
+}
+
+/* ============================================================
+   9. 视觉复查修正（2026-11-19 实测截图后补）
+   ============================================================ */
+
+/* 关于我：原站是整块蓝底，和 violet 语言的「纸面 + 局部饱和块」不一致。
+   改为纸面网点，让酸绿金句横幅与白卡片成为焦点 */
+.about { background-color: var(--paper); }
+
+/* per-section 的 section-tag 覆盖（global.css 里 .about/.stats/.workflow-teaser
+   用更高优先级把背景改成了 --yellow，导致浅字压酸绿底不可读）。
+   这里用同优先级覆盖，统一回墨底纸字 */
+.about .section-tag,
+.stats .section-tag,
+.workflow-teaser .section-tag,
+.reading .section-tag {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* 3D 切换钮 / 次级按钮：白底在深色态保留，文字必须锁回墨色，
+   否则 var(--ink) 翻成浅色 → 白底白字 */
+.hero-mode-toggle,
+:root[data-theme='dark'] .hero-mode-toggle {
+  background: var(--surface);
+  border-color: var(--ink);
+  color: #0A0A0A;
+}
+
+:root[data-theme='dark'] .btn-secondary { color: #0A0A0A; }
+
+/* 跑马灯（酸绿正带）：底色不随主题翻转，文字也不能翻 */
+.marquee-track span { color: #0A0A0A; }
+.marquee--violet .marquee-track span { color: #fff; }
+
+/* ------ 深色态：所有「亮饱和底」上的文字锁回墨色 ------
+   原因：--ink 在深色主题下翻成浅色，但这些色块并不翻，
+   于是浅字压亮底。用不随主题变化的 #0A0A0A 锁死。 */
+:root[data-theme='dark'] .hero-sub strong,
+:root[data-theme='dark'] .hero-status-badge,
+:root[data-theme='dark'] .about-quote-banner,
+:root[data-theme='dark'] .about-quote-text,
+:root[data-theme='dark'] .about-quote-by,
+:root[data-theme='dark'] .marquee:not(.marquee--violet) .marquee-track span,
+:root[data-theme='dark'] .project-cover,
+:root[data-theme='dark'] .stat-yellow,
+:root[data-theme='dark'] .stat-pink,
+:root[data-theme='dark'] .stat-blue,
+:root[data-theme='dark'] .stat-green,
+:root[data-theme='dark'] .soft-tag,
+:root[data-theme='dark'] .wf-chip-yellow,
+:root[data-theme='dark'] .wf-chip-pink,
+:root[data-theme='dark'] .wf-chip-blue,
+:root[data-theme='dark'] .wf-chip-green,
+:root[data-theme='dark'] .footer-mail-btn {
+  color: #0A0A0A;
+}

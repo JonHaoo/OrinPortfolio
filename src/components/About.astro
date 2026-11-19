@@ -1,44 +1,97 @@
 ---
-// 关于我：引言贴纸卡 + 介绍 + 经历 + 技能标签（对应设计稿 2:101）
-const experiences = [
-  { dot: 'dot-yellow', text: '客户侧：需求洽谈 → 方案演示 → 配置交付 → 使用辅导 → 反馈回收，五环节独立闭环' },
-  { dot: 'dot-pink', text: '工程侧：React / Vue3 / TypeScript + Node.js，企业级前端项目与高并发 C 端活动页交付' },
-  { dot: 'dot-green', text: '双向转译：把业务问题拆成 AI 可介入的环节，也把系统能力讲成客户用得上的操作' },
+// 关于我 —— 卷首（editorial）
+// 2026-11-19 第六轮：与下面四块都不同，这一块是「读」的，不是「操作」的。
+// 左栏一条边注（引文，替代原来的整幅色块横幅），右栏正文；
+// 下方一条横向路线轴（2px 贯通线 + 方形站点）和一张三列词表（细线分隔，不做胶囊标签）。
+// 隐私边界不变：无公司名、任职时间、教育背景；表述保持理性客观。
+const pathSteps = [
+  { no: '01', title: '工程实现', chain: '技术选型 → 架构搭建 → 代码审查 → 规范制定' },
+  { no: '02', title: 'AI 应用落地', chain: '提示词设计 → 智能助手配置 → 交付培训 → 技术支持' },
+  { no: '03', title: '业务与数据', chain: '选品预判 → 智能文案 → 广告投放 → 数据复盘' },
+  { no: '04', title: '双向转译', chain: '业务问题 → AI 可介入环节 → 客户可操作用法' },
 ];
 
-const skills = ['Prompt 工程', '智能助手配置', '知识库 / RAG', 'LLM 评测', 'React', 'Vue3', 'TypeScript', 'Node.js', 'Python', 'Docker', 'Claude Code / Cursor', 'GEO'];
+const skillGroups = [
+  { no: '01', title: 'AI 应用', items: ['Prompt 工程', '智能助手配置', '知识库 / RAG', 'LLM 评测', 'AI 生图', '品牌 GEO'] },
+  { no: '02', title: '工程能力', items: ['React', 'Vue3', 'TypeScript', 'Node.js', 'Next / Nuxt', 'Docker + OSS'] },
+  { no: '03', title: '业务与数据', items: ['ECharts 可视化', '数据流转梳理', 'AI Coding', '电商运营复盘'] },
+];
 ---
 
 <section class="about" id="about">
   <div class="section-header">
     <span class="section-tag">ABOUT ME</span>
     <h2 class="section-title">关于我</h2>
+    <p class="section-sub">工作路径从企业级前端工程延伸到 AI 应用落地，中间那段是转译。</p>
+    <span class="section-meta">广州 · UTC+8</span>
   </div>
 
-  <div class="about-row">
-    <div class="about-quote-card">
-      <span class="quote-mark">“</span>
-      <p class="quote-text">方案讲得再漂亮，客户用起来才算落地。</p>
-      <p class="quote-by">—— 我做交付的标准</p>
+  <div class="ab-grid">
+    <p class="ab-lede">
+      工作路径由企业级前端工程延伸至 AI 应用落地：前期主导技术选型、架构搭建与规范制定，具备从零搭建到稳定迭代的工程能力。
+    </p>
+
+    <div class="ab-col">
+      <p class="ab-text">
+        后期将工程能力迁移至 AI 场景，从事提示词工程、智能助手搭建，以及面向客户的交付与教学。
+      </p>
     </div>
 
-    <div class="about-right">
-      <p class="about-intro">
-        前端全栈开发出身，熟悉企业级前端项目的完整开发链路——从架构设计、数据流梳理到稳定交付与长期迭代，工程能力扎实；近一年转到 AI
-        企业服务一线，直面客户洽谈方案、驻场辅导系统落地、以 Prompt 工程交付多场景智能助手。既能和研发对齐实现，也能把技术能力翻译成业务方听得懂的用法——这条双向转译的链路，是我最核心的能力。现在正补齐 RAG 检索与 LLM 评测的工程闭环。
+    <div class="ab-col">
+      <p class="ab-text">
+        技术实现与业务表达之间具备双向转译能力，可与研发对齐实现细节，也可将系统能力转化为业务方可操作的用法。
       </p>
+      <p class="ab-text">
+        当前关注方向为 RAG 检索与 LLM 评测的工程化。
+      </p>
+    </div>
 
-      {experiences.map((e) => (
-        <div class="exp-row">
-          <span class={`exp-dot ${e.dot}`}></span>
-          <span class="exp-text">{e.text}</span>
+    <aside class="ab-margin">
+      <span class="ab-margin-label">NOTE</span>
+      <blockquote class="ab-quote">
+        纸上得来终觉浅，<br />绝知此事要躬行。
+      </blockquote>
+      <cite class="ab-quote-by">陆游《冬夜读书示子聿》</cite>
+    </aside>
+  </div>
+
+  <div class="ab-route">
+    <div class="ab-head">
+      <span class="ab-head-label">PATH</span>
+      <span class="ab-head-rule" aria-hidden="true"></span>
+      <span class="ab-head-title">工作路径</span>
+      <span class="ab-head-count">04 段</span>
+    </div>
+
+    <ol class="ab-route-list">
+      {pathSteps.map((s) => (
+        <li class="ab-stop">
+          <span class="ab-stop-no">{s.no}</span>
+          <span class="ab-stop-title">{s.title}</span>
+          <span class="ab-stop-chain">{s.chain}</span>
+        </li>
+      ))}
+    </ol>
+  </div>
+
+  <div class="ab-vocab">
+    <div class="ab-head">
+      <span class="ab-head-label">SKILLS</span>
+      <span class="ab-head-rule" aria-hidden="true"></span>
+      <span class="ab-head-title">能力地图</span>
+      <span class="ab-head-count">03 组</span>
+    </div>
+
+    <div class="ab-vocab-grid">
+      {skillGroups.map((g) => (
+        <div class="ab-vocab-cell">
+          <span class="ab-vocab-no">{g.no}</span>
+          <h3 class="ab-vocab-name">{g.title}</h3>
+          <p class="ab-vocab-items">
+            {g.items.map((s) => <span>{s}</span>)}
+          </p>
         </div>
       ))}
-
-      <p class="skills-title">常用工具箱</p>
-      <div class="skills-wrap">
-        {skills.map((s) => <span class="skill-chip">{s}</span>)}
-      </div>
     </div>
   </div>
 </section>

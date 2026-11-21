@@ -386,17 +386,6 @@ body.hero-3d-mode .hero-mode-toggle {
    改为纸面网点，让酸绿金句横幅与白卡片成为焦点 */
 .about { background-color: var(--paper); }
 
-/* per-section 的 section-tag 覆盖（global.css 里 .about/.stats/.workflow-teaser
-   用更高优先级把背景改成了 --yellow，导致浅字压酸绿底不可读）。
-   这里用同优先级覆盖，统一回墨底纸字 */
-.about .section-tag,
-.stats .section-tag,
-.workflow-teaser .section-tag,
-.reading .section-tag {
-  background: var(--ink);
-  color: var(--paper);
-}
-
 /* 3D 切换钮 / 次级按钮：白底在深色态保留，文字必须锁回墨色，
    否则 var(--ink) 翻成浅色 → 白底白字 */
 .hero-mode-toggle,

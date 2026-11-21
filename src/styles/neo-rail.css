@@ -1,20 +1,22 @@
 /* ============================================================
    NEO_RAIL — 左侧「书脊」导航
    2026-11-19 第六轮：顶部横条改竖向书脊。
-   参考：TYPE / FORM 的 side rail（导航贴左缘、竖排、像书脊）、
-        Porto Rocha / David Fiz 的固定侧栏（编号 + 短标签）。
-   取舍：不做「hover 才展开标签」——标签常驻更好用；
-        书脊只放编号与中文短标签，颜色仍只做标记（当前项色条 + 数字）。
+   2026-11-21 第七轮：视口 fixed → 1440 画布内 sticky 首列。
+   根因：旧版书脊贴视口左缘、内容画布等比居中，≥1920 时 scale 触顶 1，
+        中间裂开 192→952px 空白；条目 flex:1 在高屏被拉成 177px 稀疏条。
+   新版：书脊随画布一起缩放居中，永远紧贴内容；条目固定高度、目录垂直居中。
+   参考：TYPE / FORM 的 side rail、Porto Rocha / David Fiz 的固定侧栏。
    ============================================================ */
 
 .site-rail {
-  position: fixed;
+  position: sticky;
   top: 0;
-  left: 0;
-  bottom: 0;
+  align-self: start;
   z-index: 60;
   display: flex;
   flex-direction: column;
+  /* 跟随视口高度，但坐标系属于画布（随 scale 一起缩放/居中） */
+  height: 100vh;
   width: 96px;
   background: var(--bg);
   border-right: 2px solid var(--ink);
@@ -65,6 +67,7 @@
 .rail-nav {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   flex: 1;
   min-height: 0;
 }
@@ -97,9 +100,11 @@
   align-items: center;
   justify-content: center;
   gap: 4px;
-  /* 条目等分书脊高度：从 logo 到主题开关之间铺满，像一个真正的目录脊椎 */
-  flex: 1 1 0;
-  min-height: 52px;
+  /* 2026-11-21：固定高度，不再等分书脊高度——
+     9xx~14xx 高屏上 flex:1 会把条目拉成 177px 的稀疏长条。
+     目录垂直居中，条目本身保持紧凑的「编号 + 短标签」书签形态。 */
+  flex: none;
+  height: 60px;
   color: var(--ink);
   text-align: center;
   animation: rail-in 0.42s cubic-bezier(0.2, 0.8, 0.25, 1) both;
@@ -225,9 +230,9 @@
   pointer-events: none;
 }
 
-/* 视口很矮时让条目继续压缩，而不是被裁掉 */
-@media (max-height: 640px) and (min-width: 1024px) {
-  .rail-item { min-height: 0; }
+/* 视口很矮时条目收紧，避免 7 项 + logo + 主题按钮被裁掉 */
+@media (max-height: 720px) and (min-width: 1024px) {
+  .rail-item { height: 48px; }
   .rail-logo { height: 72px; }
 }
 

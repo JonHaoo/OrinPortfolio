@@ -169,26 +169,33 @@
 }
 
 /* ============================================================
-   模块 00 · 关于我 —— 卷首（editorial）
-   这一块是「读」的，不是「操作」的：右边一条边注放引文（替代原来的
-   整幅色块横幅），左边一栏正文；下面一条横向路线轴 + 一张三列词表。
-   与其余四块的区别在阅读方式：只有文字与线，没有可点的卡片。
+   模块 00 · 关于我 —— 旅程地图（2026-11-20 第七轮）
+   用户反馈第六轮编辑式「太单一」（零材质、零交互、三段同节奏）。
+   拼贴三件套：撞色便签引文卡做锚点（硬阴影 + 微旋转 + 胶带），
+   路线轴随滚动生长点亮，能力词表改贴纸墙（hover 归零上浮）。
+   颜色仍只做小面积填充；便签文字锁死墨色，规避深浅主题翻转陷阱。
    ============================================================ */
-.about { --acc: var(--c1); }
+.about { --acc: var(--c1); --acc-text: var(--c1); }
+
+:root[data-theme='dark'] .about { --acc-text: var(--green); }
 
 .ab-grid {
   display: grid;
-  /* 扉页式三栏：导语独占两栏，正文分两栏，边注贴右缘（与路线轴末站同一条竖线） */
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 300px;
-  column-gap: 48px;
+  /* 拼贴：导语在上，正文两栏在左下，便签卡贴右缘跨两行 */
+  grid-template-columns: minmax(0, 1fr) 330px;
+  grid-template-areas:
+    'lede note'
+    'cols note';
+  column-gap: 56px;
+  row-gap: 28px;
   align-items: start;
   margin-top: 44px;
 }
 
 .ab-lede {
-  grid-column: 1 / 3;
+  grid-area: lede;
   max-width: 30em;
-  margin: 0 0 30px;
+  margin: 0;
   font-size: 25px;
   font-weight: 700;
   line-height: 1.72;
@@ -197,7 +204,12 @@
   text-wrap: pretty;
 }
 
-.ab-col { grid-row: 2; }
+.ab-cols {
+  grid-area: cols;
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr);
+  column-gap: 40px;
+}
 
 .ab-text {
   margin: 0;
@@ -210,44 +222,73 @@
 
 .ab-text + .ab-text { margin-top: 16px; }
 
-/* ---- 右：边注（引文） ---- */
-.ab-margin {
-  grid-column: 3;
-  grid-row: 1 / 3;
+/* ---- 右：便签引文卡（视觉锚点） ---- */
+.ab-note {
+  grid-area: note;
   position: relative;
-  margin-top: 6px;
-  padding-left: 20px;
-  border-left: 2px solid var(--ink);
+  margin-top: 10px;
+  padding: 30px 26px 26px;
+  background: var(--c2);
+  border: var(--bd) solid var(--ink);
+  box-shadow: var(--shadow-lg);
+  transform: rotate(-1.5deg);
+  transition: transform 0.28s var(--ease-lift), box-shadow 0.28s var(--ease-lift);
 }
 
-.ab-margin-label {
+/* 胶带：小面积撞色，压住卡片上缘 */
+.ab-note::before {
+  content: '';
+  position: absolute;
+  top: -13px;
+  left: 50%;
+  width: 76px;
+  height: 22px;
+  background: var(--c4);
+  border: 2px solid var(--ink);
+  transform: translateX(-50%) rotate(-3.5deg);
+}
+
+/* 深色态纸底翻深，黑阴影会消失：换成纸白阴影（与页脚 CTA 同一手法） */
+:root[data-theme='dark'] .ab-note {
+  box-shadow: 8px 8px 0 0 rgba(255, 248, 231, 1);
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .ab-note:hover {
+    transform: rotate(0deg) translateY(-4px);
+    box-shadow: var(--shadow-xl);
+  }
+  :root[data-theme='dark'] .ab-note:hover {
+    box-shadow: 10px 10px 0 0 rgba(255, 248, 231, 1);
+  }
+}
+
+.ab-note-label {
   display: block;
   font-family: var(--mono);
   font-size: 9.5px;
   font-weight: 700;
   letter-spacing: 0.18em;
-  color: var(--ink);
-  opacity: 0.62;
+  color: rgba(10, 10, 10, 0.62);
 }
 
 .ab-quote {
   margin: 14px 0 0;
-  font-size: 19px;
+  font-size: 20px;
   font-weight: 800;
   line-height: 1.85;
   letter-spacing: -0.01em;
-  color: var(--ink);
+  color: #0a0a0a;
 }
 
 .ab-quote-by {
   display: block;
-  margin-top: 12px;
+  margin-top: 14px;
   font-family: var(--mono);
   font-size: 10px;
   font-style: normal;
   letter-spacing: 0.04em;
-  color: var(--ink);
-  opacity: 0.62;
+  color: rgba(10, 10, 10, 0.62);
 }
 
 /* ---- 小标题：标签 ——— 中文标题 · 数量 ---- */
@@ -289,15 +330,40 @@
   opacity: 0.62;
 }
 
-/* ---- 路线轴：一条 2px 通线穿过四个方形站点 ---- */
+/* ---- 路线轴：随滚动生长的进度线 + 逐个点亮的站点 ---- */
 .ab-route { margin-top: 58px; }
 
 .ab-route-list {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+/* 轨道 + 进度线：直线用 scaleX 生长（视觉上等价描边生长，代价更低）。
+   --jp 由 home-interactions 的 initAboutJourney 按滚动写入，默认 1（无 JS 完整可见） */
+.ab-route-list::before,
+.ab-route-list::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 0;
+}
+
+.ab-route-list::before {
+  height: 2px;
+  background: var(--hair);
+}
+
+.ab-route-list::after {
+  height: 3px;
+  background: var(--ink);
+  transform-origin: 0 50%;
+  transform: scaleX(var(--jp, 1));
 }
 
 .ab-stop {
@@ -306,30 +372,36 @@
   flex-direction: column;
   gap: 8px;
   padding: 26px 30px 0 0;
-  border-top: 2px solid var(--ink);
 }
 
-/* 站点方块骑在通线上 */
+/* 站点方块骑在通线上；点亮后酸绿填充（小面积撞色） */
 .ab-stop::before {
   content: '';
   position: absolute;
   top: -7px;
   left: 0;
+  z-index: 1;
   width: 12px;
   height: 12px;
+  box-sizing: border-box;
   background: var(--ink);
-  transition: background-color 0.24s;
+  border: 2px solid var(--ink);
+  transition: background-color 0.3s, transform 0.3s;
 }
 
-.ab-stop:hover::before { background: var(--acc); }
+.ab-stop.is-lit::before {
+  background: var(--c2);
+  transform: scale(1.15);
+}
+
+.ab-stop:hover::before { background: var(--c2); }
 
 .ab-stop-no {
   font-family: var(--mono);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.14em;
-  color: var(--ink);
-  opacity: 0.62;
+  color: var(--acc-text);
 }
 
 .ab-stop-title {
@@ -347,7 +419,7 @@
   text-wrap: pretty;
 }
 
-/* ---- 词表：细线分隔，不做胶囊标签 ---- */
+/* ---- 贴纸墙：小角度旋转，hover 归零上浮 ---- */
 .ab-vocab { margin-top: 56px; }
 
 .ab-vocab-grid {
@@ -366,11 +438,8 @@
   font-size: 9.5px;
   font-weight: 700;
   letter-spacing: 0.14em;
-  color: var(--acc);
+  color: var(--acc-text);
 }
-
-/* 电紫压在深底上只有 3.17:1，深色态换浅紫 */
-:root[data-theme='dark'] .ab-vocab-no { color: var(--green); }
 
 .ab-vocab-name {
   margin: 6px 0 0;
@@ -380,53 +449,79 @@
   color: var(--ink);
 }
 
-.ab-vocab-items {
+.ab-stickers {
   display: flex;
   flex-wrap: wrap;
-  gap: 2px 16px;
-  margin: 10px 0 0;
-  font-size: 13px;
-  line-height: 1.95;
-  color: var(--ink);
-  opacity: 0.78;
+  gap: 12px;
+  margin: 16px 0 0;
 }
 
-/* 每项前一个小方块做分隔：避免用「·」拼接后换行时行首挂一个点 */
-.ab-vocab-items > span {
+/* 每组的填充色：只落在首词一张贴纸上（小面积） */
+.tone-acid { --tone: var(--c2); }
+.tone-blue { --tone: var(--c4); }
+.tone-violet { --tone: var(--green); }
+
+.ab-chip {
+  --r: 0deg;
   display: inline-flex;
   align-items: baseline;
-  gap: 7px;
-  white-space: nowrap;
+  padding: 7px 12px;
+  border: 2.5px solid #0a0a0a;
+  background: var(--surface);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.25;
+  /* 贴纸底恒为白（--surface 深色态不翻转），字与框锁死墨色，规避白底白字 */
+  color: #0a0a0a;
+  transform: rotate(var(--r));
+  transition: transform 0.22s var(--ease-lift), box-shadow 0.22s var(--ease-lift);
 }
 
-.ab-vocab-items > span::before {
-  content: '';
-  width: 3px;
-  height: 3px;
-  background: currentColor;
-  transform: translateY(-3px);
+/* 旋转角度按序号固定，不用随机数（水合稳定） */
+.ab-chip:nth-child(4n + 1) { --r: -1.8deg; }
+.ab-chip:nth-child(4n + 2) { --r: 1.5deg; }
+.ab-chip:nth-child(4n + 3) { --r: -1deg; }
+.ab-chip:nth-child(4n) { --r: 2deg; }
+
+.ab-chip.hl {
+  background: var(--tone);
+  /* --tone 三色都是浅饱和底，深浅主题都锁墨字 */
+  color: #0a0a0a;
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .ab-chip:hover {
+    transform: rotate(0deg) translateY(-3px);
+    box-shadow: var(--shadow-sm);
+  }
 }
 
 @media (max-width: 1023px) {
   .ab-grid {
     grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'lede'
+      'note'
+      'cols';
     row-gap: 24px;
     margin-top: 32px;
   }
-  .ab-lede { grid-column: 1; font-size: 20px; margin-bottom: 0; max-width: none; }
-  .ab-col { grid-row: auto; }
-  .ab-margin { grid-column: 1; grid-row: auto; margin-top: 8px; }
-  .ab-margin { padding-left: 16px; }
-  .ab-quote { font-size: 17px; }
+  .ab-lede { font-size: 20px; max-width: none; }
+  .ab-note { margin-top: 6px; max-width: 420px; }
+  .ab-cols { grid-template-columns: minmax(0, 1fr); row-gap: 16px; }
   .ab-route { margin-top: 40px; }
-  .ab-route-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .ab-stop { padding: 22px 20px 22px 0; }
+  .ab-route-list { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; }
+  /* 双行网格里通线只盖得住首行，退回站点自带顶线 */
+  .ab-route-list::before,
+  .ab-route-list::after { display: none; }
+  .ab-stop { border-top: 2px solid var(--ink); padding: 22px 20px 22px 0; }
   .ab-stop:nth-child(n + 3) { margin-top: 26px; }
   .ab-vocab { margin-top: 40px; }
   .ab-vocab-grid { grid-template-columns: minmax(0, 1fr); gap: 22px; }
 }
 
 @media (max-width: 560px) {
+  .ab-note { transform: none; max-width: none; }
   .ab-route-list { grid-template-columns: minmax(0, 1fr); }
   .ab-stop { padding: 20px 0 20px 0; }
   .ab-stop:nth-child(n + 2) {
@@ -435,6 +530,7 @@
     border-top-color: var(--hair);
   }
   .ab-stop:nth-child(n + 2)::before { display: none; }
+  .ab-stop.is-lit .ab-stop-title { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
   .ab-head { grid-template-columns: auto minmax(0, 1fr) auto; }
   .ab-head-count { display: none; }
 }
@@ -743,237 +839,257 @@
 }
 
 /* ============================================================
-   模块 02 · 能力与方法 —— 抽屉卡带（横向滚动）
+   模块 02 · 能力与方法 —— 巨型标号带（2026-11-21 第九轮）
+   用户否决「能力罗盘」（细线 + 小方块 = 简陋），从三种布局原型中选定 B。
+   执行依据 NEO_BRUTAL_TOKENS：3px 粗边框 / 8px 零模糊硬阴影 /
+   平面饱和色块 / 破格几何 / 巨大编号。
+   交互：点超大数字或方向键切换，整块海报换色，证据面板错峰滑入。
+   深浅主题：彩色块与白底面板上的文字一律锁死对比色，不随主题翻转。
    ============================================================ */
 .stats { --acc: var(--c2); }
 
-.cap-track {
-  display: flex;
-  gap: 22px;
-  padding: 36px 0 6px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-  cursor: grab;
-}
-
-.cap-track::-webkit-scrollbar { display: none; }
-
-.cap-track.is-drag {
-  cursor: grabbing;
-  user-select: none;
-}
-
-/* 拖拽时不要让子元素抢指针，否则 pointermove 会断 */
-.cap-track.is-drag * { pointer-events: none; }
-
-.cap-card {
-  --acc: var(--c1);
-  position: relative;
-  flex: 0 0 calc((100% - 44px) / 3);
-  scroll-snap-align: start;
-  display: flex;
-  flex-direction: column;
-  padding: 24px 26px;
-  min-height: 402px;
-  background: var(--raise);
-  border: 2px solid var(--ink);
-}
-
-.cap-card--1 .cap-card-tab { color: #fff; }
-
-.cap-card--2 { --acc: var(--c4); }
-.cap-card--3 { --acc: var(--c3); }
-.cap-card--4 { --acc: var(--c2); }
-
-/* 档案抽屉的标签页：伸出卡片顶部，让横向卡带有一条「目录」的节奏 */
-.cap-card-tab {
-  position: absolute;
-  top: -32px;
-  left: -2px;
+/* ---- 巨型标号带：四个超大描边数字，选中项填对应色 ---- */
+.cap-belt {
   display: grid;
-  place-items: center;
-  min-width: 64px;
-  height: 32px;
-  padding: 0 12px;
-  background: var(--acc);
-  border: 2px solid var(--ink);
-  border-bottom: none;
-  font-family: var(--sans);
-  font-size: 15px;
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  color: #0a0a0a;
-  font-variant-numeric: tabular-nums;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 38px;
+  border: var(--bd) solid var(--ink);
+  box-shadow: var(--shadow-lg);
 }
 
-.cap-card-en {
-  align-self: flex-end;
+.bl-tab {
+  --acc: var(--c1);
+  --on: #fff;
+  position: relative;
+  padding: 16px 18px 14px;
+  background: var(--bg);
+  color: var(--ink);
+  border: none;
+  border-right: var(--bd) solid var(--ink);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  transition: background-color 0.22s, color 0.22s;
+}
+
+.bl-tab:last-child { border-right: none; }
+.bl-tab--1 { --acc: var(--c1); --on: #fff; }
+.bl-tab--2 { --acc: var(--c4); --on: #0a0a0a; }
+.bl-tab--3 { --acc: var(--c3); --on: #0a0a0a; }
+.bl-tab--4 { --acc: var(--c2); --on: #0a0a0a; }
+
+.bl-num {
+  display: block;
+  font-family: var(--sans);
+  font-size: clamp(48px, 5.4vw, 78px);
+  font-weight: 900;
+  line-height: 0.84;
+  letter-spacing: -0.07em;
+  color: transparent;
+  -webkit-text-stroke: 2px var(--ink);
+  transition: color 0.22s, -webkit-text-stroke-color 0.22s;
+}
+
+.bl-tab.on { background: var(--acc); color: var(--on); }
+.bl-tab.on .bl-num { color: var(--on); -webkit-text-stroke-color: var(--on); }
+
+.bl-lbl {
+  display: block;
+  margin-top: 10px;
   font-family: var(--mono);
   font-size: 9.5px;
   font-weight: 700;
-  letter-spacing: 0.16em;
-  color: var(--ink);
-  opacity: 0.62;
+  letter-spacing: 0.14em;
+  opacity: 0.78;
 }
 
-.cap-card-title {
-  margin-top: 16px;
+.bl-nm {
+  display: block;
+  margin-top: 3px;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+/* ---- 主从面板：左彩色海报 / 右白底证据 ---- */
+.cap-stage {
+  border: var(--bd) solid var(--ink);
+  border-top: none;
+  box-shadow: var(--shadow-lg);
+  margin-top: 14px;
+  background: var(--surface);
+}
+
+.bl-panel {
+  --acc: var(--c1);
+  --on: #fff;
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+  min-height: 272px;
+}
+
+.bl-panel[hidden] { display: none; }
+.bl-panel--1 { --acc: var(--c1); --on: #fff; }
+.bl-panel--2 { --acc: var(--c4); --on: #0a0a0a; }
+.bl-panel--3 { --acc: var(--c3); --on: #0a0a0a; }
+.bl-panel--4 { --acc: var(--c2); --on: #0a0a0a; }
+
+.bl-poster {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+  padding: 26px 28px;
+  background: var(--acc);
+  color: var(--on);
+  border-right: var(--bd) solid #0a0a0a;
+}
+
+.bl-poster::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(10, 10, 10, 0.18) 1.2px, transparent 1.2px);
+  background-size: 14px 14px;
+  pointer-events: none;
+}
+
+.bl-big {
+  position: absolute;
+  top: 6px;
+  left: 18px;
   font-family: var(--sans);
-  font-size: 27px;
+  font-size: 124px;
   font-weight: 900;
-  line-height: 1.2;
-  letter-spacing: -0.035em;
-  color: var(--ink);
+  line-height: 0.8;
+  letter-spacing: -0.08em;
+  opacity: 0.26;
 }
 
-.cap-card-desc {
-  margin-top: 10px;
-  font-size: 14px;
-  line-height: 1.75;
-  color: var(--ink);
+.bl-name {
+  position: relative;
+  margin-top: auto;
+  font-family: var(--sans);
+  font-size: 34px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+
+.bl-en {
+  position: relative;
+  margin-top: 8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
   opacity: 0.76;
+}
+
+.bl-stamp {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border: var(--bd) solid #0a0a0a;
+  border-radius: 50%;
+  background: var(--surface);
+  color: #0a0a0a;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  transform: rotate(-12deg);
+}
+
+.bl-body {
+  padding: 26px 30px;
+  /* 白底面板恒为 --surface（深色态不翻转），文字与边框锁死墨色 */
+  color: #0a0a0a;
+}
+
+.bl-desc {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.8;
   text-wrap: pretty;
 }
 
-.cap-card-label {
-  margin-top: 22px;
+.bl-label {
+  display: block;
+  margin: 20px 0 12px;
   font-family: var(--mono);
   font-size: 9.5px;
   font-weight: 700;
   letter-spacing: 0.16em;
-  color: var(--ink);
-  opacity: 0.62;
+  color: #0a0a0a;
+  opacity: 0.6;
 }
 
-.cap-card-list {
+.bl-ev {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin: 12px 0 0;
+  gap: 9px;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.cap-card-list li {
-  position: relative;
-  padding-left: 15px;
+.bl-ev li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
   font-size: 13px;
-  line-height: 1.62;
-  color: var(--ink);
-  opacity: 0.9;
+  line-height: 1.6;
+  color: #0a0a0a;
 }
 
-.cap-card-list li::before {
+.bl-ev li::before {
   content: '';
-  position: absolute;
-  left: 0;
-  top: 0.62em;
-  width: 5px;
-  height: 5px;
+  flex: none;
+  width: 9px;
+  height: 9px;
+  margin-top: 0.42em;
   background: var(--acc);
+  border: 2px solid #0a0a0a;
 }
 
-.cap-card-tags {
+.bl-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 14px;
-  margin: auto 0 0;
-  padding: 18px 0 0;
+  gap: 8px;
+  margin: 18px 0 0;
+  padding: 0;
   list-style: none;
+}
+
+.bl-tags li {
+  padding: 5px 9px;
+  border: 2px solid #0a0a0a;
+  background: var(--surface);
+  color: #0a0a0a;
   font-family: var(--mono);
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.04em;
-  color: var(--ink);
-  opacity: 0.62;
 }
 
-/* ---- 翻页控制 ---- */
-.cap-ctrl {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 28px;
-  margin-top: 18px;
-  padding-top: 16px;
-  border-top: 1px solid var(--hair);
+/* 切换时证据错峰滑入；重播靠 JS 摘掉 is-current 再加回 */
+@keyframes bl-in {
+  from { opacity: 0; translate: 16px 0; }
+  to { opacity: 1; translate: 0 0; }
 }
 
-.cap-ctrl-left {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  min-width: 0;
-}
-
-.cap-ctrl-hint {
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.02em;
-  color: var(--ink);
-  opacity: 0.62;
-  white-space: nowrap;
-}
-
-.cap-progress {
-  display: block;
-  width: 160px;
-  height: 3px;
-  flex: none;
-  background: var(--hair);
-}
-
-.cap-progress-bar {
-  display: block;
-  width: 100%;
-  height: 100%;
-  background: var(--ink);
-  transform: scaleX(0.06);
-  transform-origin: left;
-  transition: transform 0.25s var(--ease-lift);
-}
-
-.cap-ctrl-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: none;
-}
-
-.cap-count {
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: var(--ink);
-  opacity: 0.7;
-  font-variant-numeric: tabular-nums;
-}
-
-.cap-btn {
-  width: 40px;
-  height: 40px;
-  display: grid;
-  place-items: center;
-  background: none;
-  border: 2px solid var(--ink);
-  color: var(--ink);
-  cursor: pointer;
-  transition: background-color 0.2s, color 0.2s, transform 0.2s;
-}
-
-.cap-btn:hover:not(:disabled) {
-  background: var(--ink);
-  color: var(--bg);
-}
-
-.cap-btn:active:not(:disabled) { transform: translate(2px, 2px); }
-
-.cap-btn:disabled {
-  opacity: 0.26;
-  cursor: default;
+@media (prefers-reduced-motion: no-preference) {
+  .bl-panel.is-current .bl-desc { animation: bl-in 0.34s var(--ease-lift) both; }
+  .bl-panel.is-current .bl-ev li {
+    animation: bl-in 0.36s var(--ease-lift) both;
+    animation-delay: calc(0.06s + var(--ev-i) * 0.06s);
+  }
 }
 
 /* ---- 协作方法：四条准则横排，编号压在句子上方 ---- */
@@ -1007,6 +1123,7 @@
   opacity: 0.62;
 }
 
+/* ---- 协作方法：循环流水线（四段 + 流动箭头） ---- */
 .method-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1017,39 +1134,89 @@
 }
 
 .method-item {
-  padding: 0 26px 0 24px;
-  border-left: 1px solid var(--hair);
+  position: relative;
+  padding: 14px 30px 14px 24px;
+  border: 2px solid var(--ink);
+  border-right: none;
+  background: var(--bg);
+  transition: background-color 0.24s, transform 0.24s;
 }
 
-.method-item:first-child {
-  padding-left: 0;
-  border-left: none;
+.method-grid .method-item:first-child { border-left: 2px solid var(--ink); }
+
+.method-grid .method-item:last-child { border-right: 2px solid var(--ink); }
+
+/* 悬停时整段抬起、编号色块翻转 */
+@media (hover: hover) {
+  .method-item:hover {
+    background: var(--raise);
+    transform: translateY(-3px);
+  }
 }
 
 .method-no {
-  display: block;
+  display: inline-block;
+  padding: 3px 7px;
+  background: var(--ink);
+  color: var(--bg);
   font-family: var(--mono);
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.14em;
-  color: var(--ink);
-  opacity: 0.62;
+  letter-spacing: 0.1em;
 }
 
 .method-name {
-  margin-top: 8px;
-  font-size: 17px;
+  margin-top: 10px;
+  font-size: 16px;
   font-weight: 800;
   letter-spacing: -0.01em;
   color: var(--ink);
 }
 
 .method-desc {
-  margin-top: 8px;
-  font-size: 13px;
-  line-height: 1.72;
+  margin-top: 7px;
+  font-size: 12.5px;
+  line-height: 1.7;
   color: var(--ink);
-  opacity: 0.72;
+  opacity: 0.74;
+}
+
+/* 段间箭头：虚线轨道 + 流动的小三角，暗示循环方向 */
+.method-arrow {
+  position: absolute;
+  top: 50%;
+  right: -13px;
+  z-index: 2;
+  width: 24px;
+  height: 14px;
+  transform: translateY(-50%);
+  background: var(--bg);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.method-arrow::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  border-top: 2px solid var(--ink);
+  border-right: 2px solid var(--ink);
+  transform: translateY(-50%) rotate(45deg);
+  animation: method-flow 1.8s ease-in-out infinite;
+  animation-delay: calc(var(--flow-i) * 0.22s);
+}
+
+@keyframes method-flow {
+  0%, 100% { left: 2px; opacity: 0.35; }
+  50% { left: 14px; opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .method-arrow::after { animation: none; left: 9px; opacity: 0.8; }
+  .method-item { transition: none; }
 }
 
 /* ============================================================
@@ -1199,7 +1366,9 @@
   transition: color 0.2s, opacity 0.2s;
 }
 
-.rd-bars.has-on .rd-chart-read {
+/* 联动态挂在 .rd-chart 上：.rd-chart-read 在 .rd-chart-head 内，
+   与 .rd-bars 是兄弟关系，原来的 .rd-bars.has-on .rd-chart-read 永不匹配。 */
+.rd-chart.has-on .rd-chart-read {
   color: var(--c1);
   opacity: 1;
 }
@@ -1249,12 +1418,16 @@
   height: 100%;
   width: var(--w, 0%);
   background: var(--c, var(--yellow));
-  transform: scaleX(0);
+  /* 默认即终态：无 JS / reduced-motion / 爬虫看到的是完整条形图。
+     只有 JS 打上 html.rv-ready 且给 .rd-chart 挂上 .rv 后，才先折叠等待揭示。 */
+  transform: scaleX(1);
   transform-origin: left;
   transition: transform 0.9s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
-/* 进入视口后依次长出（由 .rv / .rv-in 驱动，顺序用 nth-child 排） */
+/* 进入视口后依次长出（由 .rv / .rv-in 驱动，顺序用 nth-child 排）。
+   :not(.rv-in) 不能省：.rv 类揭示后不会移除，否则折叠规则会一直压着终态。 */
+html.rv-ready .rd-chart.rv:not(.rv-in) .rd-bar { transform: scaleX(0); }
 .rd-chart.rv-in .rd-bar { transform: scaleX(1); }
 .rd-bar-row:nth-child(1) .rd-bar { transition-delay: 0.02s; }
 .rd-bar-row:nth-child(2) .rd-bar { transition-delay: 0.08s; }
@@ -1751,19 +1924,31 @@
   .wk-tab { padding: 18px 0; }
   .wk-tab-no { font-size: 26px; }
 
-  /* 能力卡带：卡片宽度按视口收，仍保留右侧露出的一角 */
-  .cap-track { gap: 16px; padding-top: 32px; }
-  .cap-card { flex: 0 0 min(84vw, 360px); min-height: 0; padding: 20px 20px 22px; }
-  .cap-card-tab { top: -30px; height: 30px; min-width: 56px; font-size: 14px; }
-  .cap-card-title { font-size: 23px; }
-  .cap-ctrl { flex-direction: column; align-items: stretch; gap: 14px; }
-  .cap-ctrl-left { flex-direction: column; align-items: flex-start; gap: 10px; }
-  .cap-ctrl-right { align-self: flex-end; }
-  .cap-progress { width: 100%; }
+  /* 巨型标号带：两列数字 + 面板上下叠 */
+  .cap-belt { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 30px; }
+  .bl-tab:nth-child(2) { border-right: none; }
+  .bl-tab:nth-child(-n + 2) { border-bottom: var(--bd) solid var(--ink); }
+  .bl-tab { padding: 12px 14px 12px; }
+  .bl-num { font-size: clamp(40px, 9vw, 60px); }
+  .bl-nm { font-size: 14px; }
 
-  .method-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 22px; }
-  .method-item:nth-child(odd) { padding-left: 0; border-left: none; }
-  .method-item:nth-child(even) { padding-left: 18px; }
+  .bl-panel { grid-template-columns: minmax(0, 1fr); min-height: 0; }
+  .bl-poster {
+    min-height: 176px;
+    padding: 20px 22px;
+    border-right: none;
+    border-bottom: var(--bd) solid #0a0a0a;
+  }
+  .bl-big { font-size: 88px; top: 0; }
+  .bl-name { font-size: 27px; }
+  .bl-stamp { width: 54px; height: 54px; font-size: 9px; right: 16px; bottom: 16px; }
+  .bl-body { padding: 22px 22px 24px; }
+  .bl-desc { font-size: 14px; }
+
+  .method-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .method-item { padding: 12px 14px; border-right: 2px solid var(--ink); }
+  .method-grid .method-item:nth-child(odd) { border-left: 2px solid var(--ink); }
+  .method-arrow { display: none; }
   .method-head { flex-direction: column; gap: 8px; }
   .method-block { margin-top: 34px; }
 
@@ -1805,11 +1990,11 @@
 
 @media (max-width: 480px) {
   .method-grid { grid-template-columns: minmax(0, 1fr); }
-  .method-item { padding: 0 !important; border-left: none; }
-  .method-item + .method-item {
-    padding-top: 16px !important;
-    border-top: 1px solid var(--hair);
-  }
+  .method-item { padding: 12px 14px !important; border-left: 2px solid var(--ink) !important; }
+  .bl-tab { padding: 10px 12px; }
+  .bl-lbl { font-size: 8.5px; letter-spacing: 0.1em; }
+  .bl-poster { min-height: 156px; }
+  .bl-big { font-size: 72px; }
 
   .wk-tab { grid-template-columns: 44px minmax(0, 1fr) 18px; gap: 10px; }
   .wk-tab-title { font-size: 15px; }

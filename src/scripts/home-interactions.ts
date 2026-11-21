@@ -1,11 +1,12 @@
 /**
- * 首页「关于我」以下的四套交互。
+ * 首页五套交互。
  *
- * 设计前提（2026-11-19 第五轮）：每个区块用不同的布局与交互语言，
+ * 设计前提（2026-11-19 第五轮 / 2026-11-20 第七轮）：每个区块用不同的布局与交互语言，
  * 但都作用在真实内容上，不做演示性组件（用户第一轮就否掉了「交互实验室」）。
  *
+ * 0) 关于我 —— 旅程地图：滚动驱动进度线生长 + 站点逐个点亮
  * 1) 精选作品 —— 主从切换：左侧索引点选，右侧档案面板切换
- * 2) 能力与方法 —— 横向卡带：按钮翻页 + 指针拖动 + 进度条
+ * 2) 能力与方法 —— 巨型标号带：点选/方向键切换 + 整块海报换色 + 证据错峰滑入
  * 3) 阅读账本 —— 图表联动：悬停/聚焦分类条，其余淡出并读占比
  * 4) 我的方法论 —— 双折页：点击/回车翻开，露出四条原则
  *
@@ -61,105 +62,59 @@ function initWorksSwitch(): void {
   select(Math.max(0, tabs.findIndex((t) => t.classList.contains('is-on'))));
 }
 
-let capSync: (() => void) | null = null;
+function initCapBelt(): void {
+  const belt = document.querySelector<HTMLElement>('[data-cap-belt]');
+  if (!belt || belt.dataset.beltInit) return;
+  belt.dataset.beltInit = '1';
 
-function initCapStrip(): void {
-  const track = document.querySelector<HTMLElement>('[data-strip-track]');
-  if (!track || track.dataset.capInit) return;
-  track.dataset.capInit = '1';
+  const tabs = Array.from(belt.querySelectorAll<HTMLButtonElement>('[data-bl-tab]'));
+  const panels = Array.from(document.querySelectorAll<HTMLElement>('[data-bl-panel]'));
+  if (!tabs.length || tabs.length !== panels.length) return;
 
-  const prev = document.querySelector<HTMLButtonElement>('[data-strip-prev]');
-  const next = document.querySelector<HTMLButtonElement>('[data-strip-next]');
-  const bar = document.querySelector<HTMLElement>('[data-strip-bar]');
-  const count = document.querySelector<HTMLElement>('[data-strip-count]');
-  const cards = Array.from(track.children) as HTMLElement[];
-  if (!cards.length) return;
+  let current = 0;
 
-  const step = () => {
-    // 必须用 offsetWidth：scrollLeft / scrollWidth / clientWidth 都是未缩放的布局坐标，
-    // 而 getBoundingClientRect().width 会被 .page 的 transform: scale() 缩过（1440 画布下 ×0.933），
-    // 两者混用会让每点一次「下一张」少走约 28px，卡片逐次错位（当前只有 4 张卡、一次就滚到底，症状被掩盖）
-    const card = cards[0].offsetWidth;
-    const gap = parseFloat(getComputedStyle(track).columnGap || '0') || 0;
-    return card + gap;
+  const select = (index: number, moveFocus = false) => {
+    if (index === current && !panels[index].hidden) return;
+    current = index;
+
+    // tablist 语义：aria-selected + roving tabindex，键盘焦点只在当前项
+    tabs.forEach((tab, i) => {
+      const on = i === index;
+      tab.classList.toggle('on', on);
+      tab.setAttribute('aria-selected', on ? 'true' : 'false');
+      tab.tabIndex = on ? 0 : -1;
+    });
+
+    panels.forEach((panel, i) => {
+      const on = i === index;
+      panel.hidden = !on;
+      panel.classList.remove('is-current');
+      if (on) {
+        // 重播证据错峰入场：摘掉 → 强制回流 → 加回
+        void panel.offsetWidth;
+        panel.classList.add('is-current');
+      }
+    });
+
+    if (moveFocus) tabs[index].focus();
   };
 
-  const go = (dir: number) => {
-    track.scrollBy({ left: step() * dir, behavior: 'smooth' });
-  };
+  tabs.forEach((tab, i) => tab.addEventListener('click', () => select(i)));
 
-  prev?.addEventListener('click', () => go(-1));
-  next?.addEventListener('click', () => go(1));
-
-  const pad = (n: number) => String(n).padStart(2, '0');
-
-  const sync = () => {
-    const max = track.scrollWidth - track.clientWidth;
-    const ratio = max > 0 ? track.scrollLeft / max : 0;
-    if (bar) bar.style.transform = `scaleX(${Math.max(0.06, ratio)})`;
-
-    // 计数器显示「当前视野里是第几张到第几张」而不是单个序号，
-    // 否则滚到末尾时左边缘是第 2 张，序号永远显示不到 04
-    if (count) {
-      const s = step();
-      const visible = Math.max(1, Math.round((track.clientWidth + (s - cards[0].offsetWidth)) / s));
-      const start = Math.round(track.scrollLeft / s);
-      const end = Math.min(start + visible, cards.length);
-      count.textContent =
-        visible <= 1
-          ? `${pad(end)} / ${pad(cards.length)}`
-          : `${pad(start + 1)}–${pad(end)} / ${pad(cards.length)}`;
-    }
-
-    if (prev) prev.disabled = track.scrollLeft < 4;
-    if (next) next.disabled = track.scrollLeft > max - 4;
-  };
-
-  track.addEventListener('scroll', sync, { passive: true });
-  // resize 只能挂在 window 上，跨软导航不会随节点自动解绑：
-  // 先摘掉上一轮的回调，否则每往返一次首页就多一个指向死节点的监听
-  if (capSync) window.removeEventListener('resize', capSync);
-  capSync = sync;
-  window.addEventListener('resize', capSync);
-  sync();
-
-  // 指针拖动：鼠标用户没有横向滚轮，靠拖拽翻页
-  let dragging = false;
-  let startX = 0;
-  let startLeft = 0;
-  let moved = 0;
-
-  track.addEventListener('pointerdown', (e) => {
-    if (e.pointerType === 'touch') return; // 触屏交给原生滚动
-    dragging = true;
-    moved = 0;
-    startX = e.clientX;
-    startLeft = track.scrollLeft;
-    track.classList.add('is-drag');
+  // 键盘：← → 顺序切换，Home / End 跳首尾
+  belt.addEventListener('keydown', (e) => {
+    const key = e.key;
+    if (key !== 'ArrowRight' && key !== 'ArrowLeft' && key !== 'Home' && key !== 'End') return;
+    e.preventDefault();
+    let to = current;
+    if (key === 'ArrowRight') to = (current + 1) % tabs.length;
+    if (key === 'ArrowLeft') to = (current - 1 + tabs.length) % tabs.length;
+    if (key === 'Home') to = 0;
+    if (key === 'End') to = tabs.length - 1;
+    select(to, true);
   });
 
-  track.addEventListener('pointermove', (e) => {
-    if (!dragging) return;
-    const dx = e.clientX - startX;
-    moved = Math.abs(dx);
-    if (moved > 3) track.setPointerCapture?.(e.pointerId);
-    track.scrollLeft = startLeft - dx;
-  });
-
-  const end = () => {
-    if (!dragging) return;
-    dragging = false;
-    track.classList.remove('is-drag');
-    if (moved > 24) {
-      // 拖过半张卡就吸附到最近一张
-      const target = Math.round(track.scrollLeft / step()) * step();
-      track.scrollTo({ left: target, behavior: 'smooth' });
-    }
-  };
-
-  track.addEventListener('pointerup', end);
-  track.addEventListener('pointercancel', end);
-  track.addEventListener('pointerleave', end);
+  select(Math.max(0, tabs.findIndex((t) => t.classList.contains('on'))));
 }
 
 function initReadingBars(): void {
@@ -168,12 +123,16 @@ function initReadingBars(): void {
   wrap.dataset.barsInit = '1';
 
   const rows = Array.from(wrap.querySelectorAll<HTMLElement>('[data-bar]'));
+  // 读数行 .rd-chart-read 是 .rd-bars 的兄弟（同属 .rd-chart），不是后代：
+  // 联动态要同步挂到 .rd-chart 上，CSS 才能选中它换成强调色。
+  const chart = wrap.closest<HTMLElement>('.rd-chart');
   const read = document.querySelector<HTMLElement>('[data-chart-read]');
   const idle = read?.dataset.idle || '';
   if (!rows.length) return;
 
   const clear = () => {
     wrap.classList.remove('has-on');
+    chart?.classList.remove('has-on');
     rows.forEach((row) => row.classList.remove('is-on'));
     if (read) read.textContent = idle;
   };
@@ -181,6 +140,7 @@ function initReadingBars(): void {
   rows.forEach((row) => {
     const on = () => {
       wrap.classList.add('has-on');
+      chart?.classList.add('has-on');
       rows.forEach((r) => r.classList.toggle('is-on', r === row));
       if (read) {
         const name = row.dataset.name || '';
@@ -223,6 +183,10 @@ function initFlipCards(): void {
       buttons.forEach((b) => b.setAttribute('aria-expanded', open ? 'true' : 'false'));
       front.inert = open;
       back.inert = !open;
+      // inert 只管可聚焦性，屏幕阅读器读的是 aria-hidden：两者必须同步，
+      // 否则翻开后背面仍被当作隐藏内容。模板默认 true，保证无 JS 时不会 Tab 到背面。
+      front.setAttribute('aria-hidden', open ? 'true' : 'false');
+      back.setAttribute('aria-hidden', open ? 'false' : 'true');
       if (moveFocus) {
         (open ? back : front)
           .querySelector<HTMLButtonElement>('[data-flip-btn]')
@@ -232,6 +196,8 @@ function initFlipCards(): void {
 
     front.inert = false;
     back.inert = true;
+    front.setAttribute('aria-hidden', 'false');
+    back.setAttribute('aria-hidden', 'true');
 
     buttons.forEach((btn) => {
       // MouseEvent.detail === 0 表示这次点击由键盘（Enter / 空格）产生
@@ -247,6 +213,66 @@ function initFlipCards(): void {
       }
     });
   });
+}
+
+/* ---- 关于我 · 旅程地图：滚动驱动进度线（2026-11-20 第七轮） ----
+   [data-journey] 上写 --jp（0→1），CSS 据此 scaleX 生长进度线；
+   4 个站点按阈值逐个点亮（.is-lit），回滚会熄灭，可来回擦洗。
+   reduced-motion：直接给终态（线全亮、站点全亮），不挂监听。
+   监听全局只挂一次、每次现查节点，兼容 ClientRouter 软导航。 */
+let journeyBound = false;
+let journeyFrame = 0;
+
+function initAboutJourney(): void {
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const paint = () => {
+    const root = document.querySelector<HTMLElement>('[data-journey]');
+    if (!root) return;
+
+    if (reduce) {
+      root.style.setProperty('--jp', '1');
+      root.querySelectorAll('.ab-stop').forEach((s) => s.classList.add('is-lit'));
+      return;
+    }
+
+    const rect = root.getBoundingClientRect();
+    const vh = window.innerHeight || 1;
+    // 进入视口 82% 高度开始生长，走到 24% 高度处完成（约 0.58 屏的滚动行程）
+    const p = (vh * 0.82 - rect.top) / (vh * 0.58);
+    const jp = Math.min(1, Math.max(0, p));
+    root.style.setProperty('--jp', jp.toFixed(4));
+    root.querySelectorAll('.ab-stop').forEach((s, i) => {
+      s.classList.toggle('is-lit', jp >= (i + 0.7) / 4);
+    });
+  };
+
+  if (reduce) {
+    paint();
+    return;
+  }
+
+  const schedule = () => {
+    if (journeyFrame) return;
+    journeyFrame = requestAnimationFrame(() => {
+      journeyFrame = 0;
+      paint();
+    });
+  };
+
+  if (!journeyBound) {
+    journeyBound = true;
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    // 打印/长截图不会滚动：给终态，避免进度线停在空白轨道上（与 reveal 兜底同一动机）
+    window.addEventListener('beforeprint', () => {
+      const root = document.querySelector<HTMLElement>('[data-journey]');
+      if (!root) return;
+      root.style.setProperty('--jp', '1');
+      root.querySelectorAll('.ab-stop').forEach((s) => s.classList.add('is-lit'));
+    });
+  }
+  paint();
 }
 
 /* 书脊导航的阅读进度：右缘那条 2px 线随滚动增长。
@@ -281,8 +307,9 @@ function initRailProgress(): void {
 }
 
 export function initHomeInteractions(): void {
+  initAboutJourney();
   initWorksSwitch();
-  initCapStrip();
+  initCapBelt();
   initReadingBars();
   initFlipCards();
   initRailProgress();

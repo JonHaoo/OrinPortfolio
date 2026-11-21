@@ -119,9 +119,18 @@ a { color: inherit; text-decoration: none; }
   top: 0;
   left: 0;
   width: 1440px;
+  /* 2026-11-21：书脊并入画布，与内容一起缩放居中。
+     首列 96px 给书脊，其余给正文；书脊不再贴在视口左缘。 */
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  align-items: start;
   transform-origin: top left;
   background: var(--bg);
   transition: background-color var(--dur-base) var(--ease-slide);
+}
+
+.page-main {
+  min-width: 0;
 }
 
 /* ---------- 导航栏 ---------- */
@@ -1611,6 +1620,8 @@ body.hero-3d-mode .hero-mode-toggle {
     position: static;
     width: 100%;
     transform: none;
+    /* 书脊折成顶部横条：画布退回单列，书脊在上、正文在下 */
+    display: block;
   }
 
   /* 头部：logo + 开关一行；导航整行铺开（触控目标加高）；CTA 省略（导航/页脚已有联系入口） */

@@ -1,8 +1,10 @@
 ---
-// 关于我 —— 卷首（editorial）
-// 2026-11-19 第六轮：与下面四块都不同，这一块是「读」的，不是「操作」的。
-// 左栏一条边注（引文，替代原来的整幅色块横幅），右栏正文；
-// 下方一条横向路线轴（2px 贯通线 + 方形站点）和一张三列词表（细线分隔，不做胶囊标签）。
+// 关于我 —— 旅程地图（2026-11-20 第七轮）
+// 用户反馈第六轮编辑式「太单一」（零材质、零交互、三段同节奏）。
+// 方向确认：滚动叙事 · 旅程地图——
+//   ① 便签引文卡做视觉锚点（撞色 + 硬阴影 + 微旋转 + 胶带）
+//   ② 路线轴改滚动驱动：进度线随滚动生长，4 站逐个点亮（可回退）
+//   ③ 能力词表改贴纸墙：小角度旋转，hover 归零上浮 + 硬阴影
 // 隐私边界不变：无公司名、任职时间、教育背景；表述保持理性客观。
 const pathSteps = [
   { no: '01', title: '工程实现', chain: '技术选型 → 架构搭建 → 代码审查 → 规范制定' },
@@ -11,10 +13,11 @@ const pathSteps = [
   { no: '04', title: '双向转译', chain: '业务问题 → AI 可介入环节 → 客户可操作用法' },
 ];
 
+// tone 只做小面积填充（每组首词高亮），文字强调仍走 --acc-text 令牌
 const skillGroups = [
-  { no: '01', title: 'AI 应用', items: ['Prompt 工程', '智能助手配置', '知识库 / RAG', 'LLM 评测', 'AI 生图', '品牌 GEO'] },
-  { no: '02', title: '工程能力', items: ['React', 'Vue3', 'TypeScript', 'Node.js', 'Next / Nuxt', 'Docker + OSS'] },
-  { no: '03', title: '业务与数据', items: ['ECharts 可视化', '数据流转梳理', 'AI Coding', '电商运营复盘'] },
+  { no: '01', title: 'AI 应用', tone: 'tone-acid', items: ['Prompt 工程', '智能助手配置', '知识库 / RAG', 'LLM 评测', 'AI 生图', '品牌 GEO'] },
+  { no: '02', title: '工程能力', tone: 'tone-blue', items: ['React', 'Vue3', 'TypeScript', 'Node.js', 'Next / Nuxt', 'Docker + OSS'] },
+  { no: '03', title: '业务与数据', tone: 'tone-violet', items: ['ECharts 可视化', '数据流转梳理', 'AI Coding', '电商运营复盘'] },
 ];
 ---
 
@@ -31,36 +34,37 @@ const skillGroups = [
       工作路径由企业级前端工程延伸至 AI 应用落地：前期主导技术选型、架构搭建与规范制定，具备从零搭建到稳定迭代的工程能力。
     </p>
 
-    <div class="ab-col">
-      <p class="ab-text">
-        后期将工程能力迁移至 AI 场景，从事提示词工程、智能助手搭建，以及面向客户的交付与教学。
-      </p>
-    </div>
-
-    <div class="ab-col">
-      <p class="ab-text">
-        技术实现与业务表达之间具备双向转译能力，可与研发对齐实现细节，也可将系统能力转化为业务方可操作的用法。
-      </p>
-      <p class="ab-text">
-        当前关注方向为 RAG 检索与 LLM 评测的工程化。
-      </p>
-    </div>
-
-    <aside class="ab-margin">
-      <span class="ab-margin-label">NOTE</span>
+    <aside class="ab-note">
+      <span class="ab-note-label">NOTE</span>
       <blockquote class="ab-quote">
         纸上得来终觉浅，<br />绝知此事要躬行。
       </blockquote>
       <cite class="ab-quote-by">陆游《冬夜读书示子聿》</cite>
     </aside>
+
+    <div class="ab-cols">
+      <div class="ab-col">
+        <p class="ab-text">
+          后期将工程能力迁移至 AI 场景，从事提示词工程、智能助手搭建，以及面向客户的交付与教学。
+        </p>
+      </div>
+      <div class="ab-col">
+        <p class="ab-text">
+          技术实现与业务表达之间具备双向转译能力，可与研发对齐实现细节，也可将系统能力转化为业务方可操作的用法。
+        </p>
+        <p class="ab-text">
+          当前关注方向为 RAG 检索与 LLM 评测的工程化。
+        </p>
+      </div>
+    </div>
   </div>
 
-  <div class="ab-route">
+  <div class="ab-route" data-journey>
     <div class="ab-head">
       <span class="ab-head-label">PATH</span>
       <span class="ab-head-rule" aria-hidden="true"></span>
       <span class="ab-head-title">工作路径</span>
-      <span class="ab-head-count">04 段</span>
+      <span class="ab-head-count">04 段 · 随滚动点亮</span>
     </div>
 
     <ol class="ab-route-list">
@@ -84,11 +88,13 @@ const skillGroups = [
 
     <div class="ab-vocab-grid">
       {skillGroups.map((g) => (
-        <div class="ab-vocab-cell">
+        <div class={`ab-vocab-cell ${g.tone}`}>
           <span class="ab-vocab-no">{g.no}</span>
           <h3 class="ab-vocab-name">{g.title}</h3>
-          <p class="ab-vocab-items">
-            {g.items.map((s) => <span>{s}</span>)}
+          <p class="ab-stickers">
+            {g.items.map((s, i) => (
+              <span class:list={['ab-chip', { hl: i === 0 }]}>{s}</span>
+            ))}
           </p>
         </div>
       ))}

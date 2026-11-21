@@ -1,10 +1,10 @@
 ---
-// 能力与方法 —— 横向卡带（可拖动 / 按钮翻页 / 进度条）
-// 2026-11-19 第五轮：与作品区的「主从切换」区分开，这里用横向滚动卡组，
-// 卡片顶部做成档案抽屉的标签页（folder tab），颜色只出现在标签与顶部色条上。
-// 内容依据：简历里真实做过的项目 + 市场对 AI 交付 / FDE 类岗位的常见要求
-//（部署与配置、系统集成、LLM 应用、技术—业务转译）。
-// 隐私边界：不出现公司名、任职时间线、学校、教育背景；只写做过的事。
+// 能力与方法 —— 巨型标号带（数字带点选 + 主从色块海报）
+// 2026-11-21 第九轮：用户否决「能力罗盘」（细线 + 小方块 = 简陋），
+// 从三种布局原型中选定 B。执行依据 NEO_BRUTAL_TOKENS：
+//   3px 粗边框 / 8px 零模糊硬阴影 / 平面饱和色块 / 破格几何 / 巨大编号。
+// 交互：点超大数字或 ← → / Home / End 切换，整块海报换色，证据面板滑入。
+// 内容不变（真实做过的事）；隐私边界：无公司名/时间线/学校；理性陈述语气。
 interface Capability {
   no: string;
   title: string;
@@ -82,65 +82,77 @@ const evidenceCount = capabilities.reduce((n, c) => n + c.evidence.length, 0);
     <span class="section-tag">CAPABILITIES</span>
     <h2 class="section-title">能力与方法</h2>
     <p class="section-sub">
-      按 AI 交付类岗位的实际要求拆成四个能力面。拖动卡带或点箭头翻页，每张只列做过的事。
+      按 AI 交付类岗位的实际要求拆成四个能力面。点上方数字切换，每面只列做过的事。
     </p>
     <span class="section-meta">4 AREAS · {evidenceCount} 条证据</span>
   </div>
 
-  <div class="cap-strip" data-strip>
-    <div class="cap-track" data-strip-track>
-      {capabilities.map((c, i) => (
-        <article class:list={['cap-card', `cap-card--${i + 1}`]}>
-          <span class="cap-card-tab" aria-hidden="true">{c.no}</span>
-          <span class="cap-card-en">{c.en}</span>
-          <h3 class="cap-card-title">{c.title}</h3>
-          <p class="cap-card-desc">{c.desc}</p>
-
-          <span class="cap-card-label">做过的事</span>
-          <ul class="cap-card-list">
-            {c.evidence.map((e) => <li>{e}</li>)}
-          </ul>
-
-          <ul class="cap-card-tags">
-            {c.tags.map((t) => <li>{t}</li>)}
-          </ul>
-        </article>
-      ))}
-    </div>
-
-    <div class="cap-ctrl">
-      <div class="cap-ctrl-left">
-        <span class="cap-ctrl-hint">拖动卡带 / 点箭头翻页 · 共 4 个能力面</span>
-        <span class="cap-progress" aria-hidden="true"><span class="cap-progress-bar" data-strip-bar></span></span>
-      </div>
-      <div class="cap-ctrl-right">
-        <span class="cap-count" data-strip-count>01 / 04</span>
-        <button type="button" class="cap-btn" data-strip-prev aria-label="上一张能力卡">
-          <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-            <path d="M17 10H3M3 10L9 4M3 10L9 16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </button>
-        <button type="button" class="cap-btn" data-strip-next aria-label="下一张能力卡">
-          <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-            <path d="M3 10H17M17 10L11 4M17 10L11 16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </button>
-      </div>
-    </div>
+  <!-- 巨型标号带：四个超大描边数字，选中项填对应色 -->
+  <div class="cap-belt" role="tablist" aria-label="能力面选择" data-cap-belt>
+    {capabilities.map((c, i) => (
+      <button
+        type="button"
+        class:list={['bl-tab', `bl-tab--${i + 1}`, { on: i === 0 }]}
+        role="tab"
+        id={`bl-tab-${i}`}
+        aria-controls={`bl-panel-${i}`}
+        aria-selected={i === 0 ? 'true' : 'false'}
+        tabindex={i === 0 ? 0 : -1}
+        data-bl-tab={i}
+      >
+        <span class="bl-num">{c.no}</span>
+        <span class="bl-lbl">{c.en}</span>
+        <span class="bl-nm">{c.title}</span>
+      </button>
+    ))}
   </div>
 
-  <!-- 协作方法：横排四条，编号 + 一句，做成「工作准则」而不是卡片 -->
+  <!-- 主从面板：左彩色海报 / 右白底证据，一次显示一项 -->
+  <div class="cap-stage" data-cap-stage>
+    {capabilities.map((c, i) => (
+      <div
+        class:list={['bl-panel', `bl-panel--${i + 1}`, { 'is-current': i === 0 }]}
+        role="tabpanel"
+        id={`bl-panel-${i}`}
+        aria-labelledby={`bl-tab-${i}`}
+        data-bl-panel={i}
+        hidden={i !== 0}
+      >
+        <div class="bl-poster">
+          <span class="bl-big" aria-hidden="true">{c.no}</span>
+          <span class="bl-name">{c.title}</span>
+          <span class="bl-en">{c.en}</span>
+          <span class="bl-stamp" aria-hidden="true">{`0${i + 1}/04`}</span>
+        </div>
+        <div class="bl-body">
+          <p class="bl-desc">{c.desc}</p>
+          <span class="bl-label">做过的事 · {c.evidence.length} 条</span>
+          <ul class="bl-ev">
+            {c.evidence.map((e, k) => (
+              <li style={`--ev-i: ${k}`}>{e}</li>
+            ))}
+          </ul>
+          <ul class="bl-tags">
+            {c.tags.map((t) => <li>{t}</li>)}
+          </ul>
+        </div>
+      </div>
+    ))}
+  </div>
+
+  <!-- 协作方法：循环流水线（四段 + 流动箭头） -->
   <div class="method-block">
     <div class="method-head">
       <h3 class="method-title">协作方法</h3>
       <span class="method-note">四条准则 · 不随项目变化</span>
     </div>
     <ol class="method-grid">
-      {methods.map((m) => (
-        <li class="method-item">
+      {methods.map((m, i) => (
+        <li class="method-item" style={`--flow-i: ${i}`}>
           <span class="method-no">{m.no}</span>
           <h4 class="method-name">{m.title}</h4>
           <p class="method-desc">{m.desc}</p>
+          {i < methods.length - 1 && <span class="method-arrow" aria-hidden="true"></span>}
         </li>
       ))}
     </ol>

@@ -92,10 +92,12 @@ const BASE_URL = import.meta.env.BASE_URL.endsWith('/')
         <slot />
       </div>
     ) : (
-      <slot name="rail" />
       <div class="viewport-scaler" id="viewport-scaler">
         <div class="page" id="page">
-          <slot />
+          <slot name="rail" />
+          <div class="page-main">
+            <slot />
+          </div>
         </div>
       </div>
     )}
@@ -130,18 +132,21 @@ const BASE_URL = import.meta.env.BASE_URL.endsWith('/')
             scaler.style.height = '';
             return;
           }
-          // 书脊占据视口左侧固定宽度：可用宽度与居中基准都要减掉它
-          var rail = document.querySelector('.site-rail');
-          var railW = rail ? Math.round(rail.getBoundingClientRect().width) : 0;
-          var viewportWidth = document.documentElement.clientWidth - railW;
+          // 2026-11-21：书脊已并入 1440 画布（.page 的 grid 首列），
+          // 不再从视口宽度里扣 railW——旧算法在 ≥1920 时 scale 触顶 1、
+          // 内容固定居中而书脊贴视口左缘，中间裂开 192→952px 的空白沟壑。
+          var viewportWidth = document.documentElement.clientWidth;
           var scale = Math.min(viewportWidth / PAGE_WIDTH, 1);
-          var left = railW + (viewportWidth - PAGE_WIDTH * scale) / 2;
+          var left = (viewportWidth - PAGE_WIDTH * scale) / 2;
           page.style.transform = 'scale(' + scale + ')';
           page.style.left = left + 'px';
           scaler.style.height = page.offsetHeight * scale + 'px';
         }
 
         function initScaler() {
+          // fluid 页（子页面）没有缩放画布：先释放上一页的 ResizeObserver，
+          // 否则它会继续持有已被软导航丢弃的旧 .page 节点，直到下次成功重建。
+          if (pageRO) { pageRO.disconnect(); pageRO = null; }
           var scaler = document.getElementById('viewport-scaler');
           var page = document.getElementById('page');
           if (!scaler || !page) return;
@@ -150,7 +155,6 @@ const BASE_URL = import.meta.env.BASE_URL.endsWith('/')
             resizeBound = true;
           }
           if (window.ResizeObserver) {
-            if (pageRO) pageRO.disconnect();
             pageRO = new ResizeObserver(fit);
             pageRO.observe(page);
           }
@@ -221,6 +225,9 @@ const BASE_URL = import.meta.env.BASE_URL.endsWith('/')
         // 锚点链接按 href 推断目标 id；跨页链接（如「工作流」）用 data-spy 显式声明。
         // 无匹配区块的页面（如 workflow 规范页）自动跳过，初始 active 保持不变。
         function initScrollSpy() {
+          // 软导航后旧 observer 观察的是死节点：任何早退分支都要先断开，
+          // 不能只在成功重建前断（fluid 子页无锚点时会提前 return）。
+          if (spyObserver) { spyObserver.disconnect(); spyObserver = null; }
           var links = document.querySelectorAll('.site-nav a[href^="#"], .site-nav a[data-spy], .site-rail a[href^="#"], .site-rail a[data-spy]');
           if (!links.length || !('IntersectionObserver' in window)) return;
           var map = {};
@@ -236,9 +243,6 @@ const BASE_URL = import.meta.env.BASE_URL.endsWith('/')
             .map(function (id) { return document.getElementById(id); })
             .filter(Boolean);
           if (!sections.length) return;
-
-          // 软导航后旧 observer 观察的是死节点，先断开再重建
-          if (spyObserver) { spyObserver.disconnect(); spyObserver = null; }
 
           var current = document.querySelector('.site-nav a.active, .site-rail a.active');
           function setActive(a) {
@@ -277,8 +281,10 @@ const BASE_URL = import.meta.env.BASE_URL.endsWith('/')
           if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
           if (revealObserver) { revealObserver.disconnect(); revealObserver = null; }
 
+          // .section-sub 是 .section-header 的后代，不单独列为揭示目标，
+          // 否则父子各挂一次 .rv，会出现两段错位的淡入。
           var nodes = document.querySelectorAll(
-            '.section-header, .section-sub, .ab-grid, .ab-route, .ab-vocab, .wk-switch, .cap-strip, .rd-chart, .wf-deck'
+            '.section-header, .ab-grid, .ab-route, .ab-vocab, .wk-switch, .cap-belt, .rd-chart, .wf-deck'
           );
           if (!nodes.length) return;
 

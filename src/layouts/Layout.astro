@@ -339,5 +339,11 @@ const BASE_URL = import.meta.env.BASE_URL.endsWith('/')
       document.addEventListener('astro:page-load', initHomeInteractions);
       initHomeInteractions();
     </script>
+
+    <!-- 访问埋点（模块只执行一次；内部自行监听 astro:page-load/before-swap
+         处理软导航换页的 PV 与停留上报，见 src/scripts/analytics.ts） -->
+    <script>
+      import '../scripts/analytics';
+    </script>
   </body>
 </html>

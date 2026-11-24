@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>作品集 · 访问监控台</title>
+<style>
+  :root {
+    --bg: #f7fafd;
+    --card: #ffffff;
+    --line: #e3eaf3;
+    --ink: #1f2c3d;
+    --ink-2: #5b6b80;
+    --ink-3: #93a3b8;
+    --blue: #2f6df6;
+    --blue-weak: #eaf1fe;
+    --blue-mid: #b9d0fb;
+    --green: #1f9d61;
+    --amber: #c07c10;
+    --red: #d54d42;
+    --mono: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font: 14px/1.6 -apple-system, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 20px 24px 80px; }
+
+  /* ---- 顶栏 ---- */
+  .top { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 6px 0 18px; }
+  .brand { display: flex; align-items: baseline; gap: 10px; }
+  .brand h1 { font-size: 19px; font-weight: 700; letter-spacing: .5px; }
+  .brand .host { font-size: 12px; color: var(--ink-3); font-family: var(--mono); }
+  .spacer { flex: 1; }
+  .tabs { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--card); }
+  .tabs button {
+    border: 0; background: transparent; padding: 6px 13px; font-size: 13px; color: var(--ink-2);
+    cursor: pointer; border-right: 1px solid var(--line);
+  }
+  .tabs button:last-child { border-right: 0; }
+  .tabs button.on { background: var(--blue-weak); color: var(--blue); font-weight: 600; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line);
+    background: var(--card); color: var(--ink-2); border-radius: 8px; padding: 6px 13px;
+    font-size: 13px; cursor: pointer;
+  }
+  .btn:hover { border-color: var(--blue-mid); color: var(--blue); }
+  .btn.pri { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .btn.pri:hover { opacity: .9; }
+
+  /* ---- 概览卡 ---- */
+  .kpis { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 14px; }
+  @media (max-width: 980px) { .kpis { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 560px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
+  .kpi { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .kpi .k { font-size: 12px; color: var(--ink-3); }
+  .kpi .v { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .kpi .s { font-size: 11px; color: var(--ink-3); margin-top: 2px; }
+  .kpi.hl .v { color: var(--blue); }
+
+  /* ---- 面板 ---- */
+  .grid2 { display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px; margin-bottom: 14px; }
+  @media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } }
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+  .panel h3 { font-size: 14px; font-weight: 600; margin-bottom: 10px; color: var(--ink); }
+  .panel h3 small { color: var(--ink-3); font-weight: 400; margin-left: 6px; }
+
+  /* 趋势柱状 */
+  .trend { display: flex; align-items: flex-end; gap: 3px; height: 120px; padding-top: 6px; }
+  .trend .day { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 3px; height: 100%; min-width: 0; }
+  .trend .bars { display: flex; align-items: flex-end; gap: 2px; width: 100%; height: calc(100% - 16px); }
+  .trend .bar { flex: 1; background: var(--blue-mid); border-radius: 2px 2px 0 0; min-height: 1px; }
+  .trend .bar.uv { background: var(--blue); }
+  .trend .lab { font-size: 11px; color: var(--ink-3); font-family: var(--mono); white-space: nowrap; overflow: hidden; }
+  .trend-legend { display: flex; gap: 14px; font-size: 11px; color: var(--ink-2); margin-top: 6px; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+
+  /* 排行列表 */
+  .rank { display: flex; flex-direction: column; gap: 7px; }
+  .rrow { display: grid; grid-template-columns: minmax(90px, 1fr) 3fr 74px; gap: 10px; align-items: center; font-size: 13px; }
+  .rrow .meta { color: var(--ink-2); font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; }
+  .rrow .track { background: var(--blue-weak); border-radius: 3px; height: 16px; position: relative; }
+  .rrow .track i { position: absolute; inset: 0 auto 0 0; background: var(--blue-mid); border-radius: 3px; }
+  .rrow .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: var(--mono); font-size: 12.5px; }
+
+  /* ---- 会话表 ---- */
+  .table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  .table th {
+    text-align: left; font-size: 12px; color: var(--ink-3); font-weight: 500;
+    padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap;
+  }
+  .table td { padding: 9px 10px; border-bottom: 1px solid var(--line); font-size: 13px; vertical-align: top; }
+  .table tr.sess { cursor: pointer; }
+  .table tr.sess:hover td { background: #f8faff; }
+  .mono { font-family: var(--mono); font-size: 12.5px; }
+  .dim { color: var(--ink-3); }
+  .chips { display: inline-flex; gap: 4px; flex-wrap: wrap; }
+  .chip { display: inline-block; border: 1px solid var(--line); border-radius: 999px; padding: 0 8px; font-size: 11px; color: var(--ink-2); background: #fafcff; white-space: nowrap; }
+  .chip.b { border-color: var(--blue-mid); color: var(--blue); background: var(--blue-weak); }
+  .chip.bot { border-color: #f3d9a8; color: var(--amber); background: #fdf7ec; }
+  .ipcell { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .ipcell .cp { border: 0; background: none; color: var(--blue); cursor: pointer; font-size: 12px; padding: 0; flex: none; }
+  .geo { color: var(--ink-2); font-size: 12px; }
+
+  /* 会话详情 */
+  .detail td { background: #fbfcfe; }
+  .detail-box { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 4px 0 2px; }
+  @media (max-width: 720px) { .detail-box { grid-template-columns: 1fr; } }
+  .detail h5 { font-size: 12px; color: var(--ink-3); font-weight: 500; margin-bottom: 6px; }
+  .tl { border-left: 2px solid var(--blue-mid); margin-left: 4px; padding-left: 12px; display: flex; flex-direction: column; gap: 5px; }
+  .tl .ti { font-size: 12.5px; color: var(--ink-2); position: relative; }
+  .tl .ti::before { content: ""; position: absolute; left: -16.5px; top: 6px; width: 5px; height: 5px; border-radius: 50%; background: var(--blue); }
+  .tl .ti b { color: var(--ink); font-weight: 600; }
+  .tl .ti .t { color: var(--ink-3); font-family: var(--mono); font-size: 11.5px; margin-right: 6px; }
+
+  /* ---- 状态 ---- */
+  .status { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-3); padding: 4px 0 12px; }
+  .status .spin { width: 12px; height: 12px; border: 2px solid var(--blue-mid); border-top-color: var(--blue); border-radius: 50%; animation: r 0.8s linear infinite; display: none; }
+  .status.loading .spin { display: inline-block; }
+  @keyframes r { to { transform: rotate(360deg); } }
+  .err { color: var(--red); }
+  .ok { color: var(--green); }
+
+  /* ---- 配置遮罩 ---- */
+  .veil { position: fixed; inset: 0; background: rgba(247, 250, 253, .96); display: flex; align-items: center; justify-content: center; z-index: 10; }
+  .veil.hidden { display: none; }
+  .cfg { width: min(430px, 92vw); background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 26px 28px; }
+  .cfg h2 { font-size: 17px; margin-bottom: 4px; }
+  .cfg p { font-size: 12.5px; color: var(--ink-3); margin-bottom: 16px; }
+  .cfg label { display: block; font-size: 12.5px; color: var(--ink-2); margin: 12px 0 5px; }
+  .cfg input {
+    width: 100%; padding: 9px 11px; border: 1px solid var(--line); border-radius: 8px;
+    font-size: 13.5px; font-family: var(--mono); outline: none; background: #fbfcfe;
+  }
+  .cfg input:focus { border-color: var(--blue); }
+  .cfg .row-err { color: var(--red); font-size: 12px; margin-top: 10px; min-height: 16px; }
+  .cfg .save { width: 100%; margin-top: 6px; justify-content: center; }
+
+  .empty { text-align: center; color: var(--ink-3); padding: 34px 0; font-size: 13px; }
+  .foot-note { margin-top: 22px; font-size: 11.5px; color: var(--ink-3); line-height: 1.8; border-top: 1px solid var(--line); padding-top: 12px; }
+  .more { display: block; margin: 12px auto 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">
+      <h1>作品集 · 访问监控台</h1>
+      <span class="host" id="hostLabel"></span>
+    </div>
+    <div class="spacer"></div>
+    <div class="tabs" id="rangeTabs">
+      <button data-days="1">今天</button>
+      <button data-days="7" class="on">近 7 天</button>
+      <button data-days="30">近 30 天</button>
+      <button data-days="90">近 90 天</button>
+    </div>
+    <button class="btn" id="refreshBtn">刷新</button>
+    <button class="btn" id="exportBtn">导出</button>
+    <button class="btn" id="cfgBtn">设置</button>
+  </div>
+
+  <div class="status" id="status">
+    <span class="spin"></span><span id="statusText">就绪</span>
+  </div>
+
+  <div id="main" style="display:none">
+    <div class="kpis">
+      <div class="kpi hl"><div class="k">浏览量 PV</div><div class="v" id="kpv">0</div><div class="s" id="kpvs"></div></div>
+      <div class="kpi"><div class="k">独立访客 UV</div><div class="v" id="kuv">0</div><div class="s" id="kuvs"></div></div>
+      <div class="kpi"><div class="k">访问会话</div><div class="v" id="kses">0</div><div class="s" id="ksess"></div></div>
+      <div class="kpi"><div class="k">平均停留</div><div class="v" id="kdwell">-</div><div class="s" id="kdwells"></div></div>
+      <div class="kpi"><div class="k">人均浏览页数</div><div class="v" id="kpages">-</div><div class="s">PV / UV</div></div>
+      <div class="kpi"><div class="k">点击操作</div><div class="v" id="kclick">0</div><div class="s" id="kclicks"></div></div>
+    </div>
+
+    <div class="grid2">
+      <div class="panel">
+        <h3>每日趋势 <small>PV / UV</small></h3>
+        <div class="trend" id="trend"></div>
+        <div class="trend-legend">
+          <span><i class="dot" style="background:var(--blue-mid)"></i>PV</span>
+          <span><i class="dot" style="background:var(--blue)"></i>UV</span>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>访客来源地 <small>Top 8</small></h3>
+        <div class="rank" id="geoRank"></div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="panel">
+        <h3>页面浏览排行 <small>PV · 平均停留</small></h3>
+        <div class="rank" id="pageRank"></div>
+      </div>
+      <div class="panel">
+        <h3>点击操作排行 <small>元素 · 次数</small></h3>
+        <div class="rank" id="clickRank"></div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-bottom:0">
+      <h3>访客访问记录 <small>点击行展开会话轨迹 · IP 由服务端记录</small></h3>
+      <div style="overflow-x:auto">
+        <table class="table">
+          <thead>
+            <tr>
+              <th style="width:96px">时间</th>
+              <th style="width:150px">IP 地址</th>
+              <th style="width:150px">归属地</th>
+              <th style="width:170px">网络 / 设备</th>
+              <th style="width:150px">来源</th>
+              <th>浏览轨迹（停留）</th>
+              <th style="width:60px;text-align:right">点击</th>
+              <th style="width:70px;text-align:right">停留</th>
+            </tr>
+          </thead>
+          <tbody id="sessBody"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="emptyTip" style="display:none">该时间段暂无访问记录</div>
+      <button class="btn more" id="moreBtn" style="display:none">加载更多会话</button>
+    </div>
+
+    <div class="foot-note">
+      数据由站点埋点（PV / 停留 / 点击 / 滚动）经 EdgeOne 边缘函数落库生成；IP 与归属地在服务端由腾讯 EdgeOne 注入。
+      会话口径：30 分钟无活动重新计会话；停留时长只累计前台可见时间。访问记录仅站长自用，请勿公开分享本页链接与 token。
+    </div>
+  </div>
+</div>
+
+<!-- 配置层 -->
+<div class="veil" id="veil">
+  <div class="cfg">
+    <h2>连接监控后端</h2>
+    <p>填入 EdgeOne 项目地址与查询 token（部署后可得，见部署指南）</p>
+    <label for="fBase">项目地址（API Base）</label>
+    <input id="fBase" placeholder="https://your-project.edgeone.app" spellcheck="false" />
+    <label for="fToken">查询 Token（ANALYTICS_TOKEN）</label>
+    <input id="fToken" placeholder="仅站长知晓的随机串" type="password" spellcheck="false" />
+    <div class="row-err" id="cfgErr"></div>
+    <button class="btn pri save" id="saveBtn">保存并连接</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var LS_KEY = 'analytics_dash_cfg_v1';
+  var state = { base: '', token: '', days: 7, events: [], sessions: [], page: 1 };
+  var PAGE_SIZE = 25;
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  // ---------------- 配置 ----------------
+  function loadCfg() {
+    try { return JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch (e) { return null; }
+  }
+  function saveCfg(base, token) {
+    localStorage.setItem(LS_KEY, JSON.stringify({ base: base, token: token }));
+  }
+  function openCfg(msg) {
+    $('veil').classList.remove('hidden');
+    var c = loadCfg() || {};
+    $('fBase').value = c.base || '';
+    $('fToken').value = c.token || '';
+    $('cfgErr').textContent = msg || '';
+  }
+  $('cfgBtn').onclick = function () { openCfg(''); };
+  $('saveBtn').onclick = function () {
+    var base = $('fBase').value.trim().replace(/\/+$/, '');
+    var token = $('fToken').value.trim();
+    var err = '';
+    if (!/^https?:\/\/.+\..+/.test(base)) err = '项目地址需以 https:// 开头';
+    else if (!token) err = 'token 不能为空';
+    $('cfgErr').textContent = err;
+    if (err) return;
+    saveCfg(base, token);
+    state.base = base; state.token = token;
+    $('veil').classList.add('hidden');
+    $('hostLabel').textContent = base.replace(/^https?:\/\//, '');
+    state.page = 1;
+    load();
+  };
+
+  // ---------------- 数据拉取 ----------------
+  function setStatus(text, cls) {
+    var s = $('status');
+    s.className = 'status ' + (cls === 'loading' ? 'loading' : '');
+    $('statusText').textContent = text;
+    $('statusText').className = cls === 'err' ? 'err' : (cls === 'ok' ? 'ok' : '');
+  }
+
+  function load(cb) {
+    if (!state.base || !state.token) { openCfg(''); return; }
+    setStatus('正在拉取数据…', 'loading');
+    var ctl = new AbortController();
+    var timer = setTimeout(function () { ctl.abort(); }, 20000);
+    fetch(state.base + '/api/stats?token=' + encodeURIComponent(state.token) + '&days=' + state.days, {
+      signal: ctl.signal,
+    })
+      .then(function (r) { return r.json().then(function (j) { return { code: r.status, j: j }; }); })
+      .then(function (res) {
+        clearTimeout(timer);
+        if (res.code === 401) { openCfg('token 无效，请重新填写'); setStatus('token 无效', 'err'); return; }
+        if (!res.j || !res.j.ok) { setStatus('后端返回错误：' + (res.j && res.j.error || res.code), 'err'); return; }
+        state.events = res.j.events || [];
+        build();
+        setStatus('已更新 · ' + fmtTs(Date.now(), true) + ' · ' + state.events.length + ' 条事件' + (res.j.truncated ? '（' + res.j.truncated + ' 条超出上限未加载）' : ''), 'ok');
+        if (cb) cb();
+      })
+      .catch(function (e) {
+        clearTimeout(timer);
+        setStatus(e.name === 'AbortError' ? '请求超时，请检查网络或地址' : '连接失败：' + e.message, 'err');
+      });
+  }
+
+  $('refreshBtn').onclick = function () { state.page = 1; load(); };
+  $('rangeTabs').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-days]');
+    if (!b) return;
+    document.querySelectorAll('#rangeTabs button').forEach(function (x) { x.classList.remove('on'); });
+    b.classList.add('on');
+    state.days = Number(b.dataset.days);
+    state.page = 1;
+    load();
+  });
+
+  $('exportBtn').onclick = function () {
+    if (!state.events.length) return;
+    var blob = new Blob([JSON.stringify(state.events, null, 2)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'analytics-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+
+  // ---------------- 工具 ----------------
+  function fmtTs(ts, hmOnly) {
+    var d = new Date(ts);
+    var p = function (n) { return String(n).padStart(2, '0'); };
+    if (hmOnly) return p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+    return p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  }
+  function fmtDur(ms) {
+    if (ms == null) return '—';
+    var s = Math.round(ms / 1000);
+    if (s < 60) return s + 's';
+    var m = Math.floor(s / 60);
+    if (m < 60) return m + 'm' + (s % 60 ? (s % 60) + 's' : '');
+    return Math.floor(m / 60) + 'h' + (m % 60) + 'm';
+  }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function hostOf(u) {
+    try { return new URL(u).hostname.replace(/^www\./, ''); } catch (e) { return u || ''; }
+  }
+
+  var ASN = {
+    4134: '中国电信', 4811: '中国电信', 4812: '中国电信', 4813: '中国电信',
+    9808: '中国移动', 56040: '中国移动', 56044: '中国移动', 56046: '中国移动', 9231: '中国移动',
+    4837: '中国联通', 9929: '中国联通', 58466: '中国联通',
+    45090: '腾讯云', 132203: '腾讯云 EdgeOne', 37963: '阿里云', 17444: '阿里云',
+    17816: '中国广电', 4538: '教育网 CERNET', 9394: 'CUII',
+  };
+  function asnName(a) {
+    if (!a) return '';
+    return ASN[a] ? ASN[a] + ' · AS' + a : 'AS' + a;
+  }
+
+  function parseUA(ua) {
+    if (!ua) return { br: '未知', os: '', bot: false };
+    var bot = /bot|crawler|spider|curl|wget|python-requests|headless/i.test(ua);
+    var br = '其他', m;
+    if ((m = ua.match(/Edg[e|A]?\/([\d.]+)/))) br = 'Edge ' + m[1].split('.')[0];
+    else if ((m = ua.match(/Chrome\/([\d.]+)/))) br = bot && /Headless/i.test(ua) ? 'Headless' : 'Chrome ' + m[1].split('.')[0];
+    else if ((m = ua.match(/Firefox\/([\d.]+)/))) br = 'Firefox ' + m[1].split('.')[0];
+    else if ((m = ua.match(/Version\/([\d.]+).*Safari/))) br = 'Safari ' + m[1].split('.')[0];
+    else if (/MicroMessenger/i.test(ua)) br = '微信内浏览器';
+    else if (/MetaMask/i.test(ua)) br = 'MetaMask';
+    var os = '';
+    if (/iPhone/i.test(ua)) os = 'iPhone';
+    else if (/iPad/i.test(ua)) os = 'iPad';
+    else if (/Android ([\d.]+)/i.test(ua)) os = 'Android ' + ua.match(/Android ([\d.]+)/)[1].split('.')[0];
+    else if (/Mac OS X/.test(ua)) os = 'macOS';
+    else if (/Windows NT 10/.test(ua)) os = 'Win10/11';
+    else if (/Windows/.test(ua)) os = 'Windows';
+    else if (/Linux/.test(ua)) os = 'Linux';
+    return { br: br, os: os, bot: bot };
+  }
+
+  // ---------------- 聚合 ----------------
+  function build() {
+    var ev = state.events;
+    var pvCount = 0, clicks = 0, scrolls = 0, stayMs = 0, stayPages = 0;
+    var byVid = {}, bySid = {}, byPage = {}, byClick = {}, byGeo = {}, byDay = {};
+
+    ev.forEach(function (e) {
+      var d = bjDate(e.ts);
+      byDay[d] = byDay[d] || { pv: 0, uvSet: {} };
+      byPage[e.p] = byPage[e.p] || { pv: 0, stay: 0, stayN: 0, sids: {} };
+      if (e.ty === 'pv') {
+        pvCount++;
+        byDay[d].pv++;
+        byDay[d].uvSet[e.vid] = 1;
+        byPage[e.p].pv++;
+        byPage[e.p].sids[e.sid] = 1;
+        var g = (e.g && (e.g.city || e.g.rg || e.g.co || e.g.cc)) || '未知';
+        byGeo[g] = (byGeo[g] || 0) + 1;
+      } else if (e.ty === 'stay') {
+        var ms = e.d && e.d.ms || 0;
+        stayMs += ms; stayPages++;
+        byPage[e.p].stay += ms;
+        byPage[e.p].stayN++;
+      } else if (e.ty === 'click') {
+        clicks++;
+        var label = (e.d && e.d.l) || '(未命名元素)';
+        byClick[label] = (byClick[label] || 0) + 1;
+      } else if (e.ty === 'scroll') {
+        scrolls++;
+      }
+      if (e.vid) byVid[e.vid] = 1;
+      bySid[e.sid] = bySid[e.sid] || [];
+      bySid[e.sid].push(e);
+    });
+
+    // ---- KPI ----
+    var uv = Object.keys(byVid).length;
+    var sess = Object.keys(bySid).length;
+    $('kpv').textContent = pvCount;
+    $('kuv').textContent = uv;
+    $('kses').textContent = sess;
+    $('kdwell').textContent = sess ? fmtDur(stayMs / Math.max(1, sess)) : '—';
+    $('kpages').textContent = uv ? (pvCount / uv).toFixed(1) : '—';
+    $('kclick').textContent = clicks;
+    var pvToday = 0;
+    var today = bjDate(Date.now());
+    if (byDay[today]) pvToday = byDay[today].pv;
+    $('kpvs').textContent = state.days > 1 ? ('含今日 ' + pvToday + ' 次') : (uv + ' 位访客');
+    $('kuvs').textContent = state.days > 1 ? '独立设备（不重复计数）' : '';
+    $('ksess').textContent = '30 分钟超时切分';
+    $('kdwells').textContent = stayPages ? ('来自 ' + stayPages + ' 次页面停留上报') : '暂无停留上报';
+    $('kclicks').textContent = state.days > 1 ? ('滚动深度事件 ' + scrolls + ' 次') : '';
+
+    // ---- 趋势 ----
+    var days = [];
+    for (var i = state.days - 1; i >= 0; i--) days.push(bjTs(i));
+    var maxPv = 1;
+    days.forEach(function (t) { var d = bjDate(t); if (byDay[d] && byDay[d].pv > maxPv) maxPv = byDay[d].pv; });
+    $('trend').innerHTML = days.map(function (t) {
+      var d = bjDate(t);
+      var pv = byDay[d] ? byDay[d].pv : 0;
+      var uvn = byDay[d] ? Object.keys(byDay[d].uvSet).length : 0;
+      var h = Math.round(pv / maxPv * 100);
+      var uh = uvn ? Math.min(100, Math.round(uvn / maxPv * 100)) : 0;
+      var lab = d.slice(4, 6) + '/' + d.slice(6, 8);
+      // 宽粒度视图隔天取样，避免标签拥挤
+      var showLab = state.days <= 31 ? true : (Number(d.slice(6, 8)) % 3 === 0);
+      return '<div class="day" title="' + d.slice(0, 4) + '-' + d.slice(4, 6) + '-' + d.slice(6, 8) + '　PV ' + pv + ' · UV ' + uvn + '">' +
+        '<div class="bars"><i class="bar" style="height:' + Math.max(2, h) + '%"></i>' +
+        (uvn ? '<i class="bar uv" style="height:' + Math.max(2, uh) + '%"></i>' : '') + '</div>' +
+        '<span class="lab">' + (showLab ? lab : '') + '</span></div>';
+    }).join('');
+
+    // ---- 归属地排行 ----
+    var geoKeys = Object.keys(byGeo).sort(function (a, b) { return byGeo[b] - byGeo[a]; });
+    $('geoRank').innerHTML = rankRows(
+      geoKeys.slice(0, 8),
+      function (k) { return byGeo[k]; },
+      function (k) { return k; },
+      Math.max.apply(null, geoKeys.map(function (k) { return byGeo[k]; }).concat([1]))
+    );
+
+    // ---- 页面排行 ----
+    var pageKeys = Object.keys(byPage).sort(function (a, b) { return byPage[b].pv - byPage[a].pv; }).slice(0, 10);
+    $('pageRank').innerHTML = rankRows(
+      pageKeys,
+      function (k) { return byPage[k].pv; },
+      function (k) {
+        var v = byPage[k];
+        var dwell = v.stayN ? fmtDur(v.stay / v.stayN) : '—';
+        return k + '｜' + Object.keys(v.sids).length + ' 会话 · 平均停 ' + dwell;
+      },
+      Math.max.apply(null, pageKeys.map(function (k) { return byPage[k].pv; }).concat([1]))
+    );
+
+    // ---- 点击排行 ----
+    var clickKeys = Object.keys(byClick).sort(function (a, b) { return byClick[b] - byClick[a]; }).slice(0, 10);
+    $('clickRank').innerHTML = rankRows(
+      clickKeys,
+      function (k) { return byClick[k]; },
+      function (k) { return k; },
+      Math.max.apply(null, clickKeys.map(function (k) { return byClick[k]; }).concat([1]))
+    );
+
+    // ---- 会话表 ----
+    state.sessions = Object.keys(bySid).map(function (sid) {
+      return { sid: sid, evs: bySid[sid] };
+    }).sort(function (a, b) { return b.evs[0].ts - a.evs[0].ts; });
+    state.page = Math.max(1, Math.min(state.page, Math.ceil(state.sessions.length / PAGE_SIZE) || 1));
+    renderSessions();
+  }
+
+  /** 北京时区日期串：YYYYMMDD */
+  function bjDate(ts) {
+    var d = new Date(ts + 8 * 3600 * 1000);
+    var p = function (n) { return String(n).padStart(2, '0'); };
+    return '' + d.getUTCFullYear() + p(d.getUTCMonth() + 1) + p(d.getUTCDate());
+  }
+  /** days 天前那天的任意时间戳（本地无关，仅为拿日期） */
+  function bjTs(daysAgo) {
+    var d = new Date(Date.now() + 8 * 3600 * 1000 - daysAgo * 86400000);
+    var p = function (n) { return String(n).padStart(2, '0') };
+    return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+  }
+
+  function rankRows(keys, val, label, maxVal) {
+    if (!keys.length) return '<div class="empty">暂无数据</div>';
+    return keys.map(function (k) {
+      var v = val(k);
+      var pct = Math.round(v / maxVal * 100);
+      var name = label(k); // 调用方提供纯文本，统一在此转义
+      return '<div class="rrow">' +
+        '<span class="name" title="' + esc(name) + '">' + (name.length > 60 ? esc(name.slice(0, 60)) + '…' : esc(name)) + '</span>' +
+        '<span class="track"><i style="width:' + Math.max(2, pct) + '%"></i></span>' +
+        '<span class="meta">' + v + '</span>' +
+        '</div>';
+    }).join('');
+  }
+
+  // ---- 会话行渲染 ----
+  function renderSessions() {
+    var start = (state.page - 1) * PAGE_SIZE;
+    var slice = state.sessions.slice(0, start + PAGE_SIZE);
+    $('emptyTip').style.display = state.sessions.length ? 'none' : 'block';
+    $('moreBtn').style.display = state.sessions.length > slice.length ? 'block' : 'none';
+    $('sessBody').innerHTML = slice.map(function (s) {
+      return sessionRow(s);
+    }).join('');
+  }
+  $('moreBtn').onclick = function () { state.page++; renderSessions(); };
+
+  function sessionRow(s) {
+    var evs = s.evs;
+    var first = evs[0], last = evs[evs.length - 1];
+    var pvs = evs.filter(function (e) { return e.ty === 'pv'; });
+    var clicks = evs.filter(function (e) { return e.ty === 'click'; });
+    var stays = evs.filter(function (e) { return e.ty === 'stay'; });
+    var dwell = stays.reduce(function (sum, e) { return sum + ((e.d && e.d.ms) || 0); }, 0);
+    var ua = parseUA(first.ua);
+    var uaInfo = ua.br + (ua.os ? ' · ' + ua.os : '');
+    var geoParts = [];
+    if (first.g) {
+      if (first.g.cc && first.g.co) geoParts.push(first.g.cc === 'CN' ? '' : first.g.co);
+      if (first.g.rg) geoParts.push(first.g.rg);
+      if (first.g.city) geoParts.push(first.g.city);
+    }
+    var geoText = geoParts.filter(Boolean).join(' · ') || '未知';
+    var net = asnName(first.g && first.g.asn) || '未知 AS';
+    var pathHtml = pvs.map(function (e, i) {
+      var st = stays.filter(function (x) { return x.p === e.p; });
+      var ms = st.length ? st[st.length - 1].d.ms : null;
+      return '<span class="chip' + (i === 0 ? ' b' : '') + '">' + esc(e.p) + (ms != null ? ' ' + fmtDur(ms) : '') + '</span>';
+    }).join('') || '<span class="dim">—</span>';
+
+    return '<tr class="sess" data-sid="' + esc(s.sid) + '">' +
+      '<td class="mono">' + fmtTs(first.ts) + '</td>' +
+      '<td class="ipcell"><span class="mono">' + (first.ip ? esc(first.ip) : '<span class="dim">未记录</span>') + '</span>' +
+        (first.ip ? '<button class="cp" data-ip="' + esc(first.ip) + '" title="复制 IP">复制</button>' : '') + '</td>' +
+      '<td class="geo">' + esc(geoText) + '</td>' +
+      '<td class="geo">' + esc(net) + (ua.bot ? ' <span class="chip bot">疑似爬虫</span>' : '') + '<br><span class="dim">' + esc(uaInfo) + (ua.br === '未知' && first.ua ? '' : '') + '</span></td>' +
+      '<td class="geo">' + (first.ref ? esc(hostOf(first.ref)) : '<span class="dim">直接访问</span>') + '</td>' +
+      '<td><div class="chips">' + pathHtml + '</div></td>' +
+      '<td style="text-align:right" class="mono">' + (clicks.length || '<span class="dim">0</span>') + '</td>' +
+      '<td style="text-align:right" class="mono">' + fmtDur(dwell) + '</td>' +
+      '</tr>';
+  }
+
+  // 行为：展开/复制
+  $('sessBody').addEventListener('click', function (e) {
+    var cp = e.target.closest('.cp');
+    if (cp) {
+      e.stopPropagation();
+      var ip = cp.dataset.ip;
+      navigator.clipboard && navigator.clipboard.writeText(ip).then(function () {
+        cp.textContent = '已复制';
+        setTimeout(function () { cp.textContent = '复制'; }, 1200);
+      });
+      return;
+    }
+    var tr = e.target.closest('tr.sess');
+    if (!tr) return;
+    var sid = tr.dataset.sid;
+    var nextRow = tr.nextElementSibling;
+    if (nextRow && nextRow.classList.contains('detail')) { nextRow.remove(); return; }
+    document.querySelectorAll('#sessBody tr.detail').forEach(function (r) { r.remove(); });
+    var s = state.sessions.find(function (x) { return x.sid === sid; });
+    if (!s) return;
+    var tr2 = document.createElement('tr');
+    tr2.className = 'detail';
+    tr2.innerHTML = '<td colspan="8"><div class="detail-box">' +
+      '<div><h5>会话轨迹（' + s.evs.length + ' 条事件）</h5><div class="tl">' +
+        s.evs.map(function (ev) {
+          var label;
+          if (ev.ty === 'pv') label = '浏览 <b>' + esc(ev.p) + '</b>';
+          else if (ev.ty === 'click') label = '点击 <b>' + esc(ev.d && ev.d.l || '未命名') + '</b>' + (ev.d && ev.d.h ? ' → ' + esc(ev.d.h) : '');
+          else if (ev.ty === 'stay') label = '停留 <b>' + esc(ev.p) + '</b> ' + fmtDur(ev.d && ev.d.ms);
+          else if (ev.ty === 'scroll') label = '滚动到 <b>' + (ev.d && ev.d.pct) + '%</b>';
+          else label = esc(ev.ty);
+          return '<div class="ti"><span class="t">' + fmtTs(ev.ts, true) + '</span>' + label + '</div>';
+        }).join('') +
+      '</div></div>' +
+      '<div><h5>环境信息</h5><div class="tl">' +
+        kvRow('访客 ID', esc(firstOf(s, 'vid'))) +
+        kvRow('IP 地址', esc(firstOf(s, 'ip') || '—')) +
+        kvRow('归属地', esc(geoTextOf(s))) +
+        kvRow('网络', esc(asnName(firstOf(s, 'g') && firstOf(s, 'g').asn) || '—')) +
+        kvRow('User-Agent', esc((firstOf(s, 'ua') || '').slice(0, 160))) +
+        kvRow('语言 / 时区', esc(firstOf(s, 'lang') || '—') + ' · ' + esc(firstOf(s, 'tz') || '—')) +
+        kvRow('屏幕分辨率', esc(firstOf(s, 'sc') || '—')) +
+        kvRow('来源页面', esc(firstOf(s, 'ref') || '直接访问')) +
+      '</div></div>' +
+      '</div></td>';
+    tr.after(tr2);
+  });
+  function firstOf(s, k) {
+    for (var i = 0; i < s.evs.length; i++) if (s.evs[i][k] != null) return s.evs[i][k];
+    return null;
+  }
+  function geoTextOf(s) {
+    var g = firstOf(s, 'g');
+    if (!g) return '—';
+    return [g.cc && g.cc !== 'CN' ? g.co : '', g.rg, g.city].filter(Boolean).join(' · ') || (g.cc || '—');
+  }
+  function kvRow(k, v) {
+    return '<div class="ti"><b>' + k + '</b>：' + v + '</div>';
+  }
+
+  // ---------------- 启动 ----------------
+  var cfg = loadCfg();
+  if (cfg && cfg.base && cfg.token) {
+    state.base = cfg.base;
+    state.token = cfg.token;
+    $('hostLabel').textContent = cfg.base.replace(/^https?:\/\//, '');
+    $('veil').classList.add('hidden'); // 已有配置：直接进入主界面
+    $('main').style.display = 'block';
+    load();
+  } else {
+    openCfg('');
+  }
+})();
+</script>
+</body>
+</html>
